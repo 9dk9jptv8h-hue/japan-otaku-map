@@ -1,0 +1,167 @@
+@import "tailwindcss";
+@import "leaflet/dist/leaflet.css";
+
+@layer base {
+  :root {
+    /* 活力色板 */
+    --color-accent: #e91e63;
+    --color-accent-light: #fce4ec;
+    --color-blue: #2196f3;
+    --color-blue-light: #e3f2fd;
+    --color-teal: #009688;
+    --color-teal-light: #e0f2f1;
+    --color-amber: #ff9800;
+    --color-amber-light: #fff3e0;
+    --color-purple: #9c27b0;
+    --color-purple-light: #f3e5f5;
+    --color-red: #f44336;
+    --color-red-light: #ffebee;
+    --color-green: #4caf50;
+    --color-green-light: #e8f5e9;
+    --color-cyan: #00bcd4;
+    --color-cyan-light: #e0f7fa;
+
+    --color-indigo: #4a5a8a;
+    --color-indigo-light: #e8ecf4;
+    --color-sumi: #3a3a3a;
+    --color-sakura: #f2a7b4;
+    --color-koi: #d94a3a;
+
+    --color-bg: #f0edf4;
+    --color-surface: #ffffff;
+    --color-text: #1a1a2e;
+    --color-text-dim: #5c5c7a;
+    --color-border: rgba(0, 0, 0, 0.06);
+    --color-glass: rgba(255, 255, 255, 0.88);
+    --color-glass-blur: blur(20px);
+
+    /* 侧边栏渐变 */
+    --sidebar-bg: linear-gradient(180deg, #fce4ec 0%, #e3f2fd 30%, #e0f7fa 60%, #f3e5f5 100%);
+    --sidebar-header-bg: linear-gradient(135deg, #e91e63, #9c27b0, #2196f3);
+
+    --sidebar-width: 380px;
+    --sidebar-tablet-width: 280px;
+    --mobile-drawer-height: 60vh;
+    --font-sans: 'Noto Sans SC', 'Hiragino Sans GB', system-ui, -apple-system, sans-serif;
+
+    color-scheme: light;
+    font-family: var(--font-sans);
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  [data-theme="dark"] {
+    --color-bg: #0d0d1a;
+    --color-surface: #1a1a2e;
+    --color-text: #e8e8f0;
+    --color-text-dim: #9090b0;
+    --color-border: rgba(255, 255, 255, 0.06);
+    --color-glass: rgba(20, 20, 40, 0.88);
+
+    --accent-light: #3d1e2e;
+    --blue-light: #1a2435;
+    --amber-light: #352a18;
+    --purple-light: #281e2d;
+
+    --sidebar-bg: linear-gradient(180deg, #1a1020 0%, #101828 30%, #0d2025 60%, #1a1028 100%);
+    --sidebar-header-bg: linear-gradient(135deg, #901840, #6a2080, #184890);
+
+    color-scheme: dark;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: var(--font-sans);
+    color: var(--color-text);
+    background: var(--color-bg);
+    overflow: hidden;
+    height: 100dvh;
+    width: 100vw;
+  }
+
+  #root {
+    height: 100dvh;
+    width: 100vw;
+    overflow: hidden;
+  }
+
+  .leaflet-container {
+    font-family: var(--font-sans) !important;
+    background: var(--color-bg) !important;
+  }
+
+  .leaflet-popup-content-wrapper {
+    border-radius: 16px !important;
+    box-shadow: 0 12px 48px rgba(0,0,0,0.18) !important;
+    padding: 0 !important;
+    overflow: hidden;
+    border: 1px solid var(--color-border) !important;
+  }
+
+  .leaflet-popup-content {
+    margin: 0 !important;
+    min-width: 260px;
+  }
+
+  .leaflet-popup-close-button {
+    z-index: 10 !important;
+    color: var(--color-text) !important;
+    font-size: 20px !important;
+    padding: 8px 12px !important;
+  }
+
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.12); border-radius: 3px; }
+  [data-theme="dark"] ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); }
+}
+
+@keyframes pulse {
+  0%   { transform: scale(1);   opacity: 0.7; }
+  50%  { transform: scale(1.7); opacity: 0; }
+  100% { transform: scale(1);   opacity: 0; }
+}
+
+.marker-pulse .pulse-ring {
+  animation: pulse 1.8s ease-out infinite;
+}
+
+@keyframes gradientShift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@layer utilities {
+  .glass {
+    background: var(--color-glass);
+    backdrop-filter: var(--color-glass-blur);
+    -webkit-backdrop-filter: var(--color-glass-blur);
+  }
+
+  .shadow-soft {
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+  }
+  [data-theme="dark"] .shadow-soft {
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
+  }
+
+  .sidebar-gradient {
+    background: var(--sidebar-bg);
+  }
+
+  .header-gradient {
+    background: var(--sidebar-header-bg);
+    background-size: 200% 200%;
+    animation: gradientShift 6s ease infinite;
+  }
+
+  .card-accent {
+    border-left: 3px solid var(--color-accent);
+  }
+
+  .text-balance { text-wrap: balance; }
+}

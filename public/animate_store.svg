@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#87CEEB"/>
+      <stop offset="100%" stop-color="#E0F0FF"/>
+    </linearGradient>
+    <linearGradient id="bldg" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#e91e63"/>
+      <stop offset="100%" stop-color="#ff5722"/>
+    </linearGradient>
+  </defs>
+  <!-- 空 -->
+  <rect width="400" height="300" fill="url(#sky)"/>
+  <!-- 道路 -->
+  <rect x="0" y="240" width="400" height="60" fill="#d0d0d0"/>
+  <rect x="0" y="240" width="400" height="2" fill="#999"/>
+  <!-- 本館ビル -->
+  <rect x="80" y="40" width="240" height="200" rx="3" fill="url(#bldg)"/>
+  <rect x="85" y="45" width="230" height="190" fill="#fff" opacity="0.92"/>
+  <!-- 看板 -->
+  <rect x="110" y="55" width="180" height="44" rx="4" fill="#fff" stroke="#e91e63" stroke-width="2"/>
+  <text x="200" y="83" text-anchor="middle" font-size="22" font-weight="bold" font-family="sans-serif" fill="#e91e63">ANIMATE</text>
+  <!-- 窓 -->
+  <rect x="105" y="110" width="40" height="30" rx="2" fill="#e3f2fd" stroke="#ccc" stroke-width="0.5"/>
+  <rect x="155" y="110" width="40" height="30" rx="2" fill="#e3f2fd" stroke="#ccc" stroke-width="0.5"/>
+  <rect x="205" y="110" width="40" height="30" rx="2" fill="#e3f2fd" stroke="#ccc" stroke-width="0.5"/>
+  <rect x="255" y="110" width="40" height="30" rx="2" fill="#e3f2fd" stroke="#ccc" stroke-width="0.5"/>
+  <rect x="105" y="150" width="40" height="30" rx="2" fill="#e3f2fd" stroke="#ccc" stroke-width="0.5"/>
+  <rect x="155" y="150" width="40" height="30" rx="2" fill="#e3f2fd" stroke="#ccc" stroke-width="0.5"/>
+  <rect x="205" y="150" width="40" height="30" rx="2" fill="#e3f2fd" stroke="#ccc" stroke-width="0.5"/>
+  <rect x="255" y="150" width="40" height="30" rx="2" fill="#e3f2fd" stroke="#ccc" stroke-width="0.5"/>
+  <rect x="105" y="190" width="40" height="30" rx="2" fill="#e3f2fd" stroke="#ccc" stroke-width="0.5"/>
+  <rect x="155" y="190" width="40" height="30" rx="2" fill="#e3f2fd" stroke="#ccc" stroke-width="0.5"/>
+  <rect x="205" y="190" width="40" height="30" rx="2" fill="#e3f2fd" stroke="#ccc" stroke-width="0.5"/>
+  <rect x="255" y="190" width="40" height="30" rx="2" fill="#e3f2fd" stroke="#ccc" stroke-width="0.5"/>
+  <!-- 玄関 -->
+  <rect x="160" y="225" width="80" height="15" rx="2" fill="#555"/>
+  <!-- 入口表示 -->
+  <text x="200" y="235" text-anchor="middle" font-size="9" font-family="sans-serif" fill="#fff">ENTRANCE</text>
+  <!-- 通行人 -->
+  <circle cx="60" cy="250" r="6" fill="#333"/>
+  <circle cx="340" cy="252" r="5" fill="#333"/>
+  <!-- 木 -->
+  <rect x="20" y="210" width="6" height="30" fill="#795548"/>
+  <circle cx="23" cy="205" r="16" fill="#4caf50"/>
+  <rect x="360" y="210" width="6" height="30" fill="#795548"/>
+  <circle cx="363" cy="205" r="16" fill="#4caf50"/>
+</svg>
