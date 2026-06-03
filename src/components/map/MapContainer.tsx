@@ -1,7 +1,8 @@
 import { useEffect, useCallback, useRef, type ReactNode } from 'react'
-import { MapContainer as LeafletMapContainer, TileLayer, useMap, useMapEvents } from 'react-leaflet'
+import { MapContainer as LeafletMapContainer, useMap, useMapEvents } from 'react-leaflet'
 import { useMapStore } from '@/store/useMapStore'
 import { DEFAULT_VIEWPORT, MIN_ZOOM, MAX_ZOOM, FLY_DURATION, JAPAN_BOUNDS } from '@/constants/mapDefaults'
+import L from 'leaflet'
 
 // 地图事件监听 + viewport 同步
 function MapEventBinder() {
@@ -11,28 +12,32 @@ function MapEventBinder() {
   const setMapReady = useMapStore((s) => s.setMapReady)
   const setMapInstance = useMapStore((s) => s.setMapInstance)
   const initialized = useRef(false)
-  const moveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    const container = map.getContainer()
+    if (!container) return
+    const observer = new ResizeObserver(() => {
+      map.invalidateSize()
+    })
+    observer.observe(container)
+    return () => observer.disconnect()
+  }, [map])
 
   useMapEvents({
     moveend: () => {
-      // 防抖：autoPan 动画中不立即更新，等动画结束再同步一次
-      if (moveTimer.current) clearTimeout(moveTimer.current)
-      moveTimer.current = setTimeout(() => {
-        const b = map.getBounds()
-        setBounds({
-          north: b.getNorth(),
-          south: b.getSouth(),
-          east: b.getEast(),
-          west: b.getWest(),
-        })
-      }, 200)
+      const b = map.getBounds()
+      setBounds({
+        north: b.getNorth(),
+        south: b.getSouth(),
+        east: b.getEast(),
+        west: b.getWest(),
+      })
     },
     click: () => {
       useMapStore.getState().setSelectedMarkerId(null)
     },
   })
 
-  // 暴露飞到功能给 store
   const flyTo = useCallback(
     (lat: number, lng: number, zoom?: number) => {
       map.flyTo([lat, lng], zoom ?? map.getZoom(), {
@@ -58,20 +63,20 @@ function MapEventBinder() {
   return null
 }
 
-// 动态瓦片图层
-function DynamicTileLayer() {
-  const tileLayer = useMapStore((s) => s.tileLayer)
-  const getTileConfig = useMapStore((s) => s.getTileConfig)
-  const config = getTileConfig()
+// MapTiler 中文路网地图
+const KEY = 'n1nlGHzCLRC9VuGsFphI'
 
-  return (
-    <TileLayer
-      key={tileLayer}
-      url={config.url}
-      attribution={config.attribution}
-      maxZoom={MAX_ZOOM}
-    />
-  )
+function MapTileLayer() {
+  const map = useMap()
+  useEffect(() => {
+    const layer = L.tileLayer(
+      `https://api.maptiler.com/maps/streets-v2/{z}/{x}/{y}.png?key=${KEY}&lang=zh`,
+      { maxZoom: 20, maxNativeZoom: 18 }
+    )
+    layer.addTo(map)
+    return () => { layer.remove() }
+  }, [map])
+  return null
 }
 
 interface MapViewProps {
@@ -91,7 +96,7 @@ export function MapView({ children }: MapViewProps) {
       maxBounds={JAPAN_BOUNDS}
       maxBoundsViscosity={0.8}
     >
-      <DynamicTileLayer />
+      <MapTileLayer />
       <MapEventBinder />
       {children}
     </LeafletMapContainer>

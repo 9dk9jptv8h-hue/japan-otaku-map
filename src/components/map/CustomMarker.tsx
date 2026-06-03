@@ -1,4 +1,4 @@
-import { useRef, useEffect } from 'react'
+import { useRef, useEffect, useMemo } from 'react'
 import { Marker, Popup } from 'react-leaflet'
 import L from 'leaflet'
 import type { LocationData, LocationCategory } from '@/types'
@@ -46,7 +46,7 @@ export function CustomMarker({ location }: CustomMarkerProps) {
     el.style.zIndex = (isHovered || isSelected) ? '1000' : ''
   }, [isHovered, isSelected])
 
-  const icon = L.divIcon({
+  const icon = useMemo(() => L.divIcon({
     html: `
       <div class="${pulse ? 'marker-pulse' : ''}" style="
         width:${size}px;height:${size + 6}px;
@@ -76,7 +76,7 @@ export function CustomMarker({ location }: CustomMarkerProps) {
     iconSize: [size, size + 6],
     iconAnchor: [size / 2, size + 3],
     popupAnchor: [0, -size - 8],
-  })
+  }), [size, color, borderWidth, pulse, label, isHovered, isSelected])
 
   return (
     <Marker
