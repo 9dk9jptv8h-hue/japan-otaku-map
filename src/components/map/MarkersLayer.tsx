@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, memo } from 'react'
 import type { LocationData } from '@/types'
 import { useMapStore } from '@/store/useMapStore'
 import { isInBounds } from '@/utils/markers'
@@ -8,10 +8,10 @@ interface MarkersLayerProps {
   locations: LocationData[]
 }
 
-export function MarkersLayer({ locations }: MarkersLayerProps) {
+export const MarkersLayer = memo(function MarkersLayer({ locations }: MarkersLayerProps) {
   const bounds = useMapStore((s) => s.bounds)
 
-  // 只在视野内渲染（视野外跳过以优化性能）
+  // 🚀 Viewport culling — 仅渲染可视区域内的标记
   const visibleLocations = useMemo(() => {
     return locations.filter((loc) =>
       isInBounds(loc.latitude, loc.longitude, bounds)
@@ -25,4 +25,4 @@ export function MarkersLayer({ locations }: MarkersLayerProps) {
       ))}
     </>
   )
-}
+})

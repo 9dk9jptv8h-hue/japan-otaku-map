@@ -7,8 +7,8 @@ export const DEFAULT_VIEWPORT: ViewportState = {
 }
 
 export const MIN_ZOOM = 4
-export const MAX_ZOOM = 18
-export const FLY_DURATION = 800
+export const MAX_ZOOM = 20
+export const FLY_DURATION = 1200
 
 // 日本本州 bounding box 用于限制地图不能拖出日本
 export const JAPAN_BOUNDS: [[number, number], [number, number]] = [
@@ -19,19 +19,19 @@ export const JAPAN_BOUNDS: [[number, number], [number, number]] = [
 // 多彩瓦片图层配置
 export const TILE_LAYERS: Record<TileLayerStyle, { url: string; attribution: string }> = {
   standard: {
-    url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    url: 'https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png',
+    attribution: '<a href="https://maps.gsi.go.jp/">国土地理院</a>',
   },
   light: {
-    url: 'https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png',
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://www.hotosm.org/">HOT</a>',
+    url: 'https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png',
+    attribution: '<a href="https://maps.gsi.go.jp/">国土地理院</a>',
   },
   dark: {
     url: 'https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png',
-    attribution: '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a> &copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>',
+    attribution: '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a>',
   },
   terrain: {
-    url: 'https://tiles.stadiamaps.com/tiles/stamen_terrain/{z}/{x}/{y}{r}.png',
-    attribution: '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a> &copy; <a href="https://stamen.com/">Stamen</a>',
+    url: 'https://cyberjapandata.gsi.go.jp/xyz/relief/{z}/{x}/{y}.png',
+    attribution: '<a href="https://maps.gsi.go.jp/">国土地理院</a>',
   },
 }

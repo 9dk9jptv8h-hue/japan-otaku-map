@@ -54,21 +54,31 @@ export function Sidebar({ locations, className }: SidebarProps) {
 
   return (
     <>
+      {/* 折叠状态下的展开按钮 */}
       {sidebarCollapsed && (
         <SidebarToggle collapsed onClick={toggleSidebar} />
       )}
 
+      {/* 侧边栏 — GPU 加速的 transform 动画 */}
       <aside
         className={cn(
-          'sidebar-gradient relative flex flex-col h-full border-r border-[var(--color-border)] overflow-hidden',
-          'transition-all duration-300 ease-out',
+          'sidebar-gradient fixed top-0 left-0 bottom-0 z-30 flex flex-col',
+          'gpu-layer',
+          'shadow-elevated',
+          'transition-transform duration-400',
           sidebarCollapsed
-            ? 'w-0 min-w-0 opacity-0 pointer-events-none'
-            : 'w-[var(--sidebar-width)] min-w-[280px] opacity-100',
+            ? '-translate-x-full'
+            : 'translate-x-0',
+          'w-[var(--sidebar-width)]',
           className
         )}
+        style={{
+          transitionTimingFunction: sidebarCollapsed
+            ? 'cubic-bezier(0.4, 0, 0.2, 1)'
+            : 'cubic-bezier(0.34, 1.56, 0.64, 1)',
+        }}
       >
-        {/* Header - 彩色渐变 */}
+        {/* Header — 彩色渐变 */}
         <div className="header-gradient shrink-0 px-5 pt-6 pb-5 text-white">
           <div className="flex items-center justify-between">
             <div>
@@ -76,7 +86,7 @@ export function Sidebar({ locations, className }: SidebarProps) {
                 🗾 日本オタクショップマップ
               </h1>
               <p className="text-sm text-white/70 mt-1">
-                Animate  ·  Melonbooks  ·  Mandarake  — 全国店舗一覧
+                Animate  ·  Melonbooks  ·  Mandarake — 全国店舗一覧
               </p>
               <div className="flex items-center gap-2 mt-3">
                 <span className="inline-flex items-center gap-1 rounded-full bg-white/20 px-2.5 py-0.5 text-xs backdrop-blur-sm">
@@ -88,14 +98,14 @@ export function Sidebar({ locations, className }: SidebarProps) {
           </div>
         </div>
 
-        {/* 搜索+筛选 */}
-        <div className="shrink-0 space-y-3 px-4 py-4 glass">
+        {/* 搜索 + 筛选 — 玻璃面板 */}
+        <div className="shrink-0 space-y-3 px-4 py-4 glass border-b border-[var(--color-border)]">
           <SearchBar />
           <FilterPanel />
           <SortControl />
         </div>
 
-        {/* 列表 */}
+        {/* 卡片列表 */}
         <div className="flex-1 overflow-y-auto px-3 pb-6 pt-2">
           <CardList locations={filtered} total={locations.length} />
         </div>

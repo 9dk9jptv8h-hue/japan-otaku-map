@@ -22,13 +22,14 @@ export function TileLayerSwitch({ className }: TileLayerSwitchProps) {
       className={cn(
         'grid grid-cols-2 gap-1 rounded-xl glass p-1.5 shadow-soft',
         'border border-[var(--color-border)]',
+        'backdrop-blur-md',
         className
       )}
     >
       <div className="col-span-2 flex items-center gap-1.5 px-1.5 py-0.5 mb-0.5">
         <Layers className="h-3.5 w-3.5 text-[var(--color-text-dim)]/60" />
         <span className="text-[10px] font-semibold text-[var(--color-text-dim)]/60 uppercase tracking-wider">
-          地图风格
+          地図スタイル
         </span>
       </div>
       {LAYERS.map((layer) => (
@@ -36,9 +37,9 @@ export function TileLayerSwitch({ className }: TileLayerSwitchProps) {
           key={layer.key}
           onClick={() => setTileLayer(layer.key)}
           className={cn(
-            'flex items-center gap-1.5 rounded-lg px-2 py-1.5 transition-all duration-200',
+            'flex items-center gap-1.5 rounded-lg px-2 py-1.5 transition-all duration-250',
             tileLayer === layer.key
-              ? 'bg-[var(--color-accent)] text-white shadow-md scale-[1.02]'
+              ? 'bg-[var(--color-accent)] text-white shadow-md scale-[1.03]'
               : 'text-[var(--color-text-dim)]/60 hover:text-[var(--color-text)] hover:bg-[var(--color-text)]/5'
           )}
         >

@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html><head>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>#map{height:100vh}</style></head><body>
+<div id="map"></div>
+<script>
+var map = L.map('map').setView([37.5, 137.5], 6);
+var BingLayer = L.TileLayer.extend({
+  getTileUrl: function(c) {
+    var z=c.z, x=c.x, y=c.y, qk='';
+    for(var i=z; i>0; i--) {
+      var d=0, m=1<<(i-1);
+      if((x&m)!==0) d++;
+      if((y&m)!==0) d+=2;
+      qk+=d;
+    }
+    return 'https://ecn.t0.tiles.virtualearth.net/tiles/a'+qk+'.jpeg?g=1';
+  }
+});
+new BingLayer().addTo(map);
+</script></body></html>

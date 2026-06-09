@@ -1,7 +1,6 @@
 import type { LocationData } from '@/types'
 import { MapView } from '@/components/map/MapContainer'
 import { MarkersLayer } from '@/components/map/MarkersLayer'
-import { MapControls } from '@/components/map/MapControls'
 import { SearchBar } from '@/components/sidebar/SearchBar'
 import { FilterPanel } from '@/components/sidebar/FilterPanel'
 import { SortControl } from '@/components/sidebar/SortControl'
@@ -9,8 +8,8 @@ import { CardList } from '@/components/sidebar/CardList'
 import { useUIStore } from '@/store/useUIStore'
 import { useFilterStore } from '@/store/useFilterStore'
 import { useDebounce } from '@/hooks/useDebounce'
-import { Drawer } from '@/components/ui/Drawer'
-import { Menu } from 'lucide-react'
+import { Menu, X } from 'lucide-react'
+import { cn } from '@/utils/cn'
 import { useMemo } from 'react'
 
 interface MobileLayoutProps {
@@ -18,7 +17,7 @@ interface MobileLayoutProps {
 }
 
 export function MobileLayout({ locations }: MobileLayoutProps) {
-  const { drawerOpen, setDrawerOpen } = useUIStore()
+  const { sidebarOpen, setSidebarOpen } = useUIStore()
   const { searchQuery, selectedCategories, sortBy } = useFilterStore()
   const debouncedSearch = useDebounce(searchQuery, 300)
 
@@ -55,44 +54,82 @@ export function MobileLayout({ locations }: MobileLayoutProps) {
   }, [locations, debouncedSearch, selectedCategories, sortBy])
 
   return (
-    <div className="relative h-full w-full">
-      {/* 地图全屏 — 没勾选分类时空地图 */}
+    <div className="relative h-full w-full" style={{ touchAction: 'pan-x pan-y pinch-zoom' }}>
+      {/* 地图全屏 */}
       <MapView>
-        <MarkersLayer locations={
-          selectedCategories.length === 0
-            ? []
-            : locations.filter((loc) => selectedCategories.includes(loc.category))
-        } />
+        <MarkersLayer locations={filtered} />
       </MapView>
 
-      {/* 顶部搜索栏 + 菜单按钮 */}
-      <div className="absolute top-0 left-0 right-0 z-[1000] p-3">
-        <div className="flex items-center gap-2">
+      {/* 顶部搜索栏 — 安全区域适配 */}
+      <div className="absolute top-0 left-0 right-0 z-[1000] p-2 pt-safe pointer-events-none">
+        <div className="flex items-center gap-2 pointer-events-auto">
           <button
-            onClick={() => setDrawerOpen(true)}
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl glass shadow-soft border border-[var(--color-sumi)]/10"
+            onClick={() => setSidebarOpen(true)}
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl glass shadow-soft border border-[var(--color-border)] active:scale-95 transition-transform"
+            aria-label="メニューを開く"
           >
-            <Menu className="h-5 w-5 text-[var(--color-sumi)]/70" />
+            <Menu className="h-5 w-5 text-[var(--color-text-dim)]" />
           </button>
-          <div className="flex-1 glass rounded-xl shadow-soft border border-[var(--color-sumi)]/10">
+          <div className="flex-1 glass rounded-xl shadow-soft border border-[var(--color-border)] pointer-events-auto">
             <SearchBar />
           </div>
         </div>
       </div>
 
-      {/* 地图控件（通过 store 访问地图） */}
-      <div className="absolute bottom-24 right-3 z-[1000]">
-        <MapControls />
-      </div>
+      {/* 遮罩 — 点击关闭抽屉 */}
+      <div
+        className={cn(
+          'fixed inset-0 z-40 bg-black/40 backdrop-blur-sm transition-all duration-300',
+          sidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        )}
+        onClick={() => setSidebarOpen(false)}
+      />
 
-      {/* 底部抽屉 */}
-      <Drawer open={drawerOpen} onClose={() => setDrawerOpen(false)}>
-        <div className="space-y-4">
+      {/* 左侧滑出抽屉 — GPU 加速 Transform 动画 */}
+      <div
+        className={cn(
+          'fixed top-0 left-0 bottom-0 z-50 w-[85vw] max-w-[360px]',
+          'sidebar-gradient flex flex-col',
+          'gpu-layer',
+          'shadow-xl',
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        )}
+        style={{
+          transition: 'transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)',
+          paddingTop: 'env(safe-area-inset-top, 0px)',
+          paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+        }}
+      >
+        {/* Header */}
+        <div className="header-gradient shrink-0 px-4 pt-4 pb-3 text-white flex items-center justify-between">
+          <div>
+            <h1 className="text-lg font-bold">🗾 日本オタクショップマップ</h1>
+            <p className="text-xs text-white/70 mt-0.5">Animate · Melonbooks · Mandarake</p>
+            <span className="inline-flex items-center gap-1 rounded-full bg-white/20 px-2 py-0.5 text-xs mt-2">
+              📍 {locations.length} 店舗
+            </span>
+          </div>
+          <button
+            onClick={() => setSidebarOpen(false)}
+            className="flex h-8 w-8 items-center justify-center rounded-full bg-white/20 hover:bg-white/30 active:scale-90 transition-all"
+            aria-label="閉じる"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+
+        {/* 搜索 + 筛选 */}
+        <div className="shrink-0 space-y-3 px-3 py-3 glass border-b border-[var(--color-border)]">
+          <SearchBar />
           <FilterPanel />
           <SortControl />
+        </div>
+
+        {/* 列表 */}
+        <div className="flex-1 overflow-y-auto px-3 pt-2 pb-safe">
           <CardList locations={filtered} total={locations.length} />
         </div>
-      </Drawer>
+      </div>
     </div>
   )
 }

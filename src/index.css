@@ -1,9 +1,12 @@
 @import "tailwindcss";
 @import "leaflet/dist/leaflet.css";
 
+/* ================================================================
+   Design Tokens & Base Layer
+   ================================================================ */
 @layer base {
   :root {
-    /* 活力色板 */
+    /* —— 活力色板 —— */
     --color-accent: #e91e63;
     --color-accent-light: #fce4ec;
     --color-blue: #2196f3;
@@ -26,6 +29,7 @@
     --color-sumi: #3a3a3a;
     --color-sakura: #f2a7b4;
     --color-koi: #d94a3a;
+    --color-gold: #c4a35a;
 
     --color-bg: #f0edf4;
     --color-surface: #ffffff;
@@ -39,10 +43,35 @@
     --sidebar-bg: linear-gradient(180deg, #fce4ec 0%, #e3f2fd 30%, #e0f7fa 60%, #f3e5f5 100%);
     --sidebar-header-bg: linear-gradient(135deg, #e91e63, #9c27b0, #2196f3);
 
+    /* 布局 */
     --sidebar-width: 380px;
     --sidebar-tablet-width: 280px;
     --mobile-drawer-height: 60vh;
     --font-sans: 'Noto Sans SC', 'Hiragino Sans GB', system-ui, -apple-system, sans-serif;
+
+    /* 统一圆角系统 */
+    --radius-xs: 4px;
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 20px;
+    --radius-2xl: 24px;
+
+    /* 统一阴影系统 */
+    --shadow-xs: 0 1px 3px rgba(0, 0, 0, 0.04);
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
+    --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.08);
+    --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.12);
+    --shadow-xl: 0 12px 56px rgba(0, 0, 0, 0.18);
+    --shadow-glow-accent: 0 0 24px rgba(233, 30, 99, 0.25);
+    --shadow-glow-blue: 0 0 24px rgba(33, 150, 243, 0.25);
+    --shadow-glow-gold: 0 0 24px rgba(255, 152, 0, 0.25);
+
+    /* 弹性贝塞尔 */
+    --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+    --ease-bounce: cubic-bezier(0.68, -0.55, 0.27, 1.55);
+    --ease-smooth: cubic-bezier(0.22, 0.61, 0.36, 1);
+    --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
 
     color-scheme: light;
     font-family: var(--font-sans);
@@ -68,6 +97,12 @@
     --sidebar-bg: linear-gradient(180deg, #1a1020 0%, #101828 30%, #0d2025 60%, #1a1028 100%);
     --sidebar-header-bg: linear-gradient(135deg, #901840, #6a2080, #184890);
 
+    --shadow-xs: 0 1px 3px rgba(0, 0, 0, 0.2);
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.35);
+    --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.45);
+    --shadow-xl: 0 12px 56px rgba(0, 0, 0, 0.55);
+
     color-scheme: dark;
   }
 
@@ -80,6 +115,9 @@
     overflow: hidden;
     height: 100dvh;
     width: 100vw;
+    /* 移动端安全区域 */
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    padding-top: env(safe-area-inset-top, 0px);
   }
 
   #root {
@@ -87,54 +125,343 @@
     width: 100vw;
     overflow: hidden;
   }
-
-  .leaflet-container {
-    font-family: var(--font-sans) !important;
-    background: var(--color-bg) !important;
-  }
-
-  .leaflet-popup-content-wrapper {
-    border-radius: 16px !important;
-    box-shadow: 0 12px 48px rgba(0,0,0,0.18) !important;
-    padding: 0 !important;
-    overflow: hidden;
-    border: 1px solid var(--color-border) !important;
-  }
-
-  .leaflet-popup-content {
-    margin: 0 !important;
-    min-width: 260px;
-  }
-
-  .leaflet-popup-close-button {
-    z-index: 10 !important;
-    color: var(--color-text) !important;
-    font-size: 20px !important;
-    padding: 8px 12px !important;
-  }
-
-  ::-webkit-scrollbar { width: 5px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.12); border-radius: 3px; }
-  [data-theme="dark"] ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); }
 }
 
+/* ================================================================
+   Keyframes — GPU Accelerated (transform + opacity only)
+   ================================================================ */
+
+/* 地图区域淡入 */
+@keyframes mapFadeIn {
+  from { opacity: 0; transform: scale(0.995); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* 弹窗弹入 — 弹性过冲 */
+@keyframes popupBounceIn {
+  0%   { opacity: 0; transform: scale(0.8) translateY(12px); }
+  55%  { transform: scale(1.04) translateY(-3px); }
+  80%  { transform: scale(0.97) translateY(1px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* 标记呼吸 */
+@keyframes markerBreath {
+  0%, 100% { transform: scale(1);   opacity: 0.9; }
+  50%      { transform: scale(1.3); opacity: 0; }
+}
+
+/* 悬浮光环脉冲 */
 @keyframes pulse {
   0%   { transform: scale(1);   opacity: 0.7; }
-  50%  { transform: scale(1.7); opacity: 0; }
+  50%  { transform: scale(1.8); opacity: 0; }
   100% { transform: scale(1);   opacity: 0; }
 }
 
-.marker-pulse .pulse-ring {
-  animation: pulse 1.8s ease-out infinite;
+/* 侧边栏弹簧滑入 */
+@keyframes sidebarSpring {
+  0%   { transform: translateX(-100%); }
+  60%  { transform: translateX(4px); }
+  80%  { transform: translateX(-2px); }
+  100% { transform: translateX(0); }
 }
 
+/* 侧边栏卡片交错入场 */
+@keyframes cardSlideIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* 右下角控件弹入 */
+@keyframes popIn {
+  from { opacity: 0; transform: scale(0.85) translateY(12px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* 加载页退出 */
+@keyframes loaderExit {
+  0%   { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(1.03); pointer-events: none; }
+}
+
+/* 渐变背景流动 */
+@keyframes bgShift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* 头部渐变流动 */
 @keyframes gradientShift {
   0%   { background-position: 0% 50%; }
   50%  { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
 }
 
+/* 卡片悬停光条扫过 */
+@keyframes gleamSlide {
+  0%   { left: -200%; }
+  100% { left: 200%; }
+}
+
+/* 骨架屏闪烁 */
+@keyframes skeletonShimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* 底部安全区域弹入（移动端抽屉） */
+@keyframes drawerSlideUp {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+
+/* 遮罩淡入 */
+@keyframes overlayFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ================================================================
+   Base Styles & Leaflet Overrides
+   ================================================================ */
+
+/* 侧边栏滑入 */
+aside {
+  animation: sidebarSpring 0.6s var(--ease-spring) forwards;
+  will-change: transform;
+}
+
+/* 地图容器 */
+.leaflet-container {
+  font-family: var(--font-sans) !important;
+  background: var(--color-bg) !important;
+  touch-action: manipulation;
+  animation: mapFadeIn 0.7s var(--ease-smooth) forwards;
+}
+
+/* 瓦片淡入 + 快速加载 */
+.leaflet-tile {
+  transition: opacity 0.2s var(--ease-smooth) !important;
+  will-change: opacity;
+}
+img.leaflet-tile:not(.leaflet-tile-loaded) {
+  opacity: 0;
+}
+.leaflet-tile-loaded {
+  opacity: 1;
+}
+
+/* Canvas 渲染的 path 层优化 */
+.leaflet-zoom-animated {
+  will-change: transform;
+}
+
+/* 右下角控件弹入 */
+.absolute.bottom-4.right-4 {
+  animation: popIn 0.5s 0.2s var(--ease-spring) both;
+}
+
+/* ================================================================
+   Popup Styling — Premium feel
+   ================================================================ */
+.leaflet-popup-content-wrapper {
+  border-radius: var(--radius-xl) !important;
+  box-shadow: var(--shadow-xl) !important;
+  padding: 0 !important;
+  border: 1px solid var(--color-border) !important;
+  overflow: hidden;
+  animation: popupBounceIn 0.45s var(--ease-spring) both;
+  transform-origin: bottom center;
+}
+
+.leaflet-popup-content {
+  margin: 0 !important;
+  min-width: 280px;
+}
+
+/* Popup 关闭按钮 — 玻璃态圆形 */
+.leaflet-popup-close-button {
+  z-index: 10 !important;
+  color: #fff !important;
+  font-size: 16px !important;
+  width: 26px !important;
+  height: 26px !important;
+  line-height: 26px !important;
+  text-align: center !important;
+  top: 8px !important;
+  right: 8px !important;
+  padding: 0 !important;
+  background: rgba(0, 0, 0, 0.35) !important;
+  border-radius: 50% !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  transition: all 0.25s var(--ease-smooth) !important;
+  border: none !important;
+  font-weight: 400 !important;
+}
+.leaflet-popup-close-button:hover {
+  background: rgba(0, 0, 0, 0.6) !important;
+  transform: scale(1.12);
+}
+
+/* Popup 尖角颜色 */
+.leaflet-popup-tip {
+  box-shadow: none !important;
+  background: var(--color-surface) !important;
+  border: 1px solid var(--color-border) !important;
+}
+
+[data-theme="dark"] .leaflet-popup-tip {
+  background: var(--color-surface) !important;
+}
+
+/* ================================================================
+   Scrollbar — minimal & elegant
+   ================================================================ */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.12);
+  border-radius: 3px;
+  transition: background 0.2s;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.2);
+}
+[data-theme="dark"] ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+}
+[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Firefox scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.12) transparent;
+}
+
+/* ================================================================
+   Component-Specific Animations
+   ================================================================ */
+
+/* 自定义标记图标的过渡 */
+.custom-marker img,
+.custom-marker-icon {
+  transition: transform 0.3s var(--ease-spring);
+  will-change: transform;
+}
+.custom-marker:hover img,
+.custom-marker-icon:hover {
+  transform: scale(1.2) rotate(-5deg);
+}
+
+/* 选中标记脉冲光环 */
+.marker-pulse .pulse-ring {
+  animation: pulse 1.8s ease-out infinite;
+}
+
+/* 卡片悬停光条扫过（Gleam Effect） */
+.location-card {
+  position: relative;
+  overflow: hidden;
+}
+.location-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -200%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.35) 50%,
+    transparent 100%
+  );
+  transform: skewX(-15deg);
+  transition: none;
+  pointer-events: none;
+  z-index: 1;
+}
+.location-card:hover::after {
+  animation: gleamSlide 0.7s var(--ease-smooth) forwards;
+}
+
+[data-theme="dark"] .location-card::after {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.06) 50%,
+    transparent 100%
+  );
+}
+
+/* 骨架屏闪烁 */
+.skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0.04) 0%,
+    rgba(0, 0, 0, 0.08) 40%,
+    rgba(0, 0, 0, 0.04) 80%
+  );
+  background-size: 200% 100%;
+  animation: skeletonShimmer 1.8s ease-in-out infinite;
+}
+[data-theme="dark"] .skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.03) 0%,
+    rgba(255, 255, 255, 0.06) 40%,
+    rgba(255, 255, 255, 0.03) 80%
+  );
+  background-size: 200% 100%;
+}
+
+/* ================================================================
+   Mobile Safe Area & Touch Optimization
+   ================================================================ */
+
+/* 移动端按钮增大触控区域 */
+@media (max-width: 767px) {
+  button,
+  .clickable {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* 双指缩放友好 */
+  .leaflet-container {
+    touch-action: pan-x pan-y pinch-zoom;
+  }
+
+  /* 底部安全区域 */
+  .mobile-safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 16px);
+  }
+  .mobile-safe-top {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+
+  /* 弹窗在小屏幕上更紧凑 */
+  .leaflet-popup-content-wrapper {
+    border-radius: var(--radius-lg) !important;
+    max-width: calc(100vw - 32px) !important;
+  }
+  .leaflet-popup-content {
+    min-width: 240px !important;
+  }
+}
+
+/* ================================================================
+   Utility Layer — Reusable Tokens
+   ================================================================ */
 @layer utilities {
   .glass {
     background: var(--color-glass);
@@ -142,11 +469,24 @@
     -webkit-backdrop-filter: var(--color-glass-blur);
   }
 
-  .shadow-soft {
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+  .glass-strong {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(30px);
+    -webkit-backdrop-filter: blur(30px);
   }
-  [data-theme="dark"] .shadow-soft {
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
+
+  [data-theme="dark"] .glass-strong {
+    background: rgba(20, 20, 40, 0.95);
+  }
+
+  .shadow-soft {
+    box-shadow: var(--shadow-sm);
+  }
+  .shadow-card {
+    box-shadow: var(--shadow-md);
+  }
+  .shadow-elevated {
+    box-shadow: var(--shadow-lg);
   }
 
   .sidebar-gradient {
@@ -163,5 +503,29 @@
     border-left: 3px solid var(--color-accent);
   }
 
-  .text-balance { text-wrap: balance; }
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* 动画延迟工具 */
+  .anim-delay-1 { animation-delay: 0.05s; }
+  .anim-delay-2 { animation-delay: 0.10s; }
+  .anim-delay-3 { animation-delay: 0.15s; }
+  .anim-delay-4 { animation-delay: 0.20s; }
+  .anim-delay-5 { animation-delay: 0.25s; }
+
+  /* 移动端安全区域 */
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .pt-safe {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+
+  /* GPU 合成提示 */
+  .gpu-layer {
+    will-change: transform, opacity;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+  }
 }

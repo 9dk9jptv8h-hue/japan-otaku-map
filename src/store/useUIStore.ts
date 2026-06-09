@@ -8,9 +8,9 @@ interface UIStore {
   toggleSidebar: () => void
   setSidebarCollapsed: (collapsed: boolean) => void
 
-  // 移动端抽屉
-  drawerOpen: boolean
-  setDrawerOpen: (open: boolean) => void
+  // 移动端侧边栏
+  sidebarOpen: boolean
+  setSidebarOpen: (open: boolean) => void
 
   // 主题
   theme: ThemeMode
@@ -25,8 +25,8 @@ export const useUIStore = create<UIStore>()(
       toggleSidebar: () => set((s) => ({ sidebarCollapsed: !s.sidebarCollapsed })),
       setSidebarCollapsed: (collapsed) => set({ sidebarCollapsed: collapsed }),
 
-      drawerOpen: false,
-      setDrawerOpen: (open) => set({ drawerOpen: open }),
+      sidebarOpen: false,
+      setSidebarOpen: (open) => set({ sidebarOpen: open }),
 
       theme: 'light',
       toggleTheme: () => {

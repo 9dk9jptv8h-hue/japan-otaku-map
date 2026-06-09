@@ -12,21 +12,22 @@ export function SidebarToggle({ collapsed, onClick, className }: SidebarTogglePr
     <button
       onClick={onClick}
       className={cn(
+        'flex h-9 w-9 items-center justify-center',
+        'rounded-full border border-white/20',
+        'transition-all duration-300 ease-out',
+        'hover:scale-110 active:scale-95',
+        'shadow-lg backdrop-blur-md',
         collapsed
-          ? 'fixed top-4 left-3 z-[9999] header-gradient text-white shadow-lg'
-          : 'absolute top-4 z-20 glass',
-        'flex h-8 w-8 items-center justify-center',
-        'rounded-full shadow-soft border border-white/20',
-        'hover:scale-110 active:scale-95 transition-all duration-300 ease-out',
-        !collapsed && '-right-3',
+          ? 'fixed top-4 left-3 z-[9999] header-gradient text-white'
+          : 'glass text-[var(--color-text-dim)] hover:text-[var(--color-text)]',
         className
       )}
-      aria-label={collapsed ? '展开侧边栏' : '折叠侧边栏'}
+      aria-label={collapsed ? '展開サイドバー' : '折りたたむ'}
     >
       {collapsed ? (
-        <ChevronRight className="h-4 w-4 text-[var(--color-sumi)]/60" />
+        <ChevronRight className="h-4 w-4" />
       ) : (
-        <ChevronLeft className="h-4 w-4 text-[var(--color-sumi)]/60" />
+        <ChevronLeft className="h-4 w-4" />
       )}
     </button>
   )
