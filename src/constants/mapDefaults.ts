@@ -7,46 +7,60 @@ export const DEFAULT_VIEWPORT: ViewportState = {
 }
 
 export const MIN_ZOOM = 4
-export const MAX_ZOOM = 20
+export const MAX_ZOOM = 22
 export const FLY_DURATION = 1200
 
-// 日本本州 bounding box 用于限制地图不能拖出日本
+// 日本 bounding box [west, south, east, north] — MapLibre 格式
 export const JAPAN_BOUNDS: [[number, number], [number, number]] = [
-  [20.0, 118.0],
-  [48.0, 158.0],
+  [118.0, 20.0],
+  [158.0, 48.0],
 ]
 
-// 多彩瓦片图层配置
-// 主瓦片源：CartoDB (Fastly全球CDN，亚洲有节点，国内访问快)
-// 备用瓦片源：GSI日本 (地形图层保留)
-export const TILE_LAYERS: Record<TileLayerStyle, {
+// ================================================================
+// 瓦片源选择说明
+//
+// 主方案：OpenFreeMap — 完全免费，无需 API Key，全球 CDN，国内可直连
+//   基于 OpenMapTiles 矢量瓦片，样式文件托管在 tiles.openfreemap.org
+//   中文标签通过 map.on('style.load') 动态将 text-field 改为 name:zh 实现
+//
+// 备选方案：MapTiler Streets v2 — 矢量渲染 + 原生中文标签 (lang=zh)
+//   需要 API Key（免费层10万次/月），但 api.maptiler.com 被墙
+//   VPN 用户可用，配合根目录 tile-proxy.js 代理使用
+//   获取 Key: https://cloud.maptiler.com
+//   本地代理：node tile-proxy.js → 监听 127.0.0.1:15723
+//   使用时把 light.url 改为 http://127.0.0.1:15723/style.json?style=streets-v2
+// ================================================================
+
+// 矢量瓦片样式配置
+// OpenFreeMap 样式基于 OpenMapTiles schema，支持 name:zh 字段
+// terrain 使用 CartoDB GL (全球CDN，无需Key)
+export const TILE_STYLES: Record<TileLayerStyle, {
   url: string
   attribution: string
-  maxNativeZoom?: number
-  subdomains?: string[]
+  desc: string
 }> = {
   light: {
-    url: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>',
-    maxNativeZoom: 19,
-    subdomains: ['a', 'b', 'c', 'd'],
+    // OpenFreeMap Positron (Carto 浅色风格)
+    url: 'https://tiles.openfreemap.org/styles/positron',
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> contributors',
+    desc: '浅色',
   },
   standard: {
-    url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>',
-    maxNativeZoom: 19,
-    subdomains: ['a', 'b', 'c', 'd'],
+    // OpenFreeMap Liberty (OSM 标准彩色风格)
+    url: 'https://tiles.openfreemap.org/styles/liberty',
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> contributors',
+    desc: '标准',
   },
   dark: {
-    url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>',
-    maxNativeZoom: 19,
-    subdomains: ['a', 'b', 'c', 'd'],
+    // OpenFreeMap Dark
+    url: 'https://tiles.openfreemap.org/styles/dark',
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> contributors',
+    desc: '暗色',
   },
   terrain: {
-    // 地形图层：GSI日本地形（CDN缓存效果有限，保留官方源）
-    url: 'https://cyberjapandata.gsi.go.jp/xyz/relief/{z}/{x}/{y}.png',
-    attribution: '<a href="https://maps.gsi.go.jp/">国土地理院</a>',
-    maxNativeZoom: 18,
+    // CartoDB Positron GL — 地形友好，全球CDN，无需Key
+    url: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
+    attribution: '&copy; <a href="https://carto.com/">CARTO</a> &copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>',
+    desc: '地形',
   },
 }

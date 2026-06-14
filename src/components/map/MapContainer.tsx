@@ -1,32 +1,85 @@
-import { useEffect, useCallback, useRef, useMemo, type ReactNode } from 'react'
-import { MapContainer as LeafletMapContainer, useMap, useMapEvents } from 'react-leaflet'
+import { useEffect, useRef, type ReactNode } from 'react'
+import maplibregl from 'maplibre-gl'
+import 'maplibre-gl/dist/maplibre-gl.css'
 import { useMapStore } from '@/store/useMapStore'
-import { DEFAULT_VIEWPORT, MIN_ZOOM, MAX_ZOOM, FLY_DURATION, JAPAN_BOUNDS, TILE_LAYERS } from '@/constants/mapDefaults'
-import L from 'leaflet'
+import { DEFAULT_VIEWPORT, MIN_ZOOM, MAX_ZOOM, JAPAN_BOUNDS, TILE_STYLES } from '@/constants/mapDefaults'
 
-// 地图事件监听 + viewport 同步
-function MapEventBinder() {
-  const map = useMap()
+interface MapViewProps {
+  children?: ReactNode
+}
+
+export function MapView({ children }: MapViewProps) {
+  const mapContainer = useRef<HTMLDivElement>(null)
+  const mapRef = useRef<maplibregl.Map | null>(null)
+  const initialized = useRef(false)
+
   const setBounds = useMapStore((s) => s.setBounds)
   const setFlyToMarker = useMapStore((s) => s.setFlyToMarker)
   const setMapReady = useMapStore((s) => s.setMapReady)
   const setMapInstance = useMapStore((s) => s.setMapInstance)
-  const initialized = useRef(false)
+  const tileLayer = useMapStore((s) => s.tileLayer)
+  const setSelectedMarkerId = useMapStore((s) => s.setSelectedMarkerId)
 
+  // 初始化地图
   useEffect(() => {
-    const container = map.getContainer()
-    if (!container) return
-    let timer: ReturnType<typeof setTimeout>
-    const observer = new ResizeObserver(() => {
-      clearTimeout(timer)
-      timer = setTimeout(() => map.invalidateSize(), 150)
-    })
-    observer.observe(container)
-    return () => { observer.disconnect(); clearTimeout(timer) }
-  }, [map])
+    if (!mapContainer.current || mapRef.current) return
 
-  useMapEvents({
-    moveend: () => {
+    const styleConfig = TILE_STYLES[tileLayer]
+
+    const map = new maplibregl.Map({
+      container: mapContainer.current,
+      style: styleConfig.url,
+      center: [DEFAULT_VIEWPORT.center[1], DEFAULT_VIEWPORT.center[0]],
+      zoom: DEFAULT_VIEWPORT.zoom,
+      minZoom: MIN_ZOOM,
+      maxZoom: MAX_ZOOM,
+      maxBounds: JAPAN_BOUNDS,
+      attributionControl: false,
+      // 性能优化
+      fadeDuration: 300,
+      // 本地表意文字字体回退 — 确保中日文字符能正确渲染
+      localIdeographFontFamily: "'Noto Sans SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif",
+    })
+
+    // 添加地图归因（精简版）
+    map.addControl(
+      new maplibregl.AttributionControl({
+        compact: true,
+        customAttribution: styleConfig.attribution,
+      }),
+      'bottom-right'
+    )
+
+    map.on('load', () => {
+      mapRef.current = map
+      setMapInstance(map)
+      setMapReady(true)
+      initialized.current = true
+    })
+
+    // 中文标签自动检测：遍历 symbol 图层，将 text-field 改为优先使用 name:zh
+    // 适用于 OpenFreeMap / OpenMapTiles 等包含多语言字段的矢量瓦片
+    map.on('style.load', () => {
+      const style = map.getStyle()
+      if (!style?.layers) return
+
+      for (const layer of style.layers) {
+        if (layer.type === 'symbol' && layer.layout?.['text-field']) {
+          const textField = layer.layout['text-field']
+          if (typeof textField === 'string' && /\{name\b/.test(textField)) {
+            // 优先使用中文名 (name:zh)，回退到本地名 (name)
+            map.setLayoutProperty(
+              layer.id,
+              'text-field',
+              ['coalesce', ['get', 'name:zh'], ['get', 'name']],
+            )
+          }
+        }
+      }
+    })
+
+    // moveend：同步边界到 store
+    map.on('moveend', () => {
       const b = map.getBounds()
       setBounds({
         north: b.getNorth(),
@@ -34,113 +87,42 @@ function MapEventBinder() {
         east: b.getEast(),
         west: b.getWest(),
       })
-    },
-    click: () => {
-      useMapStore.getState().setSelectedMarkerId(null)
-    },
-  })
+    })
 
-  const flyTo = useCallback(
-    (lat: number, lng: number, zoom?: number) => {
-      map.flyTo([lat, lng], zoom ?? map.getZoom(), {
-        duration: FLY_DURATION / 1000,
+    // 点击空白取消选中
+    map.on('click', () => {
+      setSelectedMarkerId(null)
+    })
+
+    // flyTo 注册
+    const flyTo = (lng: number, lat: number, zoom?: number) => {
+      map.flyTo({
+        center: [lng, lat],
+        zoom: zoom ?? map.getZoom(),
+        duration: 1200,
       })
-    },
-    [map]
-  )
+    }
+    setFlyToMarker(flyTo)
 
-  useEffect(() => {
-    if (initialized.current) return
-    initialized.current = true
-    setMapInstance(map)
-    setFlyToMarker(() => flyTo)
-    setMapReady(true)
     return () => {
+      map.remove()
+      mapRef.current = null
       setMapInstance(null)
       setFlyToMarker(null)
       setMapReady(false)
     }
-  }, [map, flyTo, setMapInstance, setFlyToMarker, setMapReady])
+  }, [])
 
-  return null
-}
-
-// 动态瓦片图层 —— 根据 store 的 tileLayer 状态切换
-// 性能优化：全球CDN瓦片源 + 预加载 + 缩放实时更新
-function DynamicTileLayer() {
-  const map = useMap()
-  const tileLayer = useMapStore((s) => s.tileLayer)
-  const layerRef = useRef<L.TileLayer | null>(null)
-
+  // 图层切换 — 平滑 setStyle
   useEffect(() => {
-    if (layerRef.current) {
-      map.removeLayer(layerRef.current)
-    }
-
-    const config = TILE_LAYERS[tileLayer]
-    const layer = L.tileLayer(config.url, {
-      attribution: config.attribution,
-      maxZoom: 20,
-      maxNativeZoom: config.maxNativeZoom ?? 18,
-      subdomains: config.subdomains || [],
-      // 性能关键参数
-      keepBuffer: 10,           // 预加载10格周边瓦片（默认6）
-      updateInterval: 50,       // 更快响应缩放事件（默认200）
-      updateWhenZooming: true,  // 缩放过程中也更新瓦片，消除灰色空白
-      crossOrigin: true,        // 启用CORS，浏览器可激进缓存
-      // 加载失败时显示占位，避免灰色空白
-      errorTileUrl: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256"><rect fill="%23f0f0f0" width="256" height="256"/><text x="50%" y="50%" text-anchor="middle" fill="%23999" font-size="14">Loading...</text></svg>',
-    })
-
-    layer.addTo(map)
-    layerRef.current = layer
-
-    return () => {
-      if (layerRef.current) {
-        map.removeLayer(layerRef.current)
-      }
-    }
-  }, [map, tileLayer])
-
-  return null
-}
-
-interface MapViewProps {
-  children?: ReactNode
-}
-
-export function MapView({ children }: MapViewProps) {
-  // Canvas 渲染器 — 大量 Marker 时比 SVG 快 4-8x
-  const canvasRenderer = useMemo(() => L.canvas({ padding: 0.5 }), [])
+    if (!mapRef.current || !initialized.current) return
+    const styleConfig = TILE_STYLES[tileLayer]
+    mapRef.current.setStyle(styleConfig.url)
+  }, [tileLayer])
 
   return (
-    <LeafletMapContainer
-      center={DEFAULT_VIEWPORT.center}
-      zoom={DEFAULT_VIEWPORT.zoom}
-      minZoom={MIN_ZOOM}
-      maxZoom={MAX_ZOOM}
-      zoomControl={false}
-      className="h-full w-full"
-      attributionControl={false}
-      maxBounds={JAPAN_BOUNDS}
-      maxBoundsViscosity={0.8}
-      // 🚀 Canvas 渲染器取代默认 SVG
-      preferCanvas={true}
-      renderer={canvasRenderer}
-      // 惯性优化
-      inertia={true}
-      inertiaDeceleration={3000}
-      inertiaMaxSpeed={1500}
-      easeLinearity={0.2}
-      worldCopyJump={false}
-      // 性能微调
-      fadeAnimation={true}
-      zoomAnimation={true}
-      markerZoomAnimation={true}
-    >
-      <DynamicTileLayer />
-      <MapEventBinder />
+    <div ref={mapContainer} className="h-full w-full">
       {children}
-    </LeafletMapContainer>
+    </div>
   )
 }
