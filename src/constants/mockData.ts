@@ -1,6 +1,7 @@
 import type { LocationData } from '@/types'
 
 const IMG = '/animate_store.svg'
+const IMG_PILGRIMAGE = '/pilgrimage.svg'
 
 // ================================================================
 //  rating:  实际 Google Maps 参考 + 店铺地位加权
@@ -124,4 +125,48 @@ export const mockLocations: LocationData[] = [
   // Tier 3: 小規模店
   { id: 'man-knt-5', name: 'まんだらけ宇都宮店', nameJa: 'mandarake宇都宮', description: '北関東唯一のまんだらけ。', category: 'mandarake', latitude: 36.558, longitude: 139.904, imageUrl: IMG, address: '栃木県宇都宮市', tags: ['宇都宮', '栃木', '北関東'], rating: 3.9, visitCount: 250, updatedAt: '2023-08-01' },
   { id: 'man-ksu-2', name: 'まんだらけ小倉店', nameJa: 'mandarake小倉', description: '北九州市のまんだらけ。', category: 'mandarake', latitude: 33.886, longitude: 130.877, imageUrl: IMG, address: '福岡県北九州市小倉北区', tags: ['小倉', '北九州'], rating: 3.9, visitCount: 300, updatedAt: '2023-10-01' },
+
+  // ================================================================
+  //  ANIME PILGRIMAGE — アニメ聖地巡礼
+  //  热门动漫作品的真实取景地
+  // ================================================================
+  // —— 君の名は。(Your Name) ——
+  { id: 'pil-knn-1', name: '須賀神社', nameJa: '須賀神社', description: '「君の名は。」ラストシーンの階段。世界中のファンが訪れる。', category: 'pilgrimage', latitude: 35.688, longitude: 139.720, imageUrl: IMG_PILGRIMAGE, address: '東京都新宿区須賀町5番地', tags: ['君の名は', '聖地', '階段', '新宿'], rating: 4.7, visitCount: 25000, updatedAt: '2025-01-01' },
+  { id: 'pil-knn-2', name: '飛騨古川駅', nameJa: '飛騨古川駅', description: '「君の名は。」瀧が糸守を探しに来た駅。飛騨市図書館とセットで巡礼。', category: 'pilgrimage', latitude: 36.238, longitude: 137.186, imageUrl: IMG_PILGRIMAGE, address: '岐阜県飛騨市古川町金森町8-22', tags: ['君の名は', '聖地', '飛騨', '駅'], rating: 4.6, visitCount: 12000, updatedAt: '2025-01-01' },
+  { id: 'pil-knn-3', name: '飛騨市図書館', nameJa: '飛騨市図書館', description: '「君の名は。」瀧が糸守の資料を調べた図書館。', category: 'pilgrimage', latitude: 36.237, longitude: 137.187, imageUrl: IMG_PILGRIMAGE, address: '岐阜県飛騨市古川町本町2-22', tags: ['君の名は', '図書館', '飛騨'], rating: 4.5, visitCount: 8000, updatedAt: '2025-01-01' },
+
+  // —— 鬼滅の刃 ——
+  { id: 'pil-kmt-1', name: '宝満宮竈門神社', nameJa: '宝満宮竈門神社', description: '「鬼滅の刃」主人公・竈門炭治郎の名前の由来とされる神社。', category: 'pilgrimage', latitude: 33.525, longitude: 130.561, imageUrl: IMG_PILGRIMAGE, address: '福岡県太宰府市', tags: ['鬼滅の刃', '竈門', '炭治郎', '聖地'], rating: 4.5, visitCount: 6000, updatedAt: '2025-01-01' },
+
+  // —— ラブライブ！ ——
+  { id: 'pil-ll-1', name: '神田明神', nameJa: '神田明神', description: "「ラブライブ！」東條希が巫女バイト。μ'sの聖地。絵馬が大人気。", category: 'pilgrimage', latitude: 35.702, longitude: 139.768, imageUrl: IMG_PILGRIMAGE, address: '東京都千代田区外神田2-16-2', tags: ['ラブライブ', "μ's", '神田明神', '巫女', '絵馬'], rating: 4.6, visitCount: 15000, updatedAt: '2025-01-01' },
+  { id: 'pil-ll-2', name: '国立音楽大学付属高校', nameJa: '国立音楽大学付属高校', description: '「ラブライブ！」音ノ木坂学院のモデルとされる建物。神田明神の近く。', category: 'pilgrimage', latitude: 35.699, longitude: 139.769, imageUrl: IMG_PILGRIMAGE, address: '東京都世田谷区', tags: ['ラブライブ', '音ノ木坂', 'モデル'], rating: 4.2, visitCount: 3000, updatedAt: '2025-01-01' },
+
+  // —— 冴えない彼女の育てかた ——
+  { id: 'pil-sae-1', name: 'のぞき坂', nameJa: 'のぞき坂', description: '「冴えない彼女の育てかた」OPの有名な坂道。豊島区。', category: 'pilgrimage', latitude: 35.717, longitude: 139.716, imageUrl: IMG_PILGRIMAGE, address: '東京都豊島区高田2丁目', tags: ['冴カノ', 'OP', '坂道', '豊島区'], rating: 4.3, visitCount: 5000, updatedAt: '2025-01-01' },
+
+  // —— 涼宮ハルヒの憂鬱 ——
+  { id: 'pil-hrh-1', name: '西宮北高校（モデル校）', nameJa: '兵庫県立西宮北高等学校', description: '「涼宮ハルヒの憂鬱」北高のモデル。坂道が有名。', category: 'pilgrimage', latitude: 34.761, longitude: 135.312, imageUrl: IMG_PILGRIMAGE, address: '兵庫県西宮市', tags: ['涼宮ハルヒ', '北高', '西宮', 'SOS団'], rating: 4.4, visitCount: 8000, updatedAt: '2025-01-01' },
+
+  // —— らき☆すた ——
+  { id: 'pil-lks-1', name: '鷲宮神社', nameJa: '鷲宮神社', description: '「らき☆すた」柊かがみ・つかさ姉妹の実家の神社モデル。アニメ聖地巡礼の元祖的存在。', category: 'pilgrimage', latitude: 36.097, longitude: 139.656, imageUrl: IMG_PILGRIMAGE, address: '埼玉県久喜市鷲宮1-6-1', tags: ['らき☆すた', '柊家', '元祖聖地', '鷲宮'], rating: 4.5, visitCount: 10000, updatedAt: '2025-01-01' },
+
+  // —— 氷菓 ——
+  { id: 'pil-hyk-1', name: '高山陣屋', nameJa: '高山陣屋', description: '「氷菓」神山高校の文化祭シーンのモデル地の一つ。飛騨高山は聖地密集地帯。', category: 'pilgrimage', latitude: 36.140, longitude: 137.258, imageUrl: IMG_PILGRIMAGE, address: '岐阜県高山市八軒町1-5', tags: ['氷菓', '飛騨高山', '文化祭', '古典部'], rating: 4.4, visitCount: 4500, updatedAt: '2025-01-01' },
+
+  // —— 言の葉の庭 ——
+  { id: 'pil-kto-1', name: '新宿御苑', nameJa: '新宿御苑', description: '「言の葉の庭」の舞台。雨の日の庭園があまりにも美しく再現された。', category: 'pilgrimage', latitude: 35.685, longitude: 139.710, imageUrl: IMG_PILGRIMAGE, address: '東京都新宿区内藤町11', tags: ['言の葉の庭', '新宿御苑', '庭園', '新海誠'], rating: 4.6, visitCount: 18000, updatedAt: '2025-01-01' },
+
+  // —— 千と千尋の神隠し ——
+  { id: 'pil-sen-1', name: '道後温泉本館', nameJa: '道後温泉本館', description: '「千と千尋の神隠し」油屋のモデルの一つと言われる歴史的温泉。', category: 'pilgrimage', latitude: 33.842, longitude: 132.769, imageUrl: IMG_PILGRIMAGE, address: '愛媛県松山市道後湯之町5-6', tags: ['千と千尋', '油屋', '道後温泉', 'ジブリ'], rating: 4.7, visitCount: 30000, updatedAt: '2025-01-01' },
+  { id: 'pil-sen-2', name: '江戸東京たてもの園', nameJa: '江戸東京たてもの園', description: '「千と千尋の神隠し」の世界観の参考になった建築が多数。', category: 'pilgrimage', latitude: 35.700, longitude: 139.512, imageUrl: IMG_PILGRIMAGE, address: '東京都小金井市桜町3-7-1', tags: ['千と千尋', 'ジブリ', '建築', '小金井'], rating: 4.5, visitCount: 12000, updatedAt: '2025-01-01' },
+
+  // —— すずめの戸締まり ——
+  { id: 'pil-szm-1', name: '旧豊後森機関庫', nameJa: '旧豊後森機関庫', description: '「すずめの戸締まり」九州で最初の扉が開く廃墟。', category: 'pilgrimage', latitude: 33.287, longitude: 131.066, imageUrl: IMG_PILGRIMAGE, address: '大分県玖珠郡玖珠町', tags: ['すずめの戸締まり', '廃墟', '大分', '新海誠'], rating: 4.3, visitCount: 3500, updatedAt: '2025-01-01' },
+
+  // —— ガールズ＆パンツァー ——
+  { id: 'pil-grp-1', name: '大洗磯前神社', nameJa: '大洗磯前神社', description: '「ガールズ＆パンツァー」の聖地。鳥居が海に面した絶景神社。痛絵馬多数。', category: 'pilgrimage', latitude: 36.311, longitude: 140.587, imageUrl: IMG_PILGRIMAGE, address: '茨城県東茨城郡大洗町磯浜町6890', tags: ['ガルパン', '大洗', '痛絵馬', '鳥居'], rating: 4.5, visitCount: 9000, updatedAt: '2025-01-01' },
+
+  // —— 氷菓 (飛騨エリア追加) ——
+  { id: 'pil-hyk-2', name: '水無神社', nameJa: '水無神社', description: '「氷菓」OPに登場。千反田えるの実家（設定上）の近く。', category: 'pilgrimage', latitude: 36.084, longitude: 137.252, imageUrl: IMG_PILGRIMAGE, address: '岐阜県高山市一之宮町', tags: ['氷菓', '千反田', '飛騨'], rating: 4.3, visitCount: 3500, updatedAt: '2025-01-01' },
 ]

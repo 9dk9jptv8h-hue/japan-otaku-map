@@ -7,18 +7,21 @@ const CATEGORY_COLORS: Record<string, string> = {
   animate: '#e91e63',
   melonbooks: '#4caf50',
   mandarake: '#ff9800',
+  pilgrimage: '#d32f2f',
 }
 
 const CATEGORY_GRADIENTS: Record<string, string> = {
   animate: 'linear-gradient(135deg, #fce4ec, #fff5f5)',
   melonbooks: 'linear-gradient(135deg, #e8f5e9, #f1f8e9)',
   mandarake: 'linear-gradient(135deg, #fff3e0, #fff8e1)',
+  pilgrimage: 'linear-gradient(135deg, #ffebee, #fff3f3)',
 }
 
 const CATEGORY_DARK_GRADIENTS: Record<string, string> = {
   animate: 'linear-gradient(135deg, #2d1520, #1a1020)',
   melonbooks: 'linear-gradient(135deg, #152518, #101a10)',
   mandarake: 'linear-gradient(135deg, #251a10, #1a1410)',
+  pilgrimage: 'linear-gradient(135deg, #2d1515, #1a1010)',
 }
 
 function getAccent(category: string): string {

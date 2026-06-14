@@ -32,8 +32,9 @@ export const JAPAN_BOUNDS: [[number, number], [number, number]] = [
 // ================================================================
 
 // 矢量瓦片样式配置
-// OpenFreeMap 样式基于 OpenMapTiles schema，支持 name:zh 字段
+// OpenFreeMap 样式基于 OpenMapTiles schema，支持 name:zh 等多语言字段
 // terrain 使用 CartoDB GL (全球CDN，无需Key)
+// MapTiler 代理：设置 MAPTILER_KEY 后运行 node tile-proxy.js，使用 mt-proxy 样式
 export const TILE_STYLES: Record<TileLayerStyle, {
   url: string
   attribution: string
@@ -63,4 +64,16 @@ export const TILE_STYLES: Record<TileLayerStyle, {
     attribution: '&copy; <a href="https://carto.com/">CARTO</a> &copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>',
     desc: '地形',
   },
+}
+
+// MapTiler 代理配置（可选，需先获取免费 Key 并启动 node tile-proxy.js）
+// 获取 Key: https://cloud.maptiler.com → 免费层 10 万次/月
+// 运行代理: node tile-proxy.js → 监听 127.0.0.1:15723
+// 使用时将 TILE_STYLES 中对应样式的 url 改为本地代理地址
+export const MAPTILER_PROXY = {
+  port: 15723,
+  baseUrl: 'http://127.0.0.1:15723',
+  // 矢量瓦片原生支持 lang=zh-Hans，中文覆盖率远超 OSM 的 name:zh
+  styleUrl: 'http://127.0.0.1:15723/style.json?style=streets-v2',
+  attribution: '&copy; <a href="https://www.maptiler.com/">MapTiler</a> &copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>',
 }

@@ -1,3 +1,5 @@
+import type { Map as MapLibreMap } from 'maplibre-gl'
+
 // 地点数据类型
 export interface LocationData {
   id: string
@@ -16,7 +18,7 @@ export interface LocationData {
 }
 
 // 三大分类
-export type LocationCategory = 'animate' | 'melonbooks' | 'mandarake'
+export type LocationCategory = 'animate' | 'melonbooks' | 'mandarake' | 'pilgrimage'
 
 // 分类元信息
 export interface CategoryMeta {
@@ -55,3 +57,6 @@ export interface MapBounds {
   east: number
   west: number
 }
+
+// MapLibre Map 实例类型别名
+export type MapInstance = MapLibreMap

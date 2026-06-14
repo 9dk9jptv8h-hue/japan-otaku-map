@@ -57,22 +57,30 @@ export function MapView({ children }: MapViewProps) {
       initialized.current = true
     })
 
-    // 中文标签自动检测：遍历 symbol 图层，将 text-field 改为优先使用 name:zh
+    // 多语言标签自动检测：遍历 symbol 图层，建立中文→日文→英文→本地名的完整回退链
     // 适用于 OpenFreeMap / OpenMapTiles 等包含多语言字段的矢量瓦片
+    // 回退优先级：name:zh → name:zh-Hans → name:zh-CN → int_name → name:en → name:ja → name:ja-Latn → name
     map.on('style.load', () => {
       const style = map.getStyle()
       if (!style?.layers) return
+
+      const zhFallbackExpr = [
+        'coalesce',
+        ['get', 'name:zh'],
+        ['get', 'name:zh-Hans'],
+        ['get', 'name:zh-CN'],
+        ['get', 'int_name'],
+        ['get', 'name:en'],
+        ['get', 'name:ja'],
+        ['get', 'name:ja-Latn'],
+        ['get', 'name'],
+      ]
 
       for (const layer of style.layers) {
         if (layer.type === 'symbol' && layer.layout?.['text-field']) {
           const textField = layer.layout['text-field']
           if (typeof textField === 'string' && /\{name\b/.test(textField)) {
-            // 优先使用中文名 (name:zh)，回退到本地名 (name)
-            map.setLayoutProperty(
-              layer.id,
-              'text-field',
-              ['coalesce', ['get', 'name:zh'], ['get', 'name']],
-            )
+            map.setLayoutProperty(layer.id, 'text-field', zhFallbackExpr)
           }
         }
       }

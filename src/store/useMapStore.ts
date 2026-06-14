@@ -1,12 +1,12 @@
-import type { Map as LeafletMap } from 'leaflet'
+import type { MapInstance } from '@/types'
 import { create } from 'zustand'
 import type { ViewportState, MapBounds, TileLayerStyle } from '@/types'
-import { DEFAULT_VIEWPORT, TILE_LAYERS } from '@/constants/mapDefaults'
+import { DEFAULT_VIEWPORT } from '@/constants/mapDefaults'
 
 interface MapStore {
-  // 地图实例引用
-  mapInstance: LeafletMap | null
-  setMapInstance: (map: LeafletMap | null) => void
+  // 地图实例引用 — MapLibre Map
+  mapInstance: MapInstance | null
+  setMapInstance: (map: MapInstance | null) => void
 
   // 视口状态
   viewport: ViewportState
@@ -33,12 +33,9 @@ interface MapStore {
   tileLayer: TileLayerStyle
   setTileLayer: (layer: TileLayerStyle) => void
 
-  // 飞向标记
-  flyToMarker: ((lat: number, lng: number, zoom?: number) => void) | null
-  setFlyToMarker: (fn: ((lat: number, lng: number, zoom?: number) => void) | null) => void
-
-  // 获取瓦片配置
-  getTileConfig: () => { url: string; attribution: string }
+  // 飞向标记 — MapLibre 使用 [lng, lat] 顺序
+  flyToMarker: ((lng: number, lat: number, zoom?: number) => void) | null
+  setFlyToMarker: (fn: ((lng: number, lat: number, zoom?: number) => void) | null) => void
 
   // 便捷方法
   zoomIn: () => void
@@ -59,11 +56,9 @@ export const useMapStore = create<MapStore>((set, get) => ({
   hoveredMarkerId: null as string | null,
   setSelectedMarkerId: (id) => set((s) => {
     if (id === null) return { selectedMarkerIds: [] }
-    // 已选中则取消
     if (s.selectedMarkerIds.includes(id)) {
       return { selectedMarkerIds: s.selectedMarkerIds.filter((x) => x !== id) }
     }
-    // 最多2个，超过则移除最早的
     const next = s.selectedMarkerIds.length >= 2
       ? [...s.selectedMarkerIds.slice(1), id]
       : [...s.selectedMarkerIds, id]
@@ -77,16 +72,18 @@ export const useMapStore = create<MapStore>((set, get) => ({
   isMapReady: false,
   setMapReady: (ready) => set({ isMapReady: ready }),
 
-  tileLayer: 'light',
+  tileLayer: 'standard',
   setTileLayer: (layer) => set({ tileLayer: layer }),
 
   flyToMarker: null,
   setFlyToMarker: (fn) => set({ flyToMarker: fn }),
 
-  getTileConfig: () => {
-    return TILE_LAYERS[get().tileLayer]
+  zoomIn: () => {
+    const map = get().mapInstance
+    if (map) map.zoomIn()
   },
-
-  zoomIn: () => get().mapInstance?.zoomIn(),
-  zoomOut: () => get().mapInstance?.zoomOut(),
+  zoomOut: () => {
+    const map = get().mapInstance
+    if (map) map.zoomOut()
+  },
 }))
