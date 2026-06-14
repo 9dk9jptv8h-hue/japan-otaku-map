@@ -3,6 +3,7 @@ import maplibregl from 'maplibre-gl'
 import type { LocationData, LocationCategory } from '@/types'
 import { CATEGORIES } from '@/constants/theme'
 import { useMapStore } from '@/store/useMapStore'
+import { getCityPhoto } from '@/utils/city-photo'
 
 function getMarkerColor(category: LocationCategory): string {
   const meta = CATEGORIES.find((c) => c.key === category)
@@ -32,6 +33,10 @@ interface CustomMarkerProps {
 export const CustomMarker = memo(function CustomMarker({ location, map }: CustomMarkerProps) {
   const markerRef = useRef<maplibregl.Marker | null>(null)
   const popupRef = useRef<maplibregl.Popup | null>(null)
+  const elementRef = useRef<HTMLDivElement | null>(null)
+  // 缓存 DOM 子节点引用，避免更新时重复 querySelector
+  const dotRef = useRef<HTMLDivElement | null>(null)
+  const pulseRef = useRef<HTMLDivElement | null>(null)
 
   const isSelected = useMapStore((s) => s.selectedMarkerIds.includes(location.id))
   const isHovered = useMapStore((s) => s.hoveredMarkerId === location.id)
@@ -41,69 +46,97 @@ export const CustomMarker = memo(function CustomMarker({ location, map }: Custom
 
   const color = getMarkerColor(location.category)
   const iconSvg = getCategorySvg(location.category)
-  const size = isSelected ? 42 : isHovered ? 36 : 30
-  const borderWidth = isSelected ? 3 : 2
-  const pulse = isSelected
+  const borderRadius = location.category === 'mandarake' ? '50%' : '12px'
 
-  const element = useRef<HTMLDivElement | null>(null)
-
-  // 创建 marker HTML 元素（仅一次）
+  // 创建 marker HTML 元素（仅一次，使用 innerHTML 一次性构建静态结构）
   useEffect(() => {
     const el = document.createElement('div')
     el.className = 'custom-marker-el'
-    el.style.cursor = 'pointer'
-    element.current = el
-    return () => {
-      el.remove()
-    }
-  }, [])
+    el.setAttribute('data-marker-id', location.id)
 
-  // 更新 marker 外观
-  useEffect(() => {
-    const el = element.current
-    if (!el) return
-
-    const borderRadius = location.category === 'mandarake' ? '50%' : '12px'
-
+    // 一次性构建 HTML 结构 — 之后的更新通过 classList + style 属性完成
     el.innerHTML = `
-      <div class="${pulse ? 'marker-pulse' : ''}" style="
-        width:${size}px;height:${size + 8}px;
-        display:flex;align-items:center;justify-content:center;
-      ">
-        <div style="
-          width:${size}px;height:${size}px;
-          background:${color};
-          border:${borderWidth}px solid white;
-          border-radius:${borderRadius};
+      <div class="marker-container" style="display:flex;align-items:center;justify-content:center;">
+        <div class="marker-dot" style="
           display:flex;align-items:center;justify-content:center;
-          box-shadow:0 ${isSelected ? 8 : 4}px ${isSelected ? 24 : 14}px ${color}55;
-          transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1);
-          ${isHovered && !isSelected ? 'transform:scale(1.15);' : ''}
+          color:white;
         ">
           ${iconSvg}
         </div>
-        ${pulse ? `<div style="
-          position:absolute;width:${size}px;height:${size}px;
-          border-radius:${borderRadius};
-          border:2.5px solid ${color};animation:pulse 1.6s ease-out infinite;
-        "></div>` : ''}
+        <div class="marker-pulse-ring" style="
+          position:absolute;
+          pointer-events:none;
+        "></div>
       </div>
     `
 
-    // 更新已有 marker
-    if (markerRef.current && map) {
-      markerRef.current.setLngLat([location.longitude, location.latitude])
-    }
-  }, [size, color, borderWidth, pulse, iconSvg, isHovered, isSelected, location, map])
+    // 缓存关键 DOM 节点
+    dotRef.current = el.querySelector('.marker-dot') as HTMLDivElement
+    pulseRef.current = el.querySelector('.marker-pulse-ring') as HTMLDivElement
 
-  // 挂载/卸载 marker
+    // 初始化 CSS 变量，避免首帧闪烁
+    const initialSize = 30
+    const initialRadius = location.category === 'mandarake' ? '50%' : '12px'
+    el.style.setProperty('--marker-size', `${initialSize}px`)
+    el.style.setProperty('--marker-color', color)
+    el.style.setProperty('--marker-radius', initialRadius)
+    el.style.setProperty('--marker-border', '2px')
+    el.style.setProperty('--marker-shadow', `0 4px 14px ${color}55`)
+
+    elementRef.current = el
+    return () => {
+      el.remove()
+      elementRef.current = null
+      dotRef.current = null
+      pulseRef.current = null
+    }
+  }, [])
+
+  // 更新 marker 外观 — 使用 classList + style.setProperty，绝不使用 innerHTML
   useEffect(() => {
-    const el = element.current
+    const el = elementRef.current
+    if (!el) return
+
+    const size = isSelected ? 42 : isHovered ? 36 : 30
+    const borderWidth = isSelected ? 3 : 2
+    const pulse = isSelected
+
+    // 用 CSS 自定义属性传递动态值，避免逐一设置 inline style
+    el.style.setProperty('--marker-size', `${size}px`)
+    el.style.setProperty('--marker-color', color)
+    el.style.setProperty('--marker-radius', borderRadius)
+    el.style.setProperty('--marker-border', `${borderWidth}px`)
+    el.style.setProperty('--marker-shadow', isSelected
+      ? `0 8px 24px ${color}55`
+      : `0 4px 14px ${color}55`
+    )
+
+    // 状态切换用 classList — 比 className 赋值更精确
+    el.classList.toggle('marker-selected', isSelected)
+    el.classList.toggle('marker-hovered', isHovered && !isSelected)
+
+    // 脉冲环显示/隐藏
+    if (pulseRef.current) {
+      pulseRef.current.style.display = pulse ? 'block' : 'none'
+    }
+
+    // 缩放效果（hover 非 selected 时）
+    if (dotRef.current) {
+      dotRef.current.style.transform = (isHovered && !isSelected) ? 'scale(1.15)' : ''
+    }
+  }, [isSelected, isHovered, color, borderRadius])
+
+  // 挂载/卸载 marker — 只在 map 实例或 location 坐标变化时触发
+  useEffect(() => {
+    const el = elementRef.current
     if (!el || !map) return
 
     // 先清除旧 marker
     if (markerRef.current) {
       markerRef.current.remove()
+    }
+    if (popupRef.current) {
+      popupRef.current.remove()
     }
 
     const marker = new maplibregl.Marker({
@@ -114,25 +147,21 @@ export const CustomMarker = memo(function CustomMarker({ location, map }: Custom
       .setLngLat([location.longitude, location.latitude])
       .addTo(map)
 
-    // 创建 popup
+    // 创建 popup（空内容，后续按需填充）
     const popup = new maplibregl.Popup({
-      offset: [0, -(size + 12)],
+      offset: [0, -44],
       closeButton: true,
       closeOnClick: false,
       maxWidth: '280px',
       className: 'maplibre-popup-card',
     })
 
-    // 构建 popup HTML
-    const popupContainer = document.createElement('div')
-    // 使用 React 渲染需要特殊处理，这里直接渲染 HTML
-    popupContainer.innerHTML = renderPopupCard(location)
-
     // 点击 marker → toggle popup + 选中
     el.onclick = (e) => {
       e.stopPropagation()
       if (!popup.isOpen()) {
-        // 关闭其他 popup 后再打开
+        const popupContainer = document.createElement('div')
+        popupContainer.innerHTML = renderPopupCard(location)
         popup.setLngLat([location.longitude, location.latitude])
         popup.setDOMContent(popupContainer)
         popup.addTo(map)
@@ -153,10 +182,12 @@ export const CustomMarker = memo(function CustomMarker({ location, map }: Custom
     return () => {
       marker.remove()
       popup.remove()
+      markerRef.current = null
+      popupRef.current = null
     }
-  }, [map])
+  }, [map, location.longitude, location.latitude, location.id])
 
-  // 选中状态变化时更新 popup
+  // 选中状态变化时同步 popup 开关
   useEffect(() => {
     if (!popupRef.current || !map) return
     if (isSelected) {
@@ -177,12 +208,12 @@ export const CustomMarker = memo(function CustomMarker({ location, map }: Custom
   return null
 })
 
-// 用 HTML 字符串渲染 PopupCard（避免 ReactDOM.createRoot 的额外依赖）
+// 用 HTML 字符串渲染 PopupCard
 function renderPopupCard(location: LocationData): string {
   const category = CATEGORIES.find((c) => c.key === location.category)
   const color = category?.color ?? '#607d8b'
   const label = category?.label ?? ''
-  const photoUrl = getCityPhotoUrl(location.name, location.address)
+  const photoUrl = getCityPhoto(location.name, location.address)
 
   const tagHtml = location.tags.slice(0, 5).map((tag) =>
     `<span style="
@@ -210,7 +241,7 @@ function renderPopupCard(location: LocationData): string {
     <div style="width:280px;overflow:hidden;font-family:'Noto Sans SC','Hiragino Sans GB',system-ui,sans-serif;">
       <div style="position:relative;height:120px;overflow:hidden;background:#f0f0f0;">
         <img src="${photoUrl}" alt="${location.address}" loading="lazy"
-          style="width:100%;height:100%;object-fit:cover;transition:transform 0.7s ease-out;"
+          style="width:100%;height:100%;object-fit:cover;"
           onerror="this.style.display='none';this.parentElement.style.background='linear-gradient(135deg, ${color}33, ${color}11)';"/>
         <div style="position:absolute;bottom:0;left:0;right:0;height:40px;pointer-events:none;background:linear-gradient(to top, var(--color-surface, #fff), transparent);"></div>
         ${label ? `<span style="position:absolute;top:12px;left:12px;border-radius:8px;padding:2px 10px;font-size:10px;font-weight:700;color:white;background:${color};letter-spacing:0.05em;box-shadow:0 2px 8px rgba(0,0,0,0.2);">${label}</span>` : ''}
@@ -234,10 +265,4 @@ function renderPopupCard(location: LocationData): string {
       </div>
     </div>
   `
-}
-
-// 从 city-photo 工具函数复制逻辑
-import { getCityPhoto } from '@/utils/city-photo'
-function getCityPhotoUrl(name: string, address: string): string {
-  return getCityPhoto(name, address)
 }

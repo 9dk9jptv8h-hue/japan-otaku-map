@@ -69,7 +69,7 @@ export const LocationCard = memo(function LocationCard({ location }: LocationCar
       onMouseLeave={() => setHovered(null)}
       className={cn(
         'location-card group flex gap-3 p-3 rounded-xl cursor-pointer mb-1',
-        'transition-all duration-300 ease-out',
+        'transition-[transform,box-shadow,background-color] duration-300 ease-out',
         'hover:scale-[1.02] active:scale-[0.98]',
         isSelected
           ? 'ring-2 ring-offset-1 scale-[1.01]'

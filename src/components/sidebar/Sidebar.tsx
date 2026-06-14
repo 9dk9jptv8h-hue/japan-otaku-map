@@ -63,7 +63,7 @@ export function Sidebar({ locations, className }: SidebarProps) {
         break
     }
     return result
-  }, [locations, debouncedSearch, selectedCategories, sortBy])
+  }, [locations, debouncedSearch, selectedCategories, sortBy, selectedRegion])
 
   return (
     <>

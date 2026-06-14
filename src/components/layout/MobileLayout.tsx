@@ -64,7 +64,7 @@ export function MobileLayout({ locations }: MobileLayoutProps) {
         break
     }
     return result
-  }, [locations, debouncedSearch, selectedCategories, sortBy])
+  }, [locations, debouncedSearch, selectedCategories, sortBy, selectedRegion])
 
   return (
     <div className="relative h-full w-full" style={{ touchAction: 'pan-x pan-y pinch-zoom' }}>

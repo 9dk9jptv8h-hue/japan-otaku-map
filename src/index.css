@@ -350,8 +350,6 @@
 .maplibregl-ctrl-attrib {
   font-size: 10px !important;
   background: var(--color-glass) !important;
-  backdrop-filter: var(--color-glass-blur) !important;
-  -webkit-backdrop-filter: var(--color-glass-blur) !important;
   border-radius: 6px !important;
   padding: 2px 6px !important;
   border: 1px solid var(--color-border) !important;
@@ -449,24 +447,55 @@ aside {
    Component-Specific Animations
    ================================================================ */
 
-/* 自定义标记 hover 效果 */
+/* ================================================================
+   自定义标记 — CSS 自定义属性驱动，避免 JS innerHTML 更新
+   ================================================================ */
 .custom-marker-el {
-  transition: transform 0.3s var(--ease-spring);
+  --marker-size: 30px;
+  --marker-color: #607d8b;
+  --marker-radius: 12px;
+  --marker-border: 2px;
+  --marker-shadow: 0 4px 14px rgba(96, 125, 139, 0.33);
+  cursor: pointer;
   will-change: transform;
+  /* 仅在 hover/click 时触发 transform 变化，不会触发 layout */
+  transition: transform 0.3s var(--ease-spring);
 }
 .custom-marker-el:hover {
   transform: scale(1.2);
 }
 
-/* 选中标记脉冲光环 */
-.marker-pulse .pulse-ring {
-  animation: pulse 1.8s ease-out infinite;
+/* 标记主体圆点 — 所有动态尺寸/颜色通过 CSS 变量注入 */
+.marker-dot {
+  width: var(--marker-size);
+  height: var(--marker-size);
+  background: var(--marker-color);
+  border: var(--marker-border) solid white;
+  border-radius: var(--marker-radius);
+  box-shadow: var(--marker-shadow);
+  /* 精确指定过渡属性，不用 all */
+  transition: width 0.3s var(--ease-spring),
+              height 0.3s var(--ease-spring),
+              box-shadow 0.3s var(--ease-spring),
+              transform 0.3s var(--ease-spring);
+}
+
+/* 选中状态脉冲光环 */
+.marker-pulse-ring {
+  width: var(--marker-size);
+  height: var(--marker-size);
+  border-radius: var(--marker-radius);
+  border: 2.5px solid var(--marker-color);
+  animation: pulse 1.6s ease-out infinite;
 }
 
 /* 卡片悬停光条扫过（Gleam Effect） */
 .location-card {
   position: relative;
   overflow: hidden;
+  /* 延迟渲染屏幕外卡片 — 100+ 条数据时避免一次性全部 layout */
+  content-visibility: auto;
+  contain-intrinsic-size: auto 120px;
 }
 .location-card::after {
   content: '';

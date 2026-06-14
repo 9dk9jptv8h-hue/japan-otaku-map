@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import type { LocationData } from '@/types'
 import { LocationCard } from './LocationCard'
 import { EmptyState } from '@/components/ui/EmptyState'
@@ -8,7 +9,7 @@ interface CardListProps {
   total: number
 }
 
-export function CardList({ locations, total }: CardListProps) {
+export const CardList = memo(function CardList({ locations, total }: CardListProps) {
   if (locations.length === 0) {
     return (
       <EmptyState
@@ -31,4 +32,4 @@ export function CardList({ locations, total }: CardListProps) {
       ))}
     </div>
   )
-}
+})
