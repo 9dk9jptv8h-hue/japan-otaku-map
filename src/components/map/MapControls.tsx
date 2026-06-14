@@ -13,7 +13,8 @@ export function MapControls({ className }: MapControlsProps) {
   const flyToMarker = useMapStore((s) => s.flyToMarker)
 
   const goHome = () => {
-    flyToMarker?.(DEFAULT_VIEWPORT.center[0], DEFAULT_VIEWPORT.center[1], DEFAULT_VIEWPORT.zoom)
+    // MapLibre flyTo 使用 [lng, lat] 顺序
+    flyToMarker?.(DEFAULT_VIEWPORT.center[1], DEFAULT_VIEWPORT.center[0], DEFAULT_VIEWPORT.zoom)
   }
 
   const btnClass = cn(

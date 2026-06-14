@@ -10,9 +10,11 @@ interface MarkersLayerProps {
 
 export const MarkersLayer = memo(function MarkersLayer({ locations }: MarkersLayerProps) {
   const bounds = useMapStore((s) => s.bounds)
+  const mapInstance = useMapStore((s) => s.mapInstance)
 
-  // 🚀 Viewport culling — 仅渲染可视区域内的标记
+  // Viewport culling — 仅渲染可视区域内的标记
   const visibleLocations = useMemo(() => {
+    if (!bounds) return locations
     return locations.filter((loc) =>
       isInBounds(loc.latitude, loc.longitude, bounds)
     )
@@ -21,7 +23,7 @@ export const MarkersLayer = memo(function MarkersLayer({ locations }: MarkersLay
   return (
     <>
       {visibleLocations.map((location) => (
-        <CustomMarker key={location.id} location={location} />
+        <CustomMarker key={location.id} location={location} map={mapInstance} />
       ))}
     </>
   )

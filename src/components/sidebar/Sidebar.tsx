@@ -83,7 +83,7 @@ export function Sidebar({ locations, className }: SidebarProps) {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-xl font-bold tracking-tight">
-                🗾 日本动漫巡礼地图
+                🗾 日本旅游——圣地巡礼地图
               </h1>
               <p className="text-sm text-white/70 mt-1">
                 Animate · Melonbooks · Mandarake · 圣地巡礼 — 全国地点一览
