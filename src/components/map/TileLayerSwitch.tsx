@@ -29,7 +29,7 @@ export function TileLayerSwitch({ className }: TileLayerSwitchProps) {
       <div className="col-span-2 flex items-center gap-1.5 px-1.5 py-0.5 mb-0.5">
         <Layers className="h-3.5 w-3.5 text-[var(--color-text-dim)]/60" />
         <span className="text-[10px] font-semibold text-[var(--color-text-dim)]/60 uppercase tracking-wider">
-          地図スタイル
+          地图样式
         </span>
       </div>
       {LAYERS.map((layer) => (

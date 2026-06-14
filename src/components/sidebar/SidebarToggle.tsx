@@ -22,7 +22,7 @@ export function SidebarToggle({ collapsed, onClick, className }: SidebarTogglePr
           : 'glass text-[var(--color-text-dim)] hover:text-[var(--color-text)]',
         className
       )}
-      aria-label={collapsed ? '展開サイドバー' : '折りたたむ'}
+      aria-label={collapsed ? '展开侧栏' : '收起侧栏'}
     >
       {collapsed ? (
         <ChevronRight className="h-4 w-4" />

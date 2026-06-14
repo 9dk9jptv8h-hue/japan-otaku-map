@@ -1,81 +1,235 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { mockLocations } from '@/constants/mockData'
 import { useUIStore } from '@/store/useUIStore'
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
 import { AppShell } from '@/components/layout/AppShell'
 
-function SkeletonLoader({ exiting }: { exiting: boolean }) {
+/* ================================================================
+   Welcome Screen — 欢迎界面 — 日本动漫圣地巡礼
+   Sakura • Sumi-e • Hanko Stamps
+   ================================================================ */
+
+const TITLE_CHARS = '日本动漫圣地巡礼地图'.split('')
+const SUBTITLE = '动漫圣地巡礼地图 — 全国圣地巡礼'
+
+interface StampData {
+  label: string
+  sub: string
+  color: string
+  bg: string
+  border: string
+  shadow: string
+}
+
+const STAMPS: StampData[] = [
+  {
+    label: 'アニメイト',
+    sub: 'Animate',
+    color: '#e91e63',
+    bg: '#fce4ec',
+    border: '#f48fb1',
+    shadow: '0 0 24px rgba(233,30,99,0.3)',
+  },
+  {
+    label: 'メロンブックス',
+    sub: 'Melonbooks',
+    color: '#009688',
+    bg: '#e0f2f1',
+    border: '#80cbc4',
+    shadow: '0 0 24px rgba(0,150,136,0.3)',
+  },
+  {
+    label: 'まんだらけ',
+    sub: 'Mandarake',
+    color: '#ff9800',
+    bg: '#fff3e0',
+    border: '#ffcc80',
+    shadow: '0 0 24px rgba(255,152,0,0.3)',
+  },
+]
+
+interface PetalData {
+  id: number
+  left: string
+  delay: string
+  duration: string
+  size: number
+  sway: string
+  rotate: string
+  opacity: number
+}
+
+function generatePetals(): PetalData[] {
+  return Array.from({ length: 20 }, (_, i) => ({
+    id: i,
+    left: `${((i / 20) * 94 + Math.random() * 6) % 96}%`,
+    delay: `${Math.random() * 2.2}s`,
+    duration: `${2.8 + Math.random() * 3.4}s`,
+    size: 0.55 + Math.random() * 0.7,
+    sway: `${(Math.random() - 0.5) * 140}px`,
+    rotate: `${360 + Math.random() * 540}deg`,
+    opacity: 0.45 + Math.random() * 0.45,
+  }))
+}
+
+function WelcomeScreen({ exiting }: { exiting: boolean }) {
+  const petals = useMemo(() => generatePetals(), [])
+
   return (
     <div
-      className="flex h-screen w-screen items-center justify-center overflow-hidden"
+      className="fixed inset-0 z-[9999] flex items-center justify-center overflow-hidden"
       style={{
-        background: 'linear-gradient(135deg, #fce4ec, #e3f2fd, #e0f7fa, #f3e5f5)',
-        backgroundSize: '400% 400%',
-        animation: exiting ? 'loaderExit 0.5s ease-in forwards' : 'bgShift 8s ease infinite',
+        animation: exiting ? 'loaderExit 0.45s ease-in forwards' : 'inkBloom 0.8s ease-out forwards',
       }}
     >
-      <div className="flex flex-col items-center w-full max-w-[380px] px-6">
-        {/* Logo */}
-        <div
-          className="text-[56px] mb-5"
-          style={{ animation: exiting ? 'none' : 'pulse 1.5s ease-in-out infinite' }}
-        >
-          🗾
-        </div>
+      {/* —— 水墨背景层 —— */}
+      <div className="absolute inset-0" style={{ background: 'var(--welcome-bg, #f7f3ee)' }} />
+      {/* 墨韵光晕 */}
+      <div
+        className="absolute top-1/2 left-1/2 w-[140vmax] h-[140vmax] rounded-full"
+        style={{
+          background:
+            'radial-gradient(circle, rgba(233,30,99,0.06) 0%, rgba(156,39,176,0.05) 25%, rgba(33,150,243,0.04) 50%, transparent 70%)',
+          transform: 'translate(-50%, -50%)',
+          animation: 'mapBreathe 4s ease-in-out infinite',
+        }}
+      />
 
-        {/* 标题 */}
-        <h1
-          className="text-2xl font-bold mb-2 text-center"
+      {/* —— 和纸纹理 —— */}
+      <div
+        className="absolute inset-0 opacity-[0.035]"
+        style={{
+          backgroundImage:
+            'radial-gradient(circle at 20% 50%, #000 1px, transparent 1px), radial-gradient(circle at 80% 30%, #000 1px, transparent 1px), radial-gradient(circle at 50% 80%, #000 0.5px, transparent 0.5px)',
+          backgroundSize: '80px 80px, 100px 100px, 60px 60px',
+          backgroundPosition: '0 0, 20px 30px, 10px 15px',
+        }}
+      />
+
+      {/* —— 日本地图轮廓 —— */}
+      <div
+        className="absolute top-1/2 left-1/2 text-[min(48vw,56vh)] leading-none select-none pointer-events-none"
+        style={{
+          transform: 'translate(-50%, -50%)',
+          opacity: 0.06,
+          filter: 'blur(1px)',
+          animation: 'mapBreathe 5s ease-in-out infinite',
+        }}
+      >
+        🗾
+      </div>
+
+      {/* —— 樱花花瓣 —— */}
+      {petals.map((p) => (
+        <span
+          key={p.id}
+          aria-hidden
+          className="absolute top-0 pointer-events-none select-none gpu-layer"
           style={{
-            background: 'linear-gradient(135deg, #e91e63, #9c27b0, #2196f3)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-          }}
+            left: p.left,
+            fontSize: `${p.size}rem`,
+            opacity: 0,
+            animationName: 'sakuraFall',
+            animationDuration: p.duration,
+            animationDelay: p.delay,
+            animationTimingFunction: 'linear',
+            animationIterationCount: 'infinite',
+            '--petal-sway': p.sway,
+            '--petal-rotate': p.rotate,
+          } as React.CSSProperties}
         >
-          日本オタクショップマップ
-        </h1>
-        <p className="text-[13px] text-[#999] mb-8 tracking-wide">
-          Animate · Melonbooks · Mandarake — 全国店舗一覧
-        </p>
+          🌸
+        </span>
+      ))}
 
-        {/* 骨架卡片预览 — 模拟侧边栏卡片 */}
-        <div className="w-full space-y-3 mb-6">
-          {[1, 2, 3].map((i) => (
-            <div
+      {/* —— 主内容区 —— */}
+      <div
+        className="relative z-10 flex flex-col items-center px-6 w-full max-w-[440px]"
+        style={{
+          animation: exiting ? 'loaderExit 0.4s ease-in forwards' : 'inkBloom 0.9s 0.2s ease-out both',
+        }}
+      >
+        {/* 标题 — 毛笔字逐个浮现 */}
+        <h1 className="flex flex-wrap justify-center gap-[0.03em] mb-3 text-[clamp(28px,5.5vw,42px)] font-bold leading-tight">
+          {TITLE_CHARS.map((char, i) => (
+            <span
               key={i}
-              className="flex gap-3 p-3 rounded-xl skeleton-shimmer"
+              className="inline-block gpu-layer"
               style={{
-                animationDelay: `${i * 0.1}s`,
-                opacity: exiting ? 0 : undefined,
-                transition: 'opacity 0.3s',
+                animation: `charReveal 0.55s ${0.15 + i * 0.06}s var(--ease-spring) both`,
+                background: 'linear-gradient(135deg, #e91e63 0%, #9c27b0 40%, #2196f3 80%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+                textShadow: 'none',
+                filter: 'drop-shadow(0 2px 4px rgba(233,30,99,0.15))',
               }}
             >
-              <div className="flex-1 space-y-2">
-                <div className="h-4 w-3/4 rounded-md skeleton-shimmer" />
-                <div className="h-3 w-full rounded-md skeleton-shimmer" />
-                <div className="h-3 w-1/2 rounded-md skeleton-shimmer" />
-                <div className="flex gap-1.5 mt-1">
-                  <div className="h-4 w-12 rounded-full skeleton-shimmer" />
-                  <div className="h-4 w-10 rounded-full skeleton-shimmer" />
-                  <div className="h-4 w-14 rounded-full skeleton-shimmer" />
+              {char}
+            </span>
+          ))}
+        </h1>
+
+        {/* 副标题 */}
+        <p
+          className="text-[13px] tracking-[0.15em] text-[#888] mb-7 font-medium gpu-layer"
+          style={{
+            animation: `charReveal 0.5s ${0.7}s var(--ease-spring) both`,
+          }}
+        >
+          {SUBTITLE}
+        </p>
+
+        {/* —— 判子印章三连 —— */}
+        <div
+          className="flex gap-4 mb-8 flex-wrap justify-center"
+          style={{ animation: `charReveal 0.5s ${0.8}s var(--ease-spring) both` }}
+        >
+          {STAMPS.map((stamp, i) => (
+            <div
+              key={stamp.label}
+              className="flex flex-col items-center gap-1"
+              style={{
+                animation: `stampIn 0.55s ${0.85 + i * 0.12}s var(--ease-spring) both`,
+              }}
+            >
+              <div
+                className="px-3.5 py-2 rounded-lg text-center select-none gpu-layer"
+                style={{
+                  backgroundColor: stamp.bg,
+                  border: `2px solid ${stamp.border}`,
+                  boxShadow: stamp.shadow,
+                  minWidth: '88px',
+                }}
+              >
+                <div
+                  className="text-[11px] font-bold tracking-wider leading-tight"
+                  style={{ color: stamp.color }}
+                >
+                  {stamp.label}
+                </div>
+                <div
+                  className="text-[9px] font-semibold tracking-[0.08em] opacity-60 leading-tight"
+                  style={{ color: stamp.color }}
+                >
+                  {stamp.sub}
                 </div>
               </div>
             </div>
           ))}
         </div>
 
-        {/* 底部加载点 */}
-        <div className="flex gap-2">
-          {['#e91e63', '#4caf50', '#ff9800'].map((c, i) => (
+        {/* —— 加载指示点 —— */}
+        <div className="flex gap-2.5" style={{ animation: `charReveal 0.4s 1.1s var(--ease-spring) both` }}>
+          {STAMPS.map((stamp, i) => (
             <div
-              key={i}
-              className="w-2.5 h-2.5 rounded-full"
+              key={stamp.label}
+              className="w-2.5 h-2.5 rounded-full gpu-layer"
               style={{
-                backgroundColor: c,
-                animation: `pulse 1.5s ease-in-out infinite`,
-                animationDelay: `${i * 0.25}s`,
-                opacity: exiting ? 0 : undefined,
-                transition: 'opacity 0.3s',
+                backgroundColor: stamp.color,
+                animation: `dotBounce 1.2s ease-in-out infinite`,
+                animationDelay: `${i * 0.2}s`,
+                boxShadow: stamp.shadow,
               }}
             />
           ))}
@@ -85,6 +239,10 @@ function SkeletonLoader({ exiting }: { exiting: boolean }) {
   )
 }
 
+/* ================================================================
+   App Root
+   ================================================================ */
+
 export default function App() {
   const theme = useUIStore((s) => s.theme)
   const [loading, setLoading] = useState(true)
@@ -92,14 +250,26 @@ export default function App() {
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme
-    // 模拟加载 — 1.2s 开始退出，1.8s 完全加载
-    const show = setTimeout(() => setExiting(true), 1000)
-    const hide = setTimeout(() => setLoading(false), 1600)
-    return () => { clearTimeout(show); clearTimeout(hide) }
+
+    // 主题适配 Welcome 背景色
+    const isDark = theme === 'dark'
+    document.documentElement.style.setProperty(
+      '--welcome-bg',
+      isDark ? '#0d0d1a' : '#f7f3ee',
+    )
+
+    // 1.1s 开始退出动画，1.5s 完全过渡
+    const show = setTimeout(() => setExiting(true), 2500)
+    const hide = setTimeout(() => setLoading(false), 3200)
+    return () => {
+      clearTimeout(show)
+      clearTimeout(hide)
+      document.documentElement.style.removeProperty('--welcome-bg')
+    }
   }, [theme])
 
   if (loading) {
-    return <SkeletonLoader exiting={exiting} />
+    return <WelcomeScreen exiting={exiting} />
   }
 
   return (
