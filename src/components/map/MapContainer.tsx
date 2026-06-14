@@ -66,22 +66,40 @@ function MapEventBinder() {
 }
 
 // 动态瓦片图层 —— 根据 store 的 tileLayer 状态切换
+// 性能优化：全球CDN瓦片源 + 预加载 + 缩放实时更新
 function DynamicTileLayer() {
   const map = useMap()
   const tileLayer = useMapStore((s) => s.tileLayer)
+  const layerRef = useRef<L.TileLayer | null>(null)
 
   useEffect(() => {
+    if (layerRef.current) {
+      map.removeLayer(layerRef.current)
+    }
+
     const config = TILE_LAYERS[tileLayer]
     const layer = L.tileLayer(config.url, {
       attribution: config.attribution,
       maxZoom: 20,
-      maxNativeZoom: 18,
-      updateWhenZooming: false,
-      keepBuffer: 6,
-      updateInterval: 150,
+      maxNativeZoom: config.maxNativeZoom ?? 18,
+      subdomains: config.subdomains || [],
+      // 性能关键参数
+      keepBuffer: 10,           // 预加载10格周边瓦片（默认6）
+      updateInterval: 50,       // 更快响应缩放事件（默认200）
+      updateWhenZooming: true,  // 缩放过程中也更新瓦片，消除灰色空白
+      crossOrigin: true,        // 启用CORS，浏览器可激进缓存
+      // 加载失败时显示占位，避免灰色空白
+      errorTileUrl: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256"><rect fill="%23f0f0f0" width="256" height="256"/><text x="50%" y="50%" text-anchor="middle" fill="%23999" font-size="14">Loading...</text></svg>',
     })
+
     layer.addTo(map)
-    return () => { layer.remove() }
+    layerRef.current = layer
+
+    return () => {
+      if (layerRef.current) {
+        map.removeLayer(layerRef.current)
+      }
+    }
   }, [map, tileLayer])
 
   return null

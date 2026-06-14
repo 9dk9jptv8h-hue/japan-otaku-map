@@ -17,21 +17,36 @@ export const JAPAN_BOUNDS: [[number, number], [number, number]] = [
 ]
 
 // 多彩瓦片图层配置
-export const TILE_LAYERS: Record<TileLayerStyle, { url: string; attribution: string }> = {
-  standard: {
-    url: 'https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png',
-    attribution: '<a href="https://maps.gsi.go.jp/">国土地理院</a>',
-  },
+// 主瓦片源：CartoDB (Fastly全球CDN，亚洲有节点，国内访问快)
+// 备用瓦片源：GSI日本 (地形图层保留)
+export const TILE_LAYERS: Record<TileLayerStyle, {
+  url: string
+  attribution: string
+  maxNativeZoom?: number
+  subdomains?: string[]
+}> = {
   light: {
-    url: 'https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png',
-    attribution: '<a href="https://maps.gsi.go.jp/">国土地理院</a>',
+    url: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>',
+    maxNativeZoom: 19,
+    subdomains: ['a', 'b', 'c', 'd'],
+  },
+  standard: {
+    url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>',
+    maxNativeZoom: 19,
+    subdomains: ['a', 'b', 'c', 'd'],
   },
   dark: {
     url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
-    attribution: '&copy; <a href="https://carto.com/">CARTO</a>',
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>',
+    maxNativeZoom: 19,
+    subdomains: ['a', 'b', 'c', 'd'],
   },
   terrain: {
+    // 地形图层：GSI日本地形（CDN缓存效果有限，保留官方源）
     url: 'https://cyberjapandata.gsi.go.jp/xyz/relief/{z}/{x}/{y}.png',
     attribution: '<a href="https://maps.gsi.go.jp/">国土地理院</a>',
+    maxNativeZoom: 18,
   },
 }
