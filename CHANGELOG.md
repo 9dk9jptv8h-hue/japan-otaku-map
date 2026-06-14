@@ -7,6 +7,21 @@
 
 ---
 
+## [1.0.1] - 2026-06-14
+
+### Changed（变更）
+
+- **README 全面重写** — 反映当前实际状态：MapLibre GL、103地点、全中文、4分类、地区筛选
+- **GitHub仓库描述更新** — 新描述：「日本旅游——圣地巡礼地图 | 103个动漫圣地+店铺 | MapLibre矢量瓦片」
+- **GitHub Topics更新** — react, typescript, maplibre, anime, japan, pilgrimage, vite, tailwindcss, zustand, vector-tiles, otaku, travel
+- **Badges更新** — Leaflet badge → MapLibre GL 5 badge
+
+### Added（新增）
+
+- **CHANGELOG.md** — 添加更新日志，记录所有历史更新
+
+---
+
 ## [1.0.0] - 2026-06-14
 
 ### Added（新增）
@@ -65,6 +80,7 @@
 
 ---
 
+[1.0.1]: https://github.com/9dk9jptv8h-hue/japan-otaku-map/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/9dk9jptv8h-hue/japan-otaku-map/compare/v0.1.1...v1.0.0
 [0.1.1]: https://github.com/9dk9jptv8h-hue/japan-otaku-map/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/9dk9jptv8h-hue/japan-otaku-map/releases/tag/v0.1.0
