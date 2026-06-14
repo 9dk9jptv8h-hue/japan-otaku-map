@@ -1,7 +1,7 @@
 import { useEffect, useCallback, useRef, useMemo, type ReactNode } from 'react'
 import { MapContainer as LeafletMapContainer, useMap, useMapEvents } from 'react-leaflet'
 import { useMapStore } from '@/store/useMapStore'
-import { DEFAULT_VIEWPORT, MIN_ZOOM, MAX_ZOOM, FLY_DURATION, JAPAN_BOUNDS } from '@/constants/mapDefaults'
+import { DEFAULT_VIEWPORT, MIN_ZOOM, MAX_ZOOM, FLY_DURATION, JAPAN_BOUNDS, TILE_LAYERS } from '@/constants/mapDefaults'
 import L from 'leaflet'
 
 // 地图事件监听 + viewport 同步
@@ -65,25 +65,25 @@ function MapEventBinder() {
   return null
 }
 
-// MapTiler 中文路网 — 使用 WebP 格式减少瓦片体积
-const KEY = 'n1nlGHzCLRC9VuGsFphI'
-
-function MapTileLayer() {
+// 动态瓦片图层 —— 根据 store 的 tileLayer 状态切换
+function DynamicTileLayer() {
   const map = useMap()
+  const tileLayer = useMapStore((s) => s.tileLayer)
+
   useEffect(() => {
-    const layer = L.tileLayer(
-      `https://api.maptiler.com/maps/streets-v2/{z}/{x}/{y}.png?key=${KEY}&lang=zh`,
-      {
-        maxZoom: 20,
-        maxNativeZoom: 18,
-        updateWhenZooming: false,
-        keepBuffer: 6,
-        updateInterval: 150,
-      }
-    )
+    const config = TILE_LAYERS[tileLayer]
+    const layer = L.tileLayer(config.url, {
+      attribution: config.attribution,
+      maxZoom: 20,
+      maxNativeZoom: 18,
+      updateWhenZooming: false,
+      keepBuffer: 6,
+      updateInterval: 150,
+    })
     layer.addTo(map)
     return () => { layer.remove() }
-  }, [map])
+  }, [map, tileLayer])
+
   return null
 }
 
@@ -120,7 +120,7 @@ export function MapView({ children }: MapViewProps) {
       zoomAnimation={true}
       markerZoomAnimation={true}
     >
-      <MapTileLayer />
+      <DynamicTileLayer />
       <MapEventBinder />
       {children}
     </LeafletMapContainer>
