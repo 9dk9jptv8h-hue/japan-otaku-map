@@ -52,7 +52,7 @@ export function DesktopLayout({ locations }: DesktopLayoutProps) {
       {/* 侧边栏打开时显示轻薄遮罩 — 点击关闭侧边栏 */}
       <div
         className={cn(
-          'absolute inset-0 z-20 bg-black/10 backdrop-blur-[2px] transition-opacity duration-300 cursor-pointer',
+          'absolute inset-0 z-20 bg-black/10 transition-opacity duration-300 cursor-pointer',
           sidebarCollapsed ? 'opacity-0 pointer-events-none' : 'opacity-100'
         )}
         onClick={() => toggleSidebar()}
