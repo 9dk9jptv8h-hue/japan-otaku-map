@@ -39,12 +39,12 @@ For anime fans visiting Japan, finding the best otaku shops can be overwhelming.
 <div align="center">
 
 ### Welcome Screen
-<img src="https://raw.githubusercontent.com/9dk9jptv8h-hue/japan-otaku-map/main/public/screenshots/welcome-screen.png" alt="Japan Otaku Map Welcome Screen" width="640">
+<img src="https://raw.githubusercontent.com/9dk9jptv8h-hue/japan-otaku-map/master/public/screenshots/welcome-screen.png" alt="Japan Otaku Map Welcome Screen" width="640">
 
 *Anime-inspired welcome screen with sakura petals, sumi-e ink aesthetics, and hanko stamps*
 
 ### Interactive Map
-<img src="https://raw.githubusercontent.com/9dk9jptv8h-hue/japan-otaku-map/main/public/screenshots/map-interface.png" alt="Japan Otaku Map Interface" width="640">
+<img src="https://raw.githubusercontent.com/9dk9jptv8h-hue/japan-otaku-map/master/public/screenshots/map-interface.png" alt="Japan Otaku Map Interface" width="640">
 
 *Full interactive map with custom markers, filtering sidebar, and dark/light theme support*
 
