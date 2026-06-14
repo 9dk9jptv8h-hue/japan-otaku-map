@@ -198,6 +198,12 @@ Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for gui
 
 ---
 
+## 📝 更新日志
+
+查看 [CHANGELOG.md](CHANGELOG.md) 了解各版本的详细变更记录。
+
+---
+
 ## 📄 License
 
 This project is licensed under the MIT License — see [LICENSE](LICENSE) for details.
