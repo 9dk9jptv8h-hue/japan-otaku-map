@@ -16,6 +16,7 @@ interface DesktopLayoutProps {
 export function DesktopLayout({ locations }: DesktopLayoutProps) {
   const selectedCategories = useFilterStore((s) => s.selectedCategories)
   const searchQuery = useFilterStore((s) => s.searchQuery)
+  const selectedRegion = useFilterStore((s) => s.selectedRegion)
   const sidebarCollapsed = useUIStore((s) => s.sidebarCollapsed)
   const toggleSidebar = useUIStore((s) => s.toggleSidebar)
   const debouncedSearch = useDebounce(searchQuery, 300)
@@ -33,8 +34,11 @@ export function DesktopLayout({ locations }: DesktopLayoutProps) {
           loc.tags.some((t) => t.toLowerCase().includes(q))
       )
     }
+    if (selectedRegion) {
+      result = result.filter(loc => loc.address?.startsWith(selectedRegion))
+    }
     return result
-  }, [locations, selectedCategories, debouncedSearch])
+  }, [locations, selectedCategories, debouncedSearch, selectedRegion])
 
   return (
     <div className="relative flex h-full w-full overflow-hidden">

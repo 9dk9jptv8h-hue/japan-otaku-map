@@ -11,6 +11,9 @@ interface FilterStore {
 
   sortBy: SortOption
   setSortBy: (sort: SortOption) => void
+
+  selectedRegion: string | null
+  setSelectedRegion: (region: string | null) => void
 }
 
 export const useFilterStore = create<FilterStore>((set) => ({
@@ -28,4 +31,7 @@ export const useFilterStore = create<FilterStore>((set) => ({
 
   sortBy: 'rating',
   setSortBy: (sort) => set({ sortBy: sort }),
+
+  selectedRegion: null,
+  setSelectedRegion: (region) => set({ selectedRegion: region }),
 }))
