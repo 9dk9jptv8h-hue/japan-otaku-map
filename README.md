@@ -1,4 +1,4 @@
-# 🗾 日本オタクショップマップ — Japan Otaku Map
+# 🗾 日本旅游——圣地巡礼地图
 
 <div align="center">
 
@@ -7,213 +7,124 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-6.0-3178C6?logo=typescript)](https://www.typescriptlang.org)
 [![Vite](https://img.shields.io/badge/Vite-8-646CFF?logo=vite)](https://vite.dev)
 [![TailwindCSS](https://img.shields.io/badge/TailwindCSS-4-06B6D4?logo=tailwindcss)](https://tailwindcss.com)
-[![Leaflet](https://img.shields.io/badge/Leaflet-1.9-199900?logo=leaflet)](https://leafletjs.com)
+[![MapLibre](https://img.shields.io/badge/MapLibre_GL-5-396CB2?logo=maplibre)](https://maplibre.org)
 
-**An interactive pilgrimage map for anime & otaku shops across Japan — explore, filter, and plan your next 聖地巡礼.**
+**收录 103 个动漫圣地与店铺的交互式地图，基于 MapLibre 矢量瓦片渲染，支持地区筛选、分类筛选、搜索排序与深色主题。**
 
-[🌐 Live Demo](https://9dk9jptv8h-hue.github.io/japan-otaku-map/) &nbsp;|&nbsp; [🐛 Report Bug](https://github.com/9dk9jptv8h-hue/japan-otaku-map/issues) &nbsp;|&nbsp; [✨ Request Feature](https://github.com/9dk9jptv8h-hue/japan-otaku-map/issues)
+[🐛 报告 Bug](https://github.com/9dk9jptv8h-hue/japan-otaku-map/issues) &nbsp;|&nbsp; [✨ 功能建议](https://github.com/9dk9jptv8h-hue/japan-otaku-map/issues)
 
 </div>
 
 ---
 
-## 📖 About
+## 简介
 
-Japan Otaku Map is a beautifully crafted, interactive web application that maps over **50+ anime and otaku specialty shops** across Japan. Whether you are planning an アニメ聖地巡礼 (anime pilgrimage) or just browsing, this tool helps you discover iconic stores like **Animate**, **Melonbooks**, and **Mandarake** across every region — from Hokkaido to Okinawa.
-
-Each location includes real ratings, visit counts, addresses, and city photography sourced from Wikipedia — making it a practical travel companion as well as a visual delight.
-
-### Why This Exists
-
-For anime fans visiting Japan, finding the best otaku shops can be overwhelming. Google Maps lists shops but lacks the curated, fan-focused context. This project brings together:
-
-- **Curated data** — Tiered rankings based on real Google Maps reviews and store significance
-- **Cultural aesthetic** — Sumi-e ink wash, sakura petals, and hanko stamp design language
-- **Multiple store chains** — Animate, Melonbooks, and Mandarake, each color-coded
-- **Bilingual support** — Japanese shop names with English transliterations
+一张专为中国动漫迷打造的日本旅行地图。标注了全日本 103 个动漫相关地点（87 家连锁店铺 + 16 个圣地巡礼点），全中文 UI 与地点描述，使用 MapLibre GL JS 矢量瓦片实现丝滑的地图交互体验。
 
 ---
 
-## 📸 Screenshots
+## 截图
 
 <div align="center">
 
-### Welcome Screen
-<img src="https://raw.githubusercontent.com/9dk9jptv8h-hue/japan-otaku-map/master/public/screenshots/welcome-screen.png" alt="Japan Otaku Map Welcome Screen" width="640">
+### 欢迎屏
+<img src="https://raw.githubusercontent.com/9dk9jptv8h-hue/japan-otaku-map/master/public/screenshots/welcome-screen.png" alt="欢迎屏" width="640">
 
-*Anime-inspired welcome screen with sakura petals, sumi-e ink aesthetics, and hanko stamps*
-
-### Interactive Map
-<img src="https://raw.githubusercontent.com/9dk9jptv8h-hue/japan-otaku-map/master/public/screenshots/map-interface.png" alt="Japan Otaku Map Interface" width="640">
-
-*Full interactive map with custom markers, filtering sidebar, and dark/light theme support*
+### 地图界面
+<img src="https://raw.githubusercontent.com/9dk9jptv8h-hue/japan-otaku-map/master/public/screenshots/map-interface.png" alt="地图界面" width="640">
 
 </div>
 
 ---
 
-## ✨ Features
+## 功能
 
-| Category | Details |
-|----------|---------|
-| 🗺️ **Interactive Map** | Full Japan coverage via Leaflet with Bing Maps tile layer, zoom-to-city, and custom animated markers |
-| 🎨 **Anime-Style Welcome Screen** | Sakura petal animations, sumi-e ink-wash background, Japanese map silhouette, hanko stamps |
-| 🌓 **Dark / Light Theme** | Persisted theme preference, automatically adapts welcome screen and map tiles |
-| 🔍 **Search & Filter** | Full-text search across name, description, tags, and address; filter by store chain |
-| 📊 **Smart Sorting** | Sort by rating, name, most recent, or visit count |
-| 🏬 **Three Store Categories** | Animate (pink), Melonbooks (teal), Mandarake (orange) — each with distinct markers |
-| 🖼️ **City Photography** | Wikipedia-sourced city photos in location cards for visual context |
-| 📱 **Responsive Design** | Collapsible sidebar, mobile-friendly drawer, works from desktop to phone |
-| ⚡ **Performance** | Zustand state management, lazy loading, GPU-accelerated CSS animations |
-| 🌐 **GitHub Pages Ready** | Pre-configured `base` path for instant deployment |
+| 功能 | 说明 |
+|------|------|
+| 🗺️ **矢量瓦片地图** | MapLibre GL JS 渲染，OpenFreeMap 全球 CDN 瓦片源，4 种地图样式切换 |
+| 📍 **103 个地点** | 87 家动漫店铺 + 16 个圣地巡礼点，覆盖北海道到冲绳 |
+| 🏷️ **4 类分色标记** | Animate（粉色）/ Melonbooks（绿色）/ Mandarake（橙色）/ 圣地巡礼（红色） |
+| 🔍 **搜索与筛选** | 全文搜索（名称/描述/标签/地址）、地区筛选（都道府県）、分类筛选 |
+| 📊 **排序** | 按评分、名称、更新时间、访问量排序 |
+| 🌓 **深色 / 浅色主题** | 主题偏好持久化，地图瓦片同步切换 |
+| 📱 **响应式布局** | 桌面端侧边栏 + 移动端抽屉，全尺寸适配 |
+| ⚡ **性能优化** | 代码分割 3 chunk、CSS 变量驱动 marker、content-visibility 懒加载 |
 
 ---
 
-## 🛠 Tech Stack
+## 技术栈
 
-| Layer | Technology |
-|-------|------------|
-| **Framework** | [React 19](https://react.dev) with functional components & hooks |
-| **Language** | [TypeScript 6](https://www.typescriptlang.org) — strict mode |
-| **Build Tool** | [Vite 8](https://vite.dev) — sub-second HMR |
-| **Styling** | [TailwindCSS 4](https://tailwindcss.com) — utility-first, dark mode |
-| **Map Engine** | [Leaflet 1.9](https://leafletjs.com) + [react-leaflet 5](https://react-leaflet.js.org) |
-| **Map Tiles** | Bing Maps (leaflet-bing-layer) |
-| **State** | [Zustand 5](https://zustand.docs.pmnd.rs) — lightweight, persisted |
-| **Icons** | [Lucide React](https://lucide.dev) |
-| **Font** | Noto Sans SC (Google Fonts) |
+| 层级 | 技术 |
+|------|------|
+| **框架** | [React 19](https://react.dev) + Hooks |
+| **语言** | [TypeScript 6](https://www.typescriptlang.org) — 严格模式 |
+| **构建** | [Vite 8](https://vite.dev) — 亚秒级 HMR |
+| **样式** | [TailwindCSS 4](https://tailwindcss.com) — 深色模式、CSS 变量 |
+| **地图引擎** | [MapLibre GL JS 5](https://maplibre.org) — 矢量瓦片渲染 |
+| **瓦片源** | [OpenFreeMap](https://openfreemap.org) — 免费、无 Key、全球 CDN |
+| **状态管理** | [Zustand 5](https://zustand.docs.pmnd.rs) — 轻量、持久化 |
+| **图标** | [Lucide React](https://lucide.dev) |
+| **字体** | Noto Sans SC (Google Fonts) |
 
 ---
 
-## 🚀 Getting Started
+## 快速开始
 
-### Prerequisites
-
-- **Node.js** >= 18
-- **npm** >= 9
-
-### Installation
+**前置要求**: Node.js >= 18, npm >= 9
 
 ```bash
-# Clone the repository
+# 克隆仓库
 git clone git@github.com:9dk9jptv8h-hue/japan-otaku-map.git
 cd japan-otaku-map
 
-# Install dependencies
+# 安装依赖
 npm install
 
-# Start development server
+# 启动开发服务器
 npm run dev
 ```
 
-Open [http://localhost:5173/japan-otaku-map/](http://localhost:5173/japan-otaku-map/) in your browser.
+打开 [http://localhost:5173](http://localhost:5173) 即可使用。
 
-### Build for Production
+### 生产构建
 
 ```bash
 npm run build
 npm run preview
 ```
 
-The production build outputs to the `dist/` directory.
-
 ---
 
-## 📁 Project Structure
+## 项目结构
 
 ```
 src/
 ├── components/
-│   ├── layout/          # AppShell, sidebar, header
-│   ├── map/             # Map container, markers, popups
-│   ├── sidebar/         # Filter panel, location cards
-│   ├── shared/          # Shared UI components
-│   └── ui/              # ErrorBoundary, buttons, etc.
+│   ├── layout/          # AppShell、桌面/移动端布局
+│   ├── map/             # MapContainer、MarkersLayer、PopupCard、瓦片切换
+│   ├── sidebar/         # FilterPanel、SearchBar、CardList、LocationCard
+│   └── ui/              # Button、Badge、Drawer、ThemeToggle、ErrorBoundary
 ├── constants/
-│   ├── mockData.ts      # 50+ curated shop locations
-│   ├── mapDefaults.ts   # Map center, zoom, tile config
-│   └── theme.ts         # Category colors & metadata
-├── hooks/               # useDebounce, useMediaQuery, useTheme
-├── store/               # Zustand stores (UI, filter, map)
-│   ├── useUIStore.ts    # Sidebar, theme (persisted)
-│   ├── useFilterStore.ts # Search, category filter, sort
-│   └── useMapStore.ts   # Viewport, selected location
-├── types/               # TypeScript type definitions
-├── utils/
-│   ├── markers.ts       # Custom Leaflet icon factory
-│   ├── city-photo.ts    # Wikipedia city photo mapping
-│   └── bing-tiles.ts    # Bing Maps tile configuration
-├── App.tsx              # Root component + Welcome Screen
-├── main.tsx             # Entry point
-└── index.css            # Global styles + animations
+│   ├── mockData.ts      # 103 个地点数据
+│   ├── mapDefaults.ts   # 视口、瓦片样式配置
+│   └── theme.ts         # 分类颜色与元数据
+├── hooks/               # useDebounce、useMediaQuery、useTheme
+├── store/               # Zustand stores (UI / Filter / Map)
+├── types/               # TypeScript 类型定义
+├── utils/               # cn、markers、city-photo
+├── App.tsx              # 根组件 + 欢迎屏
+├── main.tsx             # 入口
+└── index.css            # 全局样式 + 动画
 ```
 
 ---
 
-## 🎨 Design Philosophy
-
-The UI draws from traditional Japanese aesthetics:
-
-- **水墨 (Sumi-e)** — Ink wash gradients and subtle textures create depth without clutter
-- **桜 (Sakura)** — Falling cherry blossom petals on the welcome screen evoke the transient beauty of もののあはれ
-- **判子 (Hanko)** — Stamp-style category badges mimic the personal seals used across Japan
-- **和紙 (Washi)** — Subtle paper-texture overlay adds warmth and tactility
-
-The welcome screen is an intentional "loading experience" — treating the initial load as a moment of visual delight rather than a spinner.
-
----
-
-## 📊 Data Sources
-
-Shop data is curated from:
-
-- [Animate Official Shop List](https://www.animate.co.jp/shop/)
-- Google Maps ratings & review counts
-- Wikipedia (city photography, CC-licensed)
-
-The dataset is currently **mock data** (`src/constants/mockData.ts`). Real data integration (Supabase / headless CMS) is planned for future releases.
-
----
-
-## 🗺️ Roadmap
-
-- [ ] Real-time data via Supabase / PostgreSQL
-- [ ] User-submitted shop reviews & photos
-- [ ] Multi-language i18n (EN / 中文 / 日本語 / 한국어)
-- [ ] Route planning between shops
-- [ ] PWA offline support
-- [ ] Shop inventory & event calendar integration
-- [ ] Community-editable wiki for each location
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on:
-
-- Reporting bugs
-- Suggesting features
-- Submitting pull requests
-- Development workflow
-
----
-
-## 📝 更新日志
+## 更新日志
 
 查看 [CHANGELOG.md](CHANGELOG.md) 了解各版本的详细变更记录。
 
 ---
 
-## 📄 License
+## License
 
-This project is licensed under the MIT License — see [LICENSE](LICENSE) for details.
-
----
-
-<div align="center">
-
-Made with ❤️ by otaku, for otaku.
-
-*アニメは国境を越える — Anime transcends borders*
-
-</div>
+MIT © [9dk9jptv8h-hue](https://github.com/9dk9jptv8h-hue)
