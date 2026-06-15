@@ -1,11 +1,10 @@
 import type { CategoryMeta } from '@/types'
 
-// 四大分类 + 圣地巡礼
+// 三大分类
 export const CATEGORIES: CategoryMeta[] = [
   { key: 'animate', label: 'Animate', color: '#e91e63', icon: 'store' },
   { key: 'melonbooks', label: 'Melonbooks', color: '#4caf50', icon: 'book' },
   { key: 'mandarake', label: 'Mandarake', color: '#ff9800', icon: 'diamond' },
-  { key: 'pilgrimage', label: '圣地巡礼', color: '#d32f2f', icon: 'torii' },
 ]
 
 // 日系色板

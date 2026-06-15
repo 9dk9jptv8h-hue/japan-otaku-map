@@ -86,7 +86,6 @@ function MarkersLayerInner({ locations }: MarkersLayerProps) {
             'animate', '#e91e63',
             'melonbooks', '#4caf50',
             'mandarake', '#ff9800',
-            'pilgrimage', '#d32f2f',
             '#607d8b', // 默认灰色
           ],
           'circle-stroke-color': '#ffffff',

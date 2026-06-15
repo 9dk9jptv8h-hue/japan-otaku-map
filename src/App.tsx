@@ -5,12 +5,12 @@ import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
 import { AppShell } from '@/components/layout/AppShell'
 
 /* ================================================================
-   Welcome Screen — 欢迎界面 — 日本旅游 圣地巡礼地图
+   Welcome Screen — 欢迎界面 — 日本旅游地图
    Sakura • Sumi-e • Hanko Stamps
    ================================================================ */
 
-const TITLE_CHARS = '日本旅游——圣地巡礼地图'.split('')
-const SUBTITLE = '日本旅游 — 全国圣地巡礼指南'
+const TITLE_CHARS = '日本旅游地图'.split('')
+const SUBTITLE = '日本旅游 — 全国店铺地图'
 
 interface StampData {
   label: string

@@ -96,10 +96,10 @@ export function Sidebar({ locations, className }: SidebarProps) {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-xl font-bold tracking-tight">
-                🗾 日本旅游——圣地巡礼地图
+                🗾 日本旅游地图
               </h1>
               <p className="text-sm text-white/70 mt-1">
-                Animate · Melonbooks · Mandarake · 圣地巡礼 — 全国地点一览
+                Animate · Melonbooks · Mandarake — 全国地点一览
               </p>
               <div className="flex items-center gap-2 mt-3">
                 <span className="inline-flex items-center gap-1 rounded-full bg-white/20 px-2.5 py-0.5 text-xs backdrop-blur-sm">

@@ -7,6 +7,15 @@
 
 ---
 
+## [2.0.0] - 2026-06-15
+
+### Changed（变更）
+- **网站改版** — 从"圣地巡礼地图"转型为"日本旅游地图"
+- **删除圣地巡礼分类** — 移除16个圣地巡礼地点和pilgrimage分类
+- **全站标题更新** — 统一改为「日本旅游地图」
+
+---
+
 ## [1.1.0] - 2026-06-15
 
 ### Performance（性能优化）
@@ -128,6 +137,8 @@
 
 ---
 
+[2.0.0]: https://github.com/9dk9jptv8h-hue/japan-otaku-map/compare/v1.1.0...v2.0.0
+[1.1.0]: https://github.com/9dk9jptv8h-hue/japan-otaku-map/compare/v1.0.4...v1.1.0
 [1.0.4]: https://github.com/9dk9jptv8h-hue/japan-otaku-map/compare/v1.0.3...v1.0.4
 [1.0.3]: https://github.com/9dk9jptv8h-hue/japan-otaku-map/compare/v1.0.2...v1.0.3
 [1.0.2]: https://github.com/9dk9jptv8h-hue/japan-otaku-map/compare/v1.0.1...v1.0.2

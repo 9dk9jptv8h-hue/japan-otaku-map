@@ -1,4 +1,4 @@
-# 🗾 日本旅游——圣地巡礼地图
+# 🗾 日本旅游地图
 
 <div align="center">
 
@@ -9,7 +9,7 @@
 [![TailwindCSS](https://img.shields.io/badge/TailwindCSS-4-06B6D4?logo=tailwindcss)](https://tailwindcss.com)
 [![MapLibre](https://img.shields.io/badge/MapLibre_GL-5-396CB2?logo=maplibre)](https://maplibre.org)
 
-**收录 103 个动漫圣地与店铺的交互式地图，基于 MapLibre 矢量瓦片渲染，支持地区筛选、分类筛选、搜索排序与深色主题。**
+**收录 87 个动漫店铺的交互式地图，基于 MapLibre 矢量瓦片渲染，支持地区筛选、分类筛选、搜索排序与深色主题。**
 
 [🐛 报告 Bug](https://github.com/9dk9jptv8h-hue/japan-otaku-map/issues) &nbsp;|&nbsp; [✨ 功能建议](https://github.com/9dk9jptv8h-hue/japan-otaku-map/issues)
 
@@ -19,7 +19,7 @@
 
 ## 简介
 
-一张专为中国动漫迷打造的日本旅行地图。标注了全日本 103 个动漫相关地点（87 家连锁店铺 + 16 个圣地巡礼点），全中文 UI 与地点描述，使用 MapLibre GL JS 矢量瓦片实现丝滑的地图交互体验。
+一张专为中国动漫迷打造的日本旅行地图。标注了全日本 87 个动漫店铺，全中文 UI 与地点描述，使用 MapLibre GL JS 矢量瓦片实现丝滑的地图交互体验。
 
 ---
 
@@ -42,8 +42,8 @@
 | 功能 | 说明 |
 |------|------|
 | 🗺️ **矢量瓦片地图** | MapLibre GL JS 渲染，OpenFreeMap 全球 CDN 瓦片源，4 种地图样式切换 |
-| 📍 **103 个地点** | 87 家动漫店铺 + 16 个圣地巡礼点，覆盖北海道到冲绳 |
-| 🏷️ **4 类分色标记** | Animate（粉色）/ Melonbooks（绿色）/ Mandarake（橙色）/ 圣地巡礼（红色） |
+| 📍 **87 个地点** | 87 个动漫店铺，覆盖北海道到冲绳 |
+| 🏷️ **3 类分色标记** | Animate（粉色）/ Melonbooks（绿色）/ Mandarake（橙色） |
 | 🔍 **搜索与筛选** | 全文搜索（名称/描述/标签/地址）、地区筛选（都道府県）、分类筛选 |
 | 📊 **排序** | 按评分、名称、更新时间、访问量排序 |
 | 🌓 **深色 / 浅色主题** | 主题偏好持久化，地图瓦片同步切换 |
@@ -105,7 +105,7 @@ src/
 │   ├── sidebar/         # FilterPanel、SearchBar、CardList、LocationCard
 │   └── ui/              # Button、Badge、Drawer、ThemeToggle、ErrorBoundary
 ├── constants/
-│   ├── mockData.ts      # 103 个地点数据
+│   ├── mockData.ts      # 87 个地点数据
 │   ├── mapDefaults.ts   # 视口、瓦片样式配置
 │   └── theme.ts         # 分类颜色与元数据
 ├── hooks/               # useDebounce、useMediaQuery、useTheme

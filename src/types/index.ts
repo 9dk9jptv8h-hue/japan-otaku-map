@@ -18,7 +18,7 @@ export interface LocationData {
 }
 
 // 三大分类
-export type LocationCategory = 'animate' | 'melonbooks' | 'mandarake' | 'pilgrimage'
+export type LocationCategory = 'animate' | 'melonbooks' | 'mandarake'
 
 // 分类元信息
 export interface CategoryMeta {

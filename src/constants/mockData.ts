@@ -1,7 +1,6 @@
 import type { LocationData } from '@/types'
 
 const IMG = '/animate_store.svg'
-const IMG_PILGRIMAGE = '/pilgrimage.svg'
 
 // ================================================================
 //  rating:  实际 Google Maps 参考 + 店铺地位加权
@@ -125,48 +124,4 @@ export const mockLocations: LocationData[] = [
   // Tier 3: 小规模店
   { id: 'man-knt-5', name: 'Mandarake宇都宫店', nameJa: 'まんだらけ宇都宮店', description: '北关东唯一的Mandarake。', category: 'mandarake', latitude: 36.558, longitude: 139.904, imageUrl: IMG, address: '栃木県宇都宮市', tags: ['宇都宫', '栃木', '北关东'], rating: 3.9, visitCount: 250, updatedAt: '2023-08-01' },
   { id: 'man-ksu-2', name: 'Mandarake小仓店', nameJa: 'まんだらけ小倉店', description: '北九州市的Mandarake。', category: 'mandarake', latitude: 33.886, longitude: 130.877, imageUrl: IMG, address: '福岡県北九州市小倉北区', tags: ['小仓', '北九州'], rating: 3.9, visitCount: 300, updatedAt: '2023-10-01' },
-
-  // ================================================================
-  //  ANIME PILGRIMAGE — 动漫圣地巡礼
-  //  热门动漫作品的真实取景地
-  // ================================================================
-  // —— 你的名字。(Your Name) ——
-  { id: 'pil-knn-1', name: '须贺神社', nameJa: '須賀神社', description: '《你的名字。》最终场景的台阶。世界各地的粉丝都来巡礼。', category: 'pilgrimage', latitude: 35.688, longitude: 139.720, imageUrl: IMG_PILGRIMAGE, address: '東京都新宿区須賀町5番地', tags: ['你的名字', '圣地', '台阶', '新宿'], rating: 4.7, visitCount: 25000, updatedAt: '2025-01-01' },
-  { id: 'pil-knn-2', name: '飞驒古川站', nameJa: '飛騨古川駅', description: '《你的名字。》中泷来寻找糸守町的车站。与飞驒市图书馆一起巡礼。', category: 'pilgrimage', latitude: 36.238, longitude: 137.186, imageUrl: IMG_PILGRIMAGE, address: '岐阜県飛騨市古川町金森町8-22', tags: ['你的名字', '圣地', '飞驒', '车站'], rating: 4.6, visitCount: 12000, updatedAt: '2025-01-01' },
-  { id: 'pil-knn-3', name: '飞驒市图书馆', nameJa: '飛騨市図書館', description: '《你的名字。》中泷查询糸守资料的图书馆。', category: 'pilgrimage', latitude: 36.237, longitude: 137.187, imageUrl: IMG_PILGRIMAGE, address: '岐阜県飛騨市古川町本町2-22', tags: ['你的名字', '图书馆', '飞驒'], rating: 4.5, visitCount: 8000, updatedAt: '2025-01-01' },
-
-  // —— 鬼灭之刃 ——
-  { id: 'pil-kmt-1', name: '宝满宫灶门神社', nameJa: '宝満宮竈門神社', description: '《鬼灭之刃》主人公灶门炭治郎名字的由来神社。', category: 'pilgrimage', latitude: 33.525, longitude: 130.561, imageUrl: IMG_PILGRIMAGE, address: '福岡県太宰府市', tags: ['鬼灭之刃', '灶门', '炭治郎', '圣地'], rating: 4.5, visitCount: 6000, updatedAt: '2025-01-01' },
-
-  // —— LoveLive! ——
-  { id: 'pil-ll-1', name: '神田明神', nameJa: '神田明神', description: "《LoveLive!》东条希打工做巫女的神社。μ's的圣地。绘马超人气。", category: 'pilgrimage', latitude: 35.702, longitude: 139.768, imageUrl: IMG_PILGRIMAGE, address: '東京都千代田区外神田2-16-2', tags: ['LoveLive', "μ's", '神田明神', '巫女', '绘马'], rating: 4.6, visitCount: 15000, updatedAt: '2025-01-01' },
-  { id: 'pil-ll-2', name: '国立音乐大学附属高中', nameJa: '国立音楽大学付属高校', description: '《LoveLive!》音之木坂学院的取景原型建筑。神田明神附近。', category: 'pilgrimage', latitude: 35.699, longitude: 139.769, imageUrl: IMG_PILGRIMAGE, address: '東京都世田谷区', tags: ['LoveLive', '音之木坂', '原型'], rating: 4.2, visitCount: 3000, updatedAt: '2025-01-01' },
-
-  // —— 路人女主的养成方法 ——
-  { id: 'pil-sae-1', name: '望坡', nameJa: 'のぞき坂', description: '《路人女主的养成方法》OP中著名的坡道。位于丰岛区。', category: 'pilgrimage', latitude: 35.717, longitude: 139.716, imageUrl: IMG_PILGRIMAGE, address: '東京都豊島区高田2丁目', tags: ['路人女主', 'OP', '坡道', '丰岛区'], rating: 4.3, visitCount: 5000, updatedAt: '2025-01-01' },
-
-  // —— 凉宫春日的忧郁 ——
-  { id: 'pil-hrh-1', name: '西宫北高中（原型校）', nameJa: '西宮北高校（モデル校）', description: '《凉宫春日的忧郁》北高的原型。坡道很有名。', category: 'pilgrimage', latitude: 34.761, longitude: 135.312, imageUrl: IMG_PILGRIMAGE, address: '兵庫県西宮市', tags: ['凉宫春日', '北高', '西宫', 'SOS团'], rating: 4.4, visitCount: 8000, updatedAt: '2025-01-01' },
-
-  // —— 幸运星 ——
-  { id: 'pil-lks-1', name: '鹫宫神社', nameJa: '鷲宮神社', description: '《幸运星》柊镜·柊司姐妹老家神社的原型。动漫圣地巡礼的元祖级存在。', category: 'pilgrimage', latitude: 36.097, longitude: 139.656, imageUrl: IMG_PILGRIMAGE, address: '埼玉県久喜市鷲宮1-6-1', tags: ['幸运星', '柊家', '元祖圣地', '鹫宫'], rating: 4.5, visitCount: 10000, updatedAt: '2025-01-01' },
-
-  // —— 冰菓 ——
-  { id: 'pil-hyk-1', name: '高山阵屋', nameJa: '高山陣屋', description: '《冰菓》神山高中文化祭场景的原型地之一。飞驒高山是圣地密集地带。', category: 'pilgrimage', latitude: 36.140, longitude: 137.258, imageUrl: IMG_PILGRIMAGE, address: '岐阜県高山市八軒町1-5', tags: ['冰菓', '飞驒高山', '文化祭', '古典部'], rating: 4.4, visitCount: 4500, updatedAt: '2025-01-01' },
-
-  // —— 言叶之庭 ——
-  { id: 'pil-kto-1', name: '新宿御苑', nameJa: '新宿御苑', description: '《言叶之庭》的舞台。雨天的庭园被精美还原得令人惊叹。', category: 'pilgrimage', latitude: 35.685, longitude: 139.710, imageUrl: IMG_PILGRIMAGE, address: '東京都新宿区内藤町11', tags: ['言叶之庭', '新宿御苑', '庭园', '新海诚'], rating: 4.6, visitCount: 18000, updatedAt: '2025-01-01' },
-
-  // —— 千与千寻 ——
-  { id: 'pil-sen-1', name: '道后温泉本馆', nameJa: '道後温泉本館', description: '据说是《千与千寻》油屋的原型之一，历史悠久的温泉。', category: 'pilgrimage', latitude: 33.842, longitude: 132.769, imageUrl: IMG_PILGRIMAGE, address: '愛媛県松山市道後湯之町5-6', tags: ['千与千寻', '油屋', '道后温泉', '吉卜力'], rating: 4.7, visitCount: 30000, updatedAt: '2025-01-01' },
-  { id: 'pil-sen-2', name: '江户东京建筑园', nameJa: '江戸東京たてもの園', description: '为《千与千寻》的世界观提供参考的建筑众多。', category: 'pilgrimage', latitude: 35.700, longitude: 139.512, imageUrl: IMG_PILGRIMAGE, address: '東京都小金井市桜町3-7-1', tags: ['千与千寻', '吉卜力', '建筑', '小金井'], rating: 4.5, visitCount: 12000, updatedAt: '2025-01-01' },
-
-  // —— 铃芽之旅 ——
-  { id: 'pil-szm-1', name: '旧丰后森机车库', nameJa: '旧豊後森機関庫', description: '《铃芽之旅》中九州第一扇门开启的废墟。', category: 'pilgrimage', latitude: 33.287, longitude: 131.066, imageUrl: IMG_PILGRIMAGE, address: '大分県玖珠郡玖珠町', tags: ['铃芽之旅', '废墟', '大分', '新海诚'], rating: 4.3, visitCount: 3500, updatedAt: '2025-01-01' },
-
-  // —— 少女与战车 ——
-  { id: 'pil-grp-1', name: '大洗矶前神社', nameJa: '大洗磯前神社', description: '《少女与战车》的圣地。鸟居面朝大海的绝景神社。痛绘马众多。', category: 'pilgrimage', latitude: 36.311, longitude: 140.587, imageUrl: IMG_PILGRIMAGE, address: '茨城県東茨城郡大洗町磯浜町6890', tags: ['少女与战车', '大洗', '痛绘马', '鸟居'], rating: 4.5, visitCount: 9000, updatedAt: '2025-01-01' },
-
-  // —— 冰菓 (飞驒地区追加) ——
-  { id: 'pil-hyk-2', name: '水无神社', nameJa: '水無神社', description: '《冰菓》OP中出现。千反田爱瑠老家（设定上）附近。', category: 'pilgrimage', latitude: 36.084, longitude: 137.252, imageUrl: IMG_PILGRIMAGE, address: '岐阜県高山市一之宮町', tags: ['冰菓', '千反田', '飞驒'], rating: 4.3, visitCount: 3500, updatedAt: '2025-01-01' },
 ]
