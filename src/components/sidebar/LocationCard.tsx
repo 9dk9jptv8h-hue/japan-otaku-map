@@ -7,12 +7,14 @@ const CATEGORY_COLORS: Record<string, string> = {
   animate: '#e91e63',
   melonbooks: '#4caf50',
   mandarake: '#ff9800',
+  surugaya: '#1565c0',
 }
 
 const CATEGORY_GRADIENTS: Record<string, string> = {
   animate: 'linear-gradient(135deg, #fce4ec, #fff5f5)',
   melonbooks: 'linear-gradient(135deg, #e8f5e9, #f1f8e9)',
   mandarake: 'linear-gradient(135deg, #fff3e0, #fff8e1)',
+  surugaya: 'linear-gradient(135deg, #e3f2fd, #e8eaf6)',
 }
 
 function getAccent(category: string): string {
