@@ -50,6 +50,70 @@ function MarkersLayerInner({ locations }: MarkersLayerProps) {
       })),
     })
 
+    // ─── 点击标记 → 弹出 Popup + 同步 store ───
+    const handleClick = (e: maplibregl.MapLayerMouseEvent) => {
+      if (!e.features || !e.features[0]) return
+      const feature = e.features[0]
+      const coords = (feature.geometry as { type: 'Point'; coordinates: number[] }).coordinates.slice() as [number, number]
+      const props = feature.properties!
+
+      // 检查当前选中状态（toggle 逻辑）
+      const currentSelected = useMapStore.getState().selectedMarkerIds
+      const isCurrentlySelected = currentSelected.includes(props.id)
+
+      // 调用 store toggle
+      setSelectedMarkerId(props.id)
+
+      if (isCurrentlySelected) {
+        // 取消选中 → 关闭 popup
+        if (popupRef.current) {
+          popupRef.current.remove()
+          popupRef.current = null
+        }
+        return
+      }
+
+      // 选中 → 打开 popup
+      if (popupRef.current) {
+        popupRef.current.remove()
+      }
+
+      const popupHTML = renderPopupHTML(props)
+
+      popupRef.current = new maplibregl.Popup({
+        offset: 15,
+        maxWidth: '300px',
+        closeButton: true,
+        closeOnClick: false,
+        className: 'maplibre-popup-card',
+      })
+        .setLngLat(coords)
+        .setHTML(popupHTML)
+        .addTo(map)
+
+      popupRef.current.on('close', () => {
+        popupRef.current = null
+        // popup 关闭时同步取消选中
+        const stillSelected = useMapStore.getState().selectedMarkerIds
+        if (stillSelected.includes(props.id)) {
+          useMapStore.getState().removeSelectedMarkerId(props.id)
+        }
+      })
+    }
+
+    // ─── 鼠标 hover 指针 ───
+    const handleMouseEnter = () => {
+      map.getCanvas().style.cursor = 'pointer'
+    }
+    const handleMouseLeave = () => {
+      map.getCanvas().style.cursor = ''
+    }
+
+    // 事件只在 useEffect 顶层绑定一次
+    map.on('click', 'location-dots', handleClick)
+    map.on('mouseenter', 'location-dots', handleMouseEnter)
+    map.on('mouseleave', 'location-dots', handleMouseLeave)
+
     const setupLayers = () => {
       const geojson = buildGeoJSON()
 
@@ -127,65 +191,6 @@ function MarkersLayerInner({ locations }: MarkersLayerProps) {
           'text-halo-width': 1.5,
         },
       })
-
-      // ─── 点击标记 → 弹出 Popup + 同步 store ───
-      map.on('click', 'location-dots', (e) => {
-        if (!e.features || !e.features[0]) return
-        const feature = e.features[0]
-        const coords = (feature.geometry as any).coordinates.slice() as [number, number]
-        const props = feature.properties!
-
-        // 检查当前选中状态（toggle 逻辑）
-        const currentSelected = useMapStore.getState().selectedMarkerIds
-        const isCurrentlySelected = currentSelected.includes(props.id)
-
-        // 调用 store toggle
-        setSelectedMarkerId(props.id)
-
-        if (isCurrentlySelected) {
-          // 取消选中 → 关闭 popup
-          if (popupRef.current) {
-            popupRef.current.remove()
-            popupRef.current = null
-          }
-          return
-        }
-
-        // 选中 → 打开 popup
-        if (popupRef.current) {
-          popupRef.current.remove()
-        }
-
-        const popupHTML = renderPopupHTML(props)
-
-        popupRef.current = new maplibregl.Popup({
-          offset: 15,
-          maxWidth: '300px',
-          closeButton: true,
-          closeOnClick: false,
-          className: 'maplibre-popup-card',
-        })
-          .setLngLat(coords)
-          .setHTML(popupHTML)
-          .addTo(map)
-
-        popupRef.current.on('close', () => {
-          popupRef.current = null
-          // popup 关闭时同步取消选中
-          const stillSelected = useMapStore.getState().selectedMarkerIds
-          if (stillSelected.includes(props.id)) {
-            useMapStore.getState().removeSelectedMarkerId(props.id)
-          }
-        })
-      })
-
-      // ─── 鼠标 hover 指针 ───
-      map.on('mouseenter', 'location-dots', () => {
-        map.getCanvas().style.cursor = 'pointer'
-      })
-      map.on('mouseleave', 'location-dots', () => {
-        map.getCanvas().style.cursor = ''
-      })
     }
 
     // 地图样式已加载 → 立即初始化；否则等待
@@ -205,6 +210,9 @@ function MarkersLayerInner({ locations }: MarkersLayerProps) {
     map.on('styledata', handleStyleData)
 
     return () => {
+      map.off('click', 'location-dots', handleClick)
+      map.off('mouseenter', 'location-dots', handleMouseEnter)
+      map.off('mouseleave', 'location-dots', handleMouseLeave)
       map.off('style.load', setupLayers)
       map.off('styledata', handleStyleData)
       if (popupRef.current) {

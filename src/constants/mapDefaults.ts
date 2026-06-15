@@ -39,7 +39,7 @@ export const TILE_STYLES: Record<TileLayerStyle, {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> contributors',
   },
   terrain: {
-    url: 'https://tiles.openfreemap.org/styles/positron',
+    url: 'https://tiles.openfreemap.org/styles/liberty',
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> contributors',
   },
 }

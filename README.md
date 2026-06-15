@@ -9,7 +9,7 @@
 [![TailwindCSS](https://img.shields.io/badge/TailwindCSS-4-06B6D4?logo=tailwindcss)](https://tailwindcss.com)
 [![MapLibre](https://img.shields.io/badge/MapLibre_GL-5-396CB2?logo=maplibre)](https://maplibre.org)
 
-**收录 124 个动漫店铺的交互式地图，基于 MapLibre 矢量瓦片渲染，支持地区筛选、分类筛选、搜索排序与深色主题。**
+**收录 124 个动漫店铺的交互式地图，基于 MapLibre 矢量瓦片渲染，支持地区筛选、分类筛选、搜索排序与地图样式切换。**
 
 [🐛 报告 Bug](https://github.com/9dk9jptv8h-hue/japan-otaku-map/issues) &nbsp;|&nbsp; [✨ 功能建议](https://github.com/9dk9jptv8h-hue/japan-otaku-map/issues)
 
@@ -46,7 +46,7 @@
 | 🏷️ **4 类分色标记** | Animate（粉色）/ Melonbooks（绿色）/ Mandarake（橙色）/ Suruga-ya（蓝色） |
 | 🔍 **搜索与筛选** | 全文搜索（名称/描述/标签/地址）、地区筛选（都道府県）、分类筛选 |
 | 📊 **排序** | 按评分、名称、更新时间、访问量排序 |
-| 🌓 **深色 / 浅色主题** | 主题偏好持久化，地图瓦片同步切换 |
+| 🌓 **地图样式切换** | 浅色 / 标准 / 暗色 / 地形，4 种瓦片样式可选 |
 | 📱 **响应式布局** | 桌面端侧边栏 + 移动端抽屉，全尺寸适配 |
 | ⚡ **性能优化** | 代码分割 3 chunk、CSS 变量驱动 marker、content-visibility 懒加载 |
 
@@ -101,17 +101,17 @@ npm run preview
 src/
 ├── components/
 │   ├── layout/          # AppShell、桌面/移动端布局
-│   ├── map/             # MapContainer、MarkersLayer、PopupCard、瓦片切换
-│   ├── sidebar/         # FilterPanel、SearchBar、CardList、LocationCard
-│   └── ui/              # Button、Badge、Drawer、ThemeToggle、ErrorBoundary
+│   ├── map/             # MapContainer、MarkersLayer、TileLayerSwitch、MapControls
+│   ├── sidebar/         # FilterPanel、SearchBar、CardList、LocationCard、SortControl
+│   └── ui/              # Badge、EmptyState、ErrorBoundary、Input
 ├── constants/
 │   ├── mockData.ts      # 124 个地点数据
 │   ├── mapDefaults.ts   # 视口、瓦片样式配置
 │   └── theme.ts         # 分类颜色与元数据
-├── hooks/               # useDebounce、useMediaQuery、useTheme
+├── hooks/               # useDebounce、useMediaQuery
 ├── store/               # Zustand stores (UI / Filter / Map)
 ├── types/               # TypeScript 类型定义
-├── utils/               # cn、markers、city-photo
+├── utils/               # cn、city-photo
 ├── App.tsx              # 根组件 + 欢迎屏
 ├── main.tsx             # 入口
 └── index.css            # 全局样式 + 动画

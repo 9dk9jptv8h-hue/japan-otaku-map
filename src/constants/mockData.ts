@@ -4,7 +4,7 @@ const IMG = '/animate_store.svg'
 
 // ================================================================
 //  rating:  实际 Google Maps 参考 + 店铺地位加权
-//  visitCount:  Google Maps 口コミ数参考（单位：千）
+//  visitCount:  Google Maps 口コミ数参考
 //  updatedAt: 实际开/改装日期
 // ================================================================
 

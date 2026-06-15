@@ -19,7 +19,7 @@ export function DesktopLayout({ locations }: DesktopLayoutProps) {
 
   // 同时按分类和搜索词过滤地图标记
   const mapLocations = useMemo(() => {
-    let result = selectedCategories.length === 0 ? [] : locations.filter((loc) => selectedCategories.includes(loc.category))
+    let result = selectedCategories.length === 0 ? [...locations] : locations.filter((loc) => selectedCategories.includes(loc.category))
     if (debouncedSearch.trim()) {
       const q = debouncedSearch.toLowerCase()
       result = result.filter(

@@ -6,6 +6,7 @@ import { SearchBar } from '@/components/sidebar/SearchBar'
 import { FilterPanel } from '@/components/sidebar/FilterPanel'
 import { SortControl } from '@/components/sidebar/SortControl'
 import { CardList } from '@/components/sidebar/CardList'
+import { TileLayerSwitch } from '@/components/map/TileLayerSwitch'
 import { useUIStore } from '@/store/useUIStore'
 import { useFilterStore } from '@/store/useFilterStore'
 import { useDebounce } from '@/hooks/useDebounce'
@@ -182,6 +183,11 @@ export function MobileLayout({ locations }: MobileLayoutProps) {
             </div>
           </div>
         )}
+
+        {/* 地图样式切换 */}
+        <div className="shrink-0 px-3 py-3 border-b border-[var(--color-border)]">
+          <TileLayerSwitch />
+        </div>
 
         {/* 列表 */}
         <div className="flex-1 overflow-y-auto px-3 pt-2 pb-safe">
