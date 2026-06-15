@@ -55,9 +55,6 @@ function WelcomeScreen({ exiting }: { exiting: boolean }) {
       if (intervalId) clearInterval(intervalId)
     }
   }, [])
-      if (intervalId) clearInterval(intervalId)
-    }
-  }, [])
 
   /* 背景粒子 — 40个彩色光点 */
   const particles = useMemo(() =>
