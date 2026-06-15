@@ -9,7 +9,7 @@
 [![TailwindCSS](https://img.shields.io/badge/TailwindCSS-4-06B6D4?logo=tailwindcss)](https://tailwindcss.com)
 [![MapLibre](https://img.shields.io/badge/MapLibre_GL-5-396CB2?logo=maplibre)](https://maplibre.org)
 
-**收录 175+ 个动漫店铺的交互式地图，基于 MapLibre 矢量瓦片渲染，支持地区筛选、分类筛选、搜索排序与地图样式切换。**
+**收录 175+ 个动漫店铺的交互式地图，基于 MapLibre 矢量瓦片渲染，支持地区筛选、分类筛选、搜索与排序。**
 
 [🐛 报告 Bug](https://github.com/9dk9jptv8h-hue/japan-otaku-map/issues) &nbsp;|&nbsp; [✨ 功能建议](https://github.com/9dk9jptv8h-hue/japan-otaku-map/issues)
 
@@ -41,14 +41,13 @@
 
 | 功能 | 说明 |
 |------|------|
-| 🗺️ **矢量瓦片地图** | MapLibre GL JS 渲染，OpenFreeMap 全球 CDN 瓦片源，4 种地图样式切换 |
+| 🗺️ **矢量瓦片地图** | MapLibre GL JS 渲染，OpenFreeMap 全球 CDN 瓦片源 |
 | 📍 **175+ 个地点** | 175+ 个动漫店铺，覆盖北海道到九州 |
 | 🏷️ **7 类分色标记** | Animate（粉色）/ Melonbooks（绿色）/ Mandarake（橙色）/ Suruga-ya（蓝色）/ GAMERS（黄色）/ Lashinbang（紫色）/ K-Books（深红） |
 | 🔍 **搜索与筛选** | 全文搜索（名称/描述/标签/地址）、地区筛选（都道府県）、分类筛选 |
 | 📊 **排序** | 按评分、名称、更新时间、访问量排序 |
-| 🌓 **地图样式切换** | 浅色 / 标准 / 暗色 / 地形，4 种瓦片样式可选 |
 | 📱 **响应式布局** | 桌面端侧边栏 + 移动端抽屉，全尺寸适配 |
-| ⚡ **性能优化** | 代码分割 3 chunk、CSS 变量驱动 marker、content-visibility 懒加载 |
+| ⚡ **性能优化** | 代码分割 3 chunk、CSS 变量驱动 marker、content-visibility 懒加载、Service Worker 瓦片缓存 |
 
 ---
 
@@ -59,7 +58,7 @@
 | **框架** | [React 19](https://react.dev) + Hooks |
 | **语言** | [TypeScript 6](https://www.typescriptlang.org) — 严格模式 |
 | **构建** | [Vite 8](https://vite.dev) — 亚秒级 HMR |
-| **样式** | [TailwindCSS 4](https://tailwindcss.com) — 深色模式、CSS 变量 |
+| **样式** | [TailwindCSS 4](https://tailwindcss.com) — CSS 变量 |
 | **地图引擎** | [MapLibre GL JS 5](https://maplibre.org) — 矢量瓦片渲染 |
 | **瓦片源** | [OpenFreeMap](https://openfreemap.org) — 免费、无 Key、全球 CDN |
 | **状态管理** | [Zustand 5](https://zustand.docs.pmnd.rs) — 轻量、持久化 |
@@ -108,7 +107,7 @@ src/
 │   ├── mockData.ts      # 175+ 个地点数据
 │   ├── mapDefaults.ts   # 视口、瓦片样式配置
 │   └── theme.ts         # 分类颜色与元数据
-├── hooks/               # useDebounce、useMediaQuery
+├── hooks/               # useDebounce、useFilteredLocations、useMediaQuery
 ├── store/               # Zustand stores (UI / Filter / Map)
 ├── types/               # TypeScript 类型定义
 ├── utils/               # cn、city-photo

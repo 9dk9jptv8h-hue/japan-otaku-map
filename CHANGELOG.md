@@ -7,6 +7,23 @@
 
 ---
 
+## [2.3.0] - 2026-06-15
+
+### Fixed（修复）
+- 消除欢迎页入场闪白 — body初始暗色背景+退出时恢复
+- 去除侧边栏CSS入场动画，防止欢迎页期间侧边栏闪现
+- 点击地图空白处关闭弹窗
+- 修复20项审查问题 — SEO meta/requestAnimationFrame/死代码清理/SW缓存上限/筛选Hook提取
+
+### Refactored（重构）
+- 提取共享筛选Hook（useFilteredLocations）+ LocationCard颜色从theme常量导入
+
+### Style（视觉）
+- 欢迎界面入场淡入过渡
+- 侧边栏关闭按钮改为半透明融入header
+
+---
+
 ## [2.2.0] - 2026-06-15
 
 ### Changed（变更）
@@ -28,6 +45,9 @@
 - 新增Lashinbang(らしんばん)约30家门店 — 紫色标记
 - 新增K-Books(ケーブックス)约7家门店 — 深红标记
 - 7大连锁店铺全覆盖，地点总数突破170+
+
+### Removed（移除）
+- 移除地图样式切换控件 — 固定使用标准样式
 
 ---
 
@@ -266,6 +286,17 @@
 
 ---
 
+[2.3.0]: https://github.com/9dk9jptv8h-hue/japan-otaku-map/compare/v2.2.0...v2.3.0
+[2.2.0]: https://github.com/9dk9jptv8h-hue/japan-otaku-map/compare/v2.1.0...v2.2.0
+[2.1.0]: https://github.com/9dk9jptv8h-hue/japan-otaku-map/compare/v2.0.0...v2.1.0
+[2.0.0]: https://github.com/9dk9jptv8h-hue/japan-otaku-map/compare/v1.9.0...v2.0.0
+[1.9.0]: https://github.com/9dk9jptv8h-hue/japan-otaku-map/compare/v1.8.1...v1.9.0
+[1.8.1]: https://github.com/9dk9jptv8h-hue/japan-otaku-map/compare/v1.8.0...v1.8.1
+[1.8.0]: https://github.com/9dk9jptv8h-hue/japan-otaku-map/compare/v1.7.0...v1.8.0
+[1.7.0]: https://github.com/9dk9jptv8h-hue/japan-otaku-map/compare/v1.6.0...v1.7.0
+[1.6.0]: https://github.com/9dk9jptv8h-hue/japan-otaku-map/compare/v1.5.0...v1.6.0
+[1.5.0]: https://github.com/9dk9jptv8h-hue/japan-otaku-map/compare/v1.4.0...v1.5.0
+[1.4.0]: https://github.com/9dk9jptv8h-hue/japan-otaku-map/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/9dk9jptv8h-hue/japan-otaku-map/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/9dk9jptv8h-hue/japan-otaku-map/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/9dk9jptv8h-hue/japan-otaku-map/compare/v1.0.4...v1.1.0
