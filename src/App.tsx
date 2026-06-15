@@ -59,10 +59,10 @@ interface PetalData {
   opacity: number
 }
 
-function generatePetals(): PetalData[] {
-  return Array.from({ length: 20 }, (_, i) => ({
+function generatePetals(count: number): PetalData[] {
+  return Array.from({ length: count }, (_, i) => ({
     id: i,
-    left: `${((i / 20) * 94 + Math.random() * 6) % 96}%`,
+    left: `${((i / count) * 94 + Math.random() * 6) % 96}%`,
     delay: `${Math.random() * 2.2}s`,
     duration: `${2.8 + Math.random() * 3.4}s`,
     size: 0.55 + Math.random() * 0.7,
@@ -73,7 +73,9 @@ function generatePetals(): PetalData[] {
 }
 
 function WelcomeScreen({ exiting }: { exiting: boolean }) {
-  const petals = useMemo(() => generatePetals(), [])
+  const [isMobile] = useState(() => window.innerWidth < 768)
+  const petalCount = isMobile ? 8 : 20
+  const petals = useMemo(() => generatePetals(petalCount), [petalCount])
 
   return (
     <div
@@ -150,7 +152,7 @@ function WelcomeScreen({ exiting }: { exiting: boolean }) {
         }}
       >
         {/* 标题 — 毛笔字逐个浮现 */}
-        <h1 className="flex flex-wrap justify-center gap-[0.03em] mb-3 text-[clamp(28px,5.5vw,42px)] font-bold leading-tight">
+        <h1 className="flex flex-wrap justify-center gap-[0.03em] mb-3 text-[clamp(22px,5.5vw,42px)] font-bold leading-tight">
           {TITLE_CHARS.map((char, i) => (
             <span
               key={i}
@@ -182,8 +184,8 @@ function WelcomeScreen({ exiting }: { exiting: boolean }) {
 
         {/* —— 判子印章三连 —— */}
         <div
-          className="flex gap-4 mb-8 flex-wrap justify-center"
-          style={{ animation: `charReveal 0.5s ${0.8}s var(--ease-spring) both` }}
+          className="flex mb-8 flex-wrap justify-center"
+          style={{ gap: isMobile ? '0.5rem' : '1rem', animation: `charReveal 0.5s ${0.8}s var(--ease-spring) both` }}
         >
           {STAMPS.map((stamp, i) => (
             <div
@@ -194,23 +196,24 @@ function WelcomeScreen({ exiting }: { exiting: boolean }) {
               }}
             >
               <div
-                className="px-3.5 py-2 rounded-lg text-center select-none gpu-layer"
+                className="rounded-lg text-center select-none gpu-layer"
                 style={{
                   backgroundColor: stamp.bg,
                   border: `2px solid ${stamp.border}`,
                   boxShadow: stamp.shadow,
-                  minWidth: '88px',
+                  minWidth: isMobile ? '72px' : '88px',
+                  padding: isMobile ? '0.375rem 0.625rem' : '0.5rem 0.875rem',
                 }}
               >
                 <div
-                  className="text-[11px] font-bold tracking-wider leading-tight"
-                  style={{ color: stamp.color }}
+                  className="font-bold tracking-wider leading-tight"
+                  style={{ color: stamp.color, fontSize: isMobile ? '10px' : '11px' }}
                 >
                   {stamp.label}
                 </div>
                 <div
-                  className="text-[9px] font-semibold tracking-[0.08em] opacity-60 leading-tight"
-                  style={{ color: stamp.color }}
+                  className="font-semibold tracking-[0.08em] opacity-60 leading-tight"
+                  style={{ color: stamp.color, fontSize: isMobile ? '8px' : '9px' }}
                 >
                   {stamp.sub}
                 </div>
@@ -247,6 +250,10 @@ export default function App() {
   const theme = useUIStore((s) => s.theme)
   const [loading, setLoading] = useState(true)
   const [exiting, setExiting] = useState(false)
+  const [isMobile] = useState(() => window.innerWidth < 768)
+
+  const loadingTime = isMobile ? 1800 : 2500
+  const exitTime = isMobile ? 2300 : 3200
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme
@@ -258,15 +265,15 @@ export default function App() {
       isDark ? '#0d0d1a' : '#f7f3ee',
     )
 
-    // 1.1s 开始退出动画，1.5s 完全过渡
-    const show = setTimeout(() => setExiting(true), 2500)
-    const hide = setTimeout(() => setLoading(false), 3200)
+    // 开始退出动画 → 完全过渡
+    const show = setTimeout(() => setExiting(true), loadingTime)
+    const hide = setTimeout(() => setLoading(false), exitTime)
     return () => {
       clearTimeout(show)
       clearTimeout(hide)
       document.documentElement.style.removeProperty('--welcome-bg')
     }
-  }, [theme])
+  }, [theme, loadingTime, exitTime])
 
   if (loading) {
     return <WelcomeScreen exiting={exiting} />

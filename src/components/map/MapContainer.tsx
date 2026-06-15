@@ -26,17 +26,21 @@ export function MapView({ children }: MapViewProps) {
 
     const styleConfig = TILE_STYLES[tileLayer]
 
+    // 移动端检测 — 降低 GPU 负载 + 禁用不必要的动画
+    const isMobile = window.innerWidth < 768
+
     const map = new maplibregl.Map({
       container: mapContainer.current,
       style: styleConfig.url,
       center: [DEFAULT_VIEWPORT.center[1], DEFAULT_VIEWPORT.center[0]],
       zoom: DEFAULT_VIEWPORT.zoom,
       minZoom: MIN_ZOOM,
-      maxZoom: MAX_ZOOM,
+      maxZoom: isMobile ? 18 : MAX_ZOOM,
       maxBounds: JAPAN_BOUNDS,
       attributionControl: false,
       // 性能优化
-      fadeDuration: 300,
+      pixelRatio: isMobile ? 1 : window.devicePixelRatio,
+      fadeDuration: isMobile ? 0 : 300,
       // 本地表意文字字体回退 — 确保中日文字符能正确渲染
       localIdeographFontFamily: "'Noto Sans SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif",
     })
@@ -97,8 +101,12 @@ export function MapView({ children }: MapViewProps) {
       })
     })
 
-    // 点击空白取消选中
-    map.on('click', () => {
+    // 点击空白取消选中 — 检查是否点击了 WebGL 标记图层，避免误清
+    map.on('click', (e) => {
+      if (map.getLayer('location-dots')) {
+        const features = map.queryRenderedFeatures(e.point, { layers: ['location-dots'] })
+        if (features.length > 0) return // 点击了标记，不清除选中
+      }
       setSelectedMarkerId(null)
     })
 

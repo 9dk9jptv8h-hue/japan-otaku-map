@@ -651,3 +651,171 @@ aside {
     backface-visibility: hidden;
   }
 }
+
+/* ================================================================
+   Mobile Performance Overrides
+   — Reduce GPU-heavy effects for smoother 60 fps on mobile devices.
+   — backdrop-blur, large box-shadows, and continuous animations are
+     the top three mobile GPU bottlenecks. Override them here so
+     desktop styles stay untouched.
+   ================================================================ */
+@media (max-width: 767px) {
+
+  /* ----------------------------------------------------------
+     A. Reduce / Remove backdrop-blur
+     backdrop-filter: blur() triggers an offscreen render pass on
+     every composited frame. On mobile GPUs this alone can halve
+     the frame budget. We swap it for higher-opacity solid fills.
+     ---------------------------------------------------------- */
+
+  /* Glass token — reduce 20px -> 4px and raise opacity */
+  :root {
+    --color-glass-blur: blur(4px);
+    --color-glass: rgba(255, 255, 255, 0.95);
+  }
+  [data-theme="dark"] {
+    --color-glass: rgba(20, 20, 40, 0.95);
+  }
+
+  /* Glass-strong — reduce 30px -> 6px, near-opaque background */
+  .glass-strong {
+    backdrop-filter: blur(6px) !important;
+    -webkit-backdrop-filter: blur(6px) !important;
+    background: rgba(255, 255, 255, 0.97) !important;
+  }
+  [data-theme="dark"] .glass-strong {
+    background: rgba(20, 20, 40, 0.97) !important;
+  }
+
+  /* Popup close button — remove blur entirely, use solid bg */
+  .maplibregl-popup-close-button {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: rgba(0, 0, 0, 0.55) !important;
+  }
+
+  /* ----------------------------------------------------------
+     B. Simplify box-shadows
+     Large blur-radius shadows (40-56px) cause expensive Gaussian
+     blurs each frame during scroll / animation. Flatten them to
+     single-layer, small-radius shadows.
+     ---------------------------------------------------------- */
+
+  :root {
+    --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.10);
+    --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.12);
+    --shadow-xl: 0 4px 20px rgba(0, 0, 0, 0.14);
+    --shadow-glow-accent: 0 0 8px rgba(233, 30, 99, 0.18);
+    --shadow-glow-blue: 0 0 8px rgba(33, 150, 243, 0.18);
+    --shadow-glow-gold: 0 0 8px rgba(255, 152, 0, 0.18);
+  }
+
+  [data-theme="dark"] {
+    --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.40);
+    --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.45);
+    --shadow-xl: 0 4px 20px rgba(0, 0, 0, 0.50);
+  }
+
+  /* Marker dot — single-layer lightweight shadow */
+  .marker-dot {
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18) !important;
+  }
+
+  /* ----------------------------------------------------------
+     C. Reduce / disable non-essential transitions
+     Keep functional transitions (drawer slide, button feedback)
+     but shorten decorative ones to free up the compositor.
+     ---------------------------------------------------------- */
+
+  /* Marker hover — shorter, simpler easing */
+  .custom-marker-el {
+    transition: transform 0.15s ease-out !important;
+  }
+
+  /* Marker dot — collapse 4-property transition into 1 */
+  .marker-dot {
+    transition: transform 0.15s ease-out !important;
+  }
+
+  /* Popup close — just background, skip transform */
+  .maplibregl-popup-close-button {
+    transition: background 0.12s ease-out !important;
+  }
+  .maplibregl-popup-close-button:hover {
+    transform: none !important;
+  }
+
+  /* Card hover gleam — disable entirely (per-card repaint) */
+  .location-card::after {
+    display: none !important;
+  }
+
+  /* ----------------------------------------------------------
+     D. Reduce animation complexity
+     Decorative animations are simplified or removed.
+     Functional animations (drawer slide) are kept but shortened.
+     ---------------------------------------------------------- */
+
+  /* Sidebar: replace multi-step spring with simple slide-in */
+  aside {
+    animation: cardSlideIn 0.3s ease-out forwards !important;
+  }
+
+  /* Popup: replace 4-step bounce with simple fade-up */
+  .maplibregl-popup-content {
+    animation: cardSlideIn 0.25s ease-out both !important;
+  }
+
+  /* Bottom-right controls: simpler entrance */
+  .absolute.bottom-4.right-4 {
+    animation: cardSlideIn 0.25s ease-out both !important;
+  }
+
+  /* Marker pulse ring — slow down to reduce frame cost */
+  .marker-pulse-ring {
+    animation-duration: 2.5s !important;
+  }
+
+  /* Header gradient — slow animation to halve repaint rate */
+  .header-gradient {
+    animation-duration: 12s !important;
+  }
+
+  /* Skeleton shimmer — slightly slower to reduce paints */
+  .skeleton-shimmer {
+    animation-duration: 2.5s !important;
+  }
+
+  /* Sakura petals — reduce will-change, simplify timing */
+  .sakura-petal,
+  [class*="sakura-petal"] {
+    animation-duration: 8s !important;
+    will-change: auto !important;
+  }
+
+  /* Ink bloom — skip the expensive filter: blur() animation */
+  .ink-bloom,
+  [class*="ink-bloom"] {
+    animation: none !important;
+    opacity: 1 !important;
+    filter: none !important;
+    transform: none !important;
+  }
+
+  /* Map outline breathe — remove continuous animation */
+  .map-breathe,
+  [class*="map-breathe"] {
+    animation: none !important;
+    opacity: 0.08 !important;
+  }
+
+  /* Map canvas — release permanent will-change layer */
+  .maplibregl-canvas {
+    will-change: auto !important;
+  }
+
+  /* Map fade-in — simplify to opacity only */
+  .maplibregl-map {
+    animation: overlayFadeIn 0.4s ease-out forwards !important;
+  }
+}
