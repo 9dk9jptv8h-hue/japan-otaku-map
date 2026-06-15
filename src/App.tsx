@@ -5,54 +5,20 @@ import { AppShell } from '@/components/layout/AppShell'
 
 /* ================================================================
    Welcome Screen — 欢迎界面 — 日本旅游地图
-   Sakura • Sumi-e • Hanko Stamps
+   Sakura • Sumi-e • Brand Dots
    ================================================================ */
 
 const TITLE_CHARS = '日本旅游地图'.split('')
-const SUBTITLE = '日本旅游 — 7大连锁动漫店铺地图'
+const SUBTITLE = '175+ 动漫店铺 · 7大连锁 · 全国覆盖'
 
-interface StampData {
-  label: string
-  sub: string
-  color: string
-  bg: string
-  border: string
-  shadow: string
-}
-
-const STAMPS: StampData[] = [
-  {
-    label: 'アニメイト',
-    sub: 'Animate',
-    color: '#e91e63',
-    bg: '#fce4ec',
-    border: '#f48fb1',
-    shadow: '0 0 24px rgba(233,30,99,0.3)',
-  },
-  {
-    label: 'メロンブックス',
-    sub: 'Melonbooks',
-    color: '#009688',
-    bg: '#e0f2f1',
-    border: '#80cbc4',
-    shadow: '0 0 24px rgba(0,150,136,0.3)',
-  },
-  {
-    label: 'まんだらけ',
-    sub: 'Mandarake',
-    color: '#ff9800',
-    bg: '#fff3e0',
-    border: '#ffcc80',
-    shadow: '0 0 24px rgba(255,152,0,0.3)',
-  },
-  {
-    label: '駿河屋',
-    sub: 'Suruga-ya',
-    color: '#1565c0',
-    bg: '#e3f2fd',
-    border: '#90caf9',
-    shadow: '0 0 24px rgba(21,101,192,0.3)',
-  },
+const BRANDS = [
+  { name: 'Animate', color: '#e91e63' },
+  { name: 'Melonbooks', color: '#009688' },
+  { name: 'Mandarake', color: '#ff9800' },
+  { name: 'Suruga-ya', color: '#1565c0' },
+  { name: 'GAMERS', color: '#fbc02d' },
+  { name: 'Lashinbang', color: '#7b1fa2' },
+  { name: 'K-Books', color: '#b71c1c' },
 ]
 
 interface PetalData {
@@ -190,57 +156,39 @@ function WelcomeScreen({ exiting }: { exiting: boolean }) {
           {SUBTITLE}
         </p>
 
-        {/* —— 判子印章三连 —— */}
+        {/* 品牌列表 — 彩色圆点 + 名称 */}
         <div
-          className="flex mb-8 flex-wrap justify-center"
-          style={{ gap: isMobile ? '0.5rem' : '1rem', animation: `charReveal 0.5s ${0.8}s var(--ease-spring) both` }}
+          className="flex flex-wrap justify-center gap-x-4 gap-y-2 mb-8 max-w-[380px]"
+          style={{ animation: `charReveal 0.5s 0.8s var(--ease-spring) both` }}
         >
-          {STAMPS.map((stamp, i) => (
-            <div
-              key={stamp.label}
-              className="flex flex-col items-center gap-1"
+          {BRANDS.map((brand, i) => (
+            <span
+              key={brand.name}
+              className="inline-flex items-center gap-1.5 text-[12px] font-medium text-[#666] gpu-layer"
               style={{
-                animation: `stampIn 0.55s ${0.85 + i * 0.12}s var(--ease-spring) both`,
+                animation: `charReveal 0.4s ${0.9 + i * 0.08}s var(--ease-spring) both`,
               }}
             >
-              <div
-                className="rounded-lg text-center select-none gpu-layer"
-                style={{
-                  backgroundColor: stamp.bg,
-                  border: `2px solid ${stamp.border}`,
-                  boxShadow: stamp.shadow,
-                  minWidth: isMobile ? '72px' : '88px',
-                  padding: isMobile ? '0.375rem 0.625rem' : '0.5rem 0.875rem',
-                }}
-              >
-                <div
-                  className="font-bold tracking-wider leading-tight"
-                  style={{ color: stamp.color, fontSize: isMobile ? '10px' : '11px' }}
-                >
-                  {stamp.label}
-                </div>
-                <div
-                  className="font-semibold tracking-[0.08em] opacity-60 leading-tight"
-                  style={{ color: stamp.color, fontSize: isMobile ? '8px' : '9px' }}
-                >
-                  {stamp.sub}
-                </div>
-              </div>
-            </div>
+              <span
+                className="inline-block w-2 h-2 rounded-full"
+                style={{ backgroundColor: brand.color }}
+              />
+              {brand.name}
+            </span>
           ))}
         </div>
 
-        {/* —— 加载指示点 —— */}
-        <div className="flex gap-2.5" style={{ animation: `charReveal 0.4s 1.1s var(--ease-spring) both` }}>
-          {STAMPS.map((stamp, i) => (
+        {/* 加载指示点 */}
+        <div className="flex gap-2.5" style={{ animation: `charReveal 0.4s 1.5s var(--ease-spring) both` }}>
+          {['#e91e63', '#1565c0', '#7b1fa2'].map((color, i) => (
             <div
-              key={stamp.label}
+              key={color}
               className="w-2.5 h-2.5 rounded-full gpu-layer"
               style={{
-                backgroundColor: stamp.color,
+                backgroundColor: color,
                 animation: `dotBounce 1.2s ease-in-out infinite`,
                 animationDelay: `${i * 0.2}s`,
-                boxShadow: stamp.shadow,
+                boxShadow: `0 0 12px ${color}40`,
               }}
             />
           ))}
