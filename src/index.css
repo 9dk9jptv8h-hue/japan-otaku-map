@@ -310,12 +310,6 @@
    Base Styles
    ================================================================ */
 
-/* 侧边栏滑入 */
-aside {
-  animation: sidebarSpring 0.6s var(--ease-spring) forwards;
-  will-change: transform;
-}
-
 /* 右下角控件弹入 */
 .absolute.bottom-4.right-4 {
   animation: popIn 0.5s 0.2s var(--ease-spring) both;
@@ -629,11 +623,6 @@ aside {
      Decorative animations are simplified or removed.
      Functional animations (drawer slide) are kept but shortened.
      ---------------------------------------------------------- */
-
-  /* Sidebar: replace multi-step spring with simple slide-in */
-  aside {
-    animation: cardSlideIn 0.3s ease-out forwards !important;
-  }
 
   /* Popup: replace 4-step bounce with simple fade-up */
   .maplibregl-popup-content {
