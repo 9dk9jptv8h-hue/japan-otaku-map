@@ -205,6 +205,7 @@ function WelcomeScreen({ exiting }: { exiting: boolean }) {
 export default function App() {
   const [loading, setLoading] = useState(true)
   const [exiting, setExiting] = useState(false)
+  const [mapReady, setMapReady] = useState(false)
   const [isMobile] = useState(() => window.innerWidth < 768)
 
   const loadingTime = isMobile ? 2200 : 2500
@@ -213,10 +214,12 @@ export default function App() {
   useEffect(() => {
     document.documentElement.style.setProperty('--welcome-bg', '#f7f3ee')
 
-    // 开始退出动画 → 完全过渡
+    // 延迟500ms再加载地图，让欢迎动画先跑顺
+    const mapTimer = setTimeout(() => setMapReady(true), 500)
     const show = setTimeout(() => setExiting(true), loadingTime)
     const hide = setTimeout(() => setLoading(false), exitTime)
     return () => {
+      clearTimeout(mapTimer)
       clearTimeout(show)
       clearTimeout(hide)
       document.documentElement.style.removeProperty('--welcome-bg')
@@ -225,8 +228,8 @@ export default function App() {
 
   return (
     <ErrorBoundary>
-      {/* 地图在底层 — 欢迎页期间就开始加载 */}
-      <AppShell locations={mockLocations} />
+      {/* 地图在底层 — 延迟500ms加载，避免和欢迎动画抢CPU */}
+      {mapReady && <AppShell locations={mockLocations} />}
 
       {/* 欢迎页覆盖在上方 — 动画结束后移除 */}
       {loading && <WelcomeScreen exiting={exiting} />}
