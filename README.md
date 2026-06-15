@@ -64,7 +64,7 @@
 | **瓦片源** | [OpenFreeMap](https://openfreemap.org) — 免费、无 Key、全球 CDN |
 | **状态管理** | [Zustand 5](https://zustand.docs.pmnd.rs) — 轻量、持久化 |
 | **图标** | [Lucide React](https://lucide.dev) |
-| **字体** | Noto Sans SC (Google Fonts) |
+| **字体** | Microsoft YaHei / PingFang SC (系统字体) |
 
 ---
 

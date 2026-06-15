@@ -29,6 +29,7 @@
     --color-sakura: #f2a7b4;
     --color-koi: #d94a3a;
     --color-gold: #c4a35a;
+    --color-washi: #f7f3ed;
 
     /* Welcome 页面 */
     --welcome-bg: #f7f3ee;
@@ -100,6 +101,7 @@
     --sidebar-header-bg: linear-gradient(135deg, #901840, #6a2080, #184890);
 
     --welcome-bg: #0d0d1a;
+    --color-washi: #1a1a2e;
 
     --shadow-xs: 0 1px 3px rgba(0, 0, 0, 0.2);
     --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
@@ -455,6 +457,15 @@ aside {
 * {
   scrollbar-width: thin;
   scrollbar-color: rgba(0, 0, 0, 0.12) transparent;
+}
+
+/* Scrollbar hide utility */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
 }
 
 /* ================================================================

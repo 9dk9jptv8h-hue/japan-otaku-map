@@ -38,21 +38,21 @@ export function MapControls({ className }: MapControlsProps) {
       <button
         onClick={zoomIn}
         className={cn(btnClass, 'rounded-t-2xl border-b border-gray-100/30')}
-        aria-label="拡大"
+        aria-label="放大"
       >
         <Plus className="h-5 w-5" />
       </button>
       <button
         onClick={goHome}
         className={cn(btnClass, 'border-b border-gray-100/30')}
-        aria-label="ホーム"
+        aria-label="回到初始位置"
       >
         <Home className="h-4 w-4" />
       </button>
       <button
         onClick={zoomOut}
         className={cn(btnClass, 'rounded-b-2xl')}
-        aria-label="縮小"
+        aria-label="缩小"
       >
         <Minus className="h-5 w-5" />
       </button>

@@ -279,7 +279,7 @@ function renderPopupHTML(props: Record<string, unknown>): string {
       : ''
 
   return `
-    <div style="width:280px;overflow:hidden;font-family:'Noto Sans SC','Hiragino Sans GB',system-ui,sans-serif;">
+    <div style="width:280px;overflow:hidden;font-family:'Microsoft YaHei','PingFang SC','Hiragino Sans GB',system-ui,sans-serif;">
       <div style="position:relative;height:120px;overflow:hidden;background:#f0f0f0;">
         <img src="${photoUrl}" alt="${address}" loading="lazy"
           style="width:100%;height:100%;object-fit:cover;"

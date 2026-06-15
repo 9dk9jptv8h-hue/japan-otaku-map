@@ -1,6 +1,7 @@
 import type { LocationData } from '@/types'
 import { MapView } from '@/components/map/MapContainer'
 import { MarkersLayer } from '@/components/map/MarkersLayer'
+import { MapControls } from '@/components/map/MapControls'
 import { SearchBar } from '@/components/sidebar/SearchBar'
 import { FilterPanel } from '@/components/sidebar/FilterPanel'
 import { SortControl } from '@/components/sidebar/SortControl'
@@ -72,6 +73,9 @@ export function MobileLayout({ locations }: MobileLayoutProps) {
       <MapView>
         <MarkersLayer locations={filtered} />
       </MapView>
+
+      {/* 地图控件 */}
+      <MapControls className="absolute bottom-6 right-3 z-[999]" />
 
       {/* 顶部搜索栏 — 侧边栏打开时完全不渲染 */}
       {!sidebarOpen && (

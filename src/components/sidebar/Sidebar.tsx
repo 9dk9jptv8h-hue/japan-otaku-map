@@ -8,6 +8,7 @@ import { FilterPanel } from './FilterPanel'
 import { SortControl } from './SortControl'
 import { CardList } from './CardList'
 import { SidebarToggle } from './SidebarToggle'
+import { ThemeToggle } from '../ui/ThemeToggle'
 import { cn } from '@/utils/cn'
 
 interface SidebarProps {
@@ -103,11 +104,14 @@ export function Sidebar({ locations, className }: SidebarProps) {
               </p>
               <div className="flex items-center gap-2 mt-3">
                 <span className="inline-flex items-center gap-1 rounded-full bg-white/20 px-2.5 py-0.5 text-xs backdrop-blur-sm">
-                  📍 {locations.length} 店舗
+                  📍 {locations.length} 地点
                 </span>
               </div>
             </div>
-            <SidebarToggle collapsed={false} onClick={toggleSidebar} className="relative top-0 !border-white/20 !text-white" />
+            <div className="flex items-center gap-2">
+              <ThemeToggle className="static h-9 w-9 z-auto" />
+              <SidebarToggle collapsed={false} onClick={toggleSidebar} className="relative top-0 !border-white/20 !text-white" />
+            </div>
           </div>
         </div>
 

@@ -7,6 +7,27 @@
 
 ---
 
+## [1.3.0] - 2026-06-15
+
+### Fixed（修复）
+- 修复侧边栏点击地点后地图飞到错误坐标（lat/lng参数顺序反了）
+- 修复ErrorBoundary无背景色（--color-washi未定义）
+- 修复地区筛选滚动条不隐藏（scrollbar-hide未定义）
+- 修复Popup字体栈不一致
+- 清除残留日文aria-label和"店舗"
+- 清除mockData中残留的"圣地巡礼"用词
+
+### Added（新增）
+- 侧边栏添加主题切换按钮（深色/浅色模式）
+- 移动端添加地图缩放控件
+
+### Changed（变更）
+- 清理未使用的组件文件（CustomMarker.tsx、PopupCard.tsx）
+- 删除无关文件deepseek-balance.html
+- README字体描述更新
+
+---
+
 ## [1.2.0] - 2026-06-15
 
 ### Changed（变更）
@@ -137,6 +158,7 @@
 
 ---
 
+[1.3.0]: https://github.com/9dk9jptv8h-hue/japan-otaku-map/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/9dk9jptv8h-hue/japan-otaku-map/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/9dk9jptv8h-hue/japan-otaku-map/compare/v1.0.4...v1.1.0
 [1.0.4]: https://github.com/9dk9jptv8h-hue/japan-otaku-map/compare/v1.0.3...v1.0.4

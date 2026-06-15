@@ -83,8 +83,8 @@ To add a new shop location, edit `src/constants/mockData.ts`:
 ```typescript
 {
   id: 'ani-xxx-N',                    // Unique ID
-  name: 'アニメイト〇〇',             // Japanese name
-  nameJa: 'animate〇〇',              // Romaji
+  name: 'animate〇〇',                 // 中文名称
+  nameJa: 'アニメイト〇〇',           // 日文名称
   description: '...',                 // Short description
   category: 'animate',                // animate | melonbooks | mandarake
   latitude: 35.000,                   // Decimal degrees
@@ -104,4 +104,4 @@ Open a [Discussion](https://github.com/9dk9jptv8h-hue/japan-otaku-map/discussion
 
 ---
 
-*Happy contributing — and may your pilgrimage be legendary.*
+*Happy contributing — and may your journey be legendary.*
