@@ -73,13 +73,16 @@ export function MobileLayout({ locations }: MobileLayoutProps) {
         <MarkersLayer locations={filtered} />
       </MapView>
 
-      {/* 顶部搜索栏 — 安全区域适配 */}
-      <div className="absolute top-0 left-0 right-0 z-[1000] p-2 pt-safe pointer-events-none">
+      {/* 顶部搜索栏 — 侧边栏打开时隐藏 */}
+      <div className={cn(
+        'absolute top-0 left-0 right-0 z-[1000] p-2 pt-safe pointer-events-none transition-opacity duration-200',
+        sidebarOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'
+      )}>
         <div className="flex items-center gap-2 pointer-events-auto">
           <button
             onClick={() => setSidebarOpen(true)}
             className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl glass shadow-soft border border-[var(--color-border)] active:scale-95 transition-transform"
-            aria-label="メニューを開く"
+            aria-label="打开菜单"
           >
             <Menu className="h-5 w-5 text-[var(--color-text-dim)]" />
           </button>
@@ -119,13 +122,13 @@ export function MobileLayout({ locations }: MobileLayoutProps) {
             <h1 className="text-lg font-bold">🗾 日本旅游——圣地巡礼地图</h1>
             <p className="text-xs text-white/70 mt-0.5">Animate · Melonbooks · Mandarake</p>
             <span className="inline-flex items-center gap-1 rounded-full bg-white/20 px-2 py-0.5 text-xs mt-2">
-              📍 {locations.length} 店舗
+              📍 {locations.length} 地点
             </span>
           </div>
           <button
             onClick={() => setSidebarOpen(false)}
             className="flex h-8 w-8 items-center justify-center rounded-full bg-white/20 hover:bg-white/30 active:scale-90 transition-all"
-            aria-label="閉じる"
+            aria-label="关闭"
           >
             <X className="h-4 w-4" />
           </button>
