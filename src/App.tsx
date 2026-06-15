@@ -74,7 +74,7 @@ function generatePetals(count: number): PetalData[] {
 
 function WelcomeScreen({ exiting }: { exiting: boolean }) {
   const [isMobile] = useState(() => window.innerWidth < 768)
-  const petalCount = isMobile ? 8 : 20
+  const petalCount = isMobile ? 14 : 20
   const petals = useMemo(() => generatePetals(petalCount), [petalCount])
 
   return (
@@ -93,7 +93,7 @@ function WelcomeScreen({ exiting }: { exiting: boolean }) {
           background:
             'radial-gradient(circle, rgba(233,30,99,0.06) 0%, rgba(156,39,176,0.05) 25%, rgba(33,150,243,0.04) 50%, transparent 70%)',
           transform: 'translate(-50%, -50%)',
-          animation: 'mapBreathe 4s ease-in-out infinite',
+          animation: `mapBreathe ${isMobile ? 8 : 4}s ease-in-out infinite`,
         }}
       />
 
@@ -115,7 +115,7 @@ function WelcomeScreen({ exiting }: { exiting: boolean }) {
           transform: 'translate(-50%, -50%)',
           opacity: 0.06,
           filter: 'blur(1px)',
-          animation: 'mapBreathe 5s ease-in-out infinite',
+          animation: `mapBreathe ${isMobile ? 10 : 5}s ease-in-out infinite`,
         }}
       >
         🗾
@@ -252,8 +252,8 @@ export default function App() {
   const [exiting, setExiting] = useState(false)
   const [isMobile] = useState(() => window.innerWidth < 768)
 
-  const loadingTime = isMobile ? 1800 : 2500
-  const exitTime = isMobile ? 2300 : 3200
+  const loadingTime = isMobile ? 2200 : 2500
+  const exitTime = isMobile ? 2800 : 3200
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme

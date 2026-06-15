@@ -269,6 +269,20 @@
   }
 }
 
+/* 水墨晕染（移动端） — 降低blur起始值，减少GPU负担 */
+@keyframes inkBloomMobile {
+  0% {
+    opacity: 0;
+    filter: blur(8px) saturate(0.6);
+    transform: scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    filter: blur(0) saturate(1);
+    transform: scale(1);
+  }
+}
+
 /* 毛笔字逐个浮现 — 从下往上 + 淡入 */
 @keyframes charReveal {
   0% {
@@ -668,10 +682,10 @@ aside {
      the frame budget. We swap it for higher-opacity solid fills.
      ---------------------------------------------------------- */
 
-  /* Glass token — reduce 20px -> 4px and raise opacity */
+  /* Glass token — keep blur quality, raise opacity slightly */
   :root {
-    --color-glass-blur: blur(4px);
-    --color-glass: rgba(255, 255, 255, 0.95);
+    --color-glass-blur: blur(12px);
+    --color-glass: rgba(255, 255, 255, 0.92);
   }
   [data-theme="dark"] {
     --color-glass: rgba(20, 20, 40, 0.95);
@@ -793,20 +807,42 @@ aside {
     will-change: auto !important;
   }
 
-  /* Ink bloom — skip the expensive filter: blur() animation */
+  /* Ink bloom — use lighter blur for mobile GPU (8px vs 16px desktop) */
   .ink-bloom,
   [class*="ink-bloom"] {
-    animation: none !important;
-    opacity: 1 !important;
-    filter: none !important;
-    transform: none !important;
+    animation-name: inkBloomMobile !important;
   }
 
-  /* Map outline breathe — remove continuous animation */
+  /* Override inkBloom keyframe for mobile — inline style references pick this up */
+  @keyframes inkBloom {
+    0% {
+      opacity: 0;
+      filter: blur(8px) saturate(0.6);
+      transform: scale(0.95);
+    }
+    100% {
+      opacity: 1;
+      filter: blur(0) saturate(1);
+      transform: scale(1);
+    }
+  }
+
+  /* Map outline breathe — keep but slow down to reduce frame cost */
   .map-breathe,
   [class*="map-breathe"] {
-    animation: none !important;
-    opacity: 0.08 !important;
+    animation: mapBreathe 8s ease-in-out infinite !important;
+  }
+
+  /* Override mapBreathe keyframe for mobile — gentler movement */
+  @keyframes mapBreathe {
+    0%, 100% {
+      opacity: 0.06;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.09;
+      transform: scale(1.01);
+    }
   }
 
   /* Map canvas — release permanent will-change layer */
