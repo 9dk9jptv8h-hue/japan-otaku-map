@@ -266,13 +266,13 @@ export default function App() {
     }
   }, [loadingTime, exitTime])
 
-  if (loading) {
-    return <WelcomeScreen exiting={exiting} />
-  }
-
   return (
     <ErrorBoundary>
+      {/* 地图在底层 — 欢迎页期间就开始加载 */}
       <AppShell locations={mockLocations} />
+
+      {/* 欢迎页覆盖在上方 — 动画结束后移除 */}
+      {loading && <WelcomeScreen exiting={exiting} />}
     </ErrorBoundary>
   )
 }

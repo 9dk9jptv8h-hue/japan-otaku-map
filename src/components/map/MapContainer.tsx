@@ -2,7 +2,7 @@ import { useEffect, useRef, type ReactNode } from 'react'
 import maplibregl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { useMapStore } from '@/store/useMapStore'
-import { DEFAULT_VIEWPORT, MIN_ZOOM, MAX_ZOOM, JAPAN_BOUNDS, TILE_STYLES } from '@/constants/mapDefaults'
+import { DEFAULT_VIEWPORT, MIN_ZOOM, MAX_ZOOM, JAPAN_BOUNDS, TILE_STYLES, stylePreloadPromise } from '@/constants/mapDefaults'
 
 interface MapViewProps {
   children?: ReactNode
@@ -29,9 +29,14 @@ export function MapView({ children }: MapViewProps) {
     // 移动端检测 — 降低 GPU 负载 + 禁用不必要的动画
     const isMobile = window.innerWidth < 768
 
-    const map = new maplibregl.Map({
-      container: mapContainer.current,
-      style: styleConfig.url,
+    // Use preloaded style JSON if available (avoids extra network round-trip)
+    const initMap = async () => {
+      const preloadedStyle = tileLayer === 'standard' ? await stylePreloadPromise : null
+      if (!mapContainer.current) return
+
+      const map = new maplibregl.Map({
+        container: mapContainer.current,
+      style: preloadedStyle || styleConfig.url,
       center: [DEFAULT_VIEWPORT.center[1], DEFAULT_VIEWPORT.center[0]],
       zoom: DEFAULT_VIEWPORT.zoom,
       minZoom: MIN_ZOOM,
@@ -43,6 +48,13 @@ export function MapView({ children }: MapViewProps) {
       fadeDuration: isMobile ? 0 : 300,
       // 本地表意文字字体回退 — 确保中日文字符能正确渲染
       localIdeographFontFamily: "'Noto Sans SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif",
+      canvasContextAttributes: { antialias: false },
+      trackResize: true,
+      collectResourceTiming: false,
+      crossSourceCollisions: false,
+      ...(isMobile ? {
+        maxTileCacheSize: 50,
+      } : {}),
     })
 
     // 添加地图归因（精简版）
@@ -120,12 +132,20 @@ export function MapView({ children }: MapViewProps) {
     }
     setFlyToMarker(flyTo)
 
+    } // end initMap
+
+    const controller = new AbortController()
+    initMap()
+
     return () => {
-      map.remove()
-      mapRef.current = null
-      setMapInstance(null)
-      setFlyToMarker(null)
-      setMapReady(false)
+      controller.abort()
+      if (mapRef.current) {
+        mapRef.current.remove()
+        mapRef.current = null
+        setMapInstance(null)
+        setFlyToMarker(null)
+        setMapReady(false)
+      }
     }
   }, [])
 

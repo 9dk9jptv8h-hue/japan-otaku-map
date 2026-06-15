@@ -77,3 +77,10 @@ export const MAPTILER_PROXY = {
   styleUrl: 'http://127.0.0.1:15723/style.json?style=streets-v2',
   attribution: '&copy; <a href="https://www.maptiler.com/">MapTiler</a> &copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>',
 }
+
+// Prefetch default style JSON at module load time
+const defaultStyleUrl = TILE_STYLES.standard.url
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const stylePreloadPromise: Promise<any> = fetch(defaultStyleUrl)
+  .then(r => r.json())
+  .catch(() => null)

@@ -8,3 +8,8 @@ createRoot(document.getElementById('root')!).render(
     <App />
   </StrictMode>,
 )
+
+// Register tile cache service worker
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/japan-otaku-map/sw.js').catch(() => {})
+}
