@@ -80,7 +80,8 @@ function WelcomeScreen({ exiting }: { exiting: boolean }) {
     <div
       className="fixed inset-0 z-[9999] flex items-center justify-center overflow-hidden"
       style={{
-        animation: exiting ? 'loaderExit 0.45s ease-in forwards' : 'inkBloom 0.8s ease-out forwards',
+        background: '#f7f3ee',
+        animation: exiting ? 'loaderExit 0.45s ease-in forwards' : undefined,
       }}
     >
       {/* —— 水墨背景层 —— */}
