@@ -7,6 +7,15 @@
 
 ---
 
+## [1.0.3] - 2026-06-15
+
+### Added（新增）
+
+- **GitHub Pages 自动部署** — 每次push到master自动构建发布，无需本地跑服务器即可访问
+- 访问地址: https://9dk9jptv8h-hue.github.io/japan-otaku-map/
+
+---
+
 ## [1.0.2] - 2026-06-15
 
 ### Fixed（修复）
@@ -89,6 +98,8 @@
 
 ---
 
+[1.0.3]: https://github.com/9dk9jptv8h-hue/japan-otaku-map/compare/v1.0.2...v1.0.3
+[1.0.2]: https://github.com/9dk9jptv8h-hue/japan-otaku-map/compare/v1.0.1...v1.0.2
 [1.0.1]: https://github.com/9dk9jptv8h-hue/japan-otaku-map/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/9dk9jptv8h-hue/japan-otaku-map/compare/v0.1.1...v1.0.0
 [0.1.1]: https://github.com/9dk9jptv8h-hue/japan-otaku-map/compare/v0.1.0...v0.1.1
