@@ -85,7 +85,6 @@ export function MobileLayout({ locations }: MobileLayoutProps) {
             <Menu className="h-5 w-5 text-[var(--color-text-dim)]" />
           </button>
           <div className="flex-1 glass rounded-xl shadow-soft border border-[var(--color-border)] pointer-events-auto">
-          )}>
             <SearchBar />
           </div>
         </div>
