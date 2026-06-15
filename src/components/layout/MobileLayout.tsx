@@ -123,7 +123,7 @@ export function MobileLayout({ locations }: MobileLayoutProps) {
         <div className="header-gradient shrink-0 px-4 pt-4 pb-3 text-white flex items-center justify-between">
           <div>
             <h1 className="text-lg font-bold">🗾 日本旅游地图</h1>
-            <p className="text-xs text-white/70 mt-0.5">Animate · Melonbooks · Mandarake · Suruga-ya</p>
+            <p className="text-xs text-white/70 mt-0.5">7大连锁 — 全国地点一览</p>
             <span className="inline-flex items-center gap-1 rounded-full bg-white/20 px-2 py-0.5 text-xs mt-2">
               📍 {locations.length} 地点
             </span>

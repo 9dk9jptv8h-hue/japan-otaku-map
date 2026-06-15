@@ -9,7 +9,7 @@ import { AppShell } from '@/components/layout/AppShell'
    ================================================================ */
 
 const TITLE_CHARS = '日本旅游地图'.split('')
-const SUBTITLE = '日本旅游 — 全国店铺地图'
+const SUBTITLE = '日本旅游 — 7大连锁动漫店铺地图'
 
 interface StampData {
   label: string

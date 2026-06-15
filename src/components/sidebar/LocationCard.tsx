@@ -8,6 +8,9 @@ const CATEGORY_COLORS: Record<string, string> = {
   melonbooks: '#4caf50',
   mandarake: '#ff9800',
   surugaya: '#1565c0',
+  gamers: '#fbc02d',
+  lashinbang: '#7b1fa2',
+  kbooks: '#b71c1c',
 }
 
 const CATEGORY_GRADIENTS: Record<string, string> = {
@@ -15,6 +18,9 @@ const CATEGORY_GRADIENTS: Record<string, string> = {
   melonbooks: 'linear-gradient(135deg, #e8f5e9, #f1f8e9)',
   mandarake: 'linear-gradient(135deg, #fff3e0, #fff8e1)',
   surugaya: 'linear-gradient(135deg, #e3f2fd, #e8eaf6)',
+  gamers: 'linear-gradient(135deg, #fff9c4, #fff176)',
+  lashinbang: 'linear-gradient(135deg, #f3e5f5, #e1bee7)',
+  kbooks: 'linear-gradient(135deg, #ffebee, #ffcdd2)',
 }
 
 function getAccent(category: string): string {

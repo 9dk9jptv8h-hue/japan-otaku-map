@@ -151,6 +151,9 @@ function MarkersLayerInner({ locations }: MarkersLayerProps) {
             'melonbooks', '#4caf50',
             'mandarake', '#ff9800',
             'surugaya', '#1565c0',
+            'gamers', '#fbc02d',
+            'lashinbang', '#7b1fa2',
+            'kbooks', '#b71c1c',
             '#607d8b', // 默认灰色
           ],
           'circle-stroke-color': '#ffffff',

@@ -20,7 +20,7 @@ export const useFilterStore = create<FilterStore>((set) => ({
   searchQuery: '',
   setSearchQuery: (q) => set({ searchQuery: q }),
 
-  selectedCategories: ['animate', 'melonbooks', 'mandarake', 'surugaya'],
+  selectedCategories: ['animate', 'melonbooks', 'mandarake', 'surugaya', 'gamers', 'lashinbang', 'kbooks'],
   toggleCategory: (cat) =>
     set((s) => ({
       selectedCategories: s.selectedCategories.includes(cat)

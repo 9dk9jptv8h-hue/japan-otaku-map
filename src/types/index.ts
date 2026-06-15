@@ -18,7 +18,7 @@ export interface LocationData {
 }
 
 // 四大分类
-export type LocationCategory = 'animate' | 'melonbooks' | 'mandarake' | 'surugaya'
+export type LocationCategory = 'animate' | 'melonbooks' | 'mandarake' | 'surugaya' | 'gamers' | 'lashinbang' | 'kbooks'
 
 // 分类元信息
 export interface CategoryMeta {
