@@ -49,7 +49,7 @@
     --sidebar-width: 380px;
     --sidebar-tablet-width: 280px;
     --mobile-drawer-height: 60vh;
-    --font-sans: 'Noto Sans SC', 'Hiragino Sans GB', system-ui, -apple-system, sans-serif;
+    --font-sans: 'Microsoft YaHei', 'PingFang SC', 'Hiragino Sans GB', system-ui, -apple-system, sans-serif;
 
     /* 统一圆角系统 */
     --radius-xs: 4px;
