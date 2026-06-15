@@ -1,6 +1,5 @@
 import { useEffect, useState, useMemo } from 'react'
 import { mockLocations } from '@/constants/mockData'
-import { useUIStore } from '@/store/useUIStore'
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
 import { AppShell } from '@/components/layout/AppShell'
 
@@ -247,7 +246,6 @@ function WelcomeScreen({ exiting }: { exiting: boolean }) {
    ================================================================ */
 
 export default function App() {
-  const theme = useUIStore((s) => s.theme)
   const [loading, setLoading] = useState(true)
   const [exiting, setExiting] = useState(false)
   const [isMobile] = useState(() => window.innerWidth < 768)
@@ -256,14 +254,7 @@ export default function App() {
   const exitTime = isMobile ? 2800 : 3200
 
   useEffect(() => {
-    document.documentElement.dataset.theme = theme
-
-    // 主题适配 Welcome 背景色
-    const isDark = theme === 'dark'
-    document.documentElement.style.setProperty(
-      '--welcome-bg',
-      isDark ? '#0d0d1a' : '#f7f3ee',
-    )
+    document.documentElement.style.setProperty('--welcome-bg', '#f7f3ee')
 
     // 开始退出动画 → 完全过渡
     const show = setTimeout(() => setExiting(true), loadingTime)
@@ -273,7 +264,7 @@ export default function App() {
       clearTimeout(hide)
       document.documentElement.style.removeProperty('--welcome-bg')
     }
-  }, [theme, loadingTime, exitTime])
+  }, [loadingTime, exitTime])
 
   if (loading) {
     return <WelcomeScreen exiting={exiting} />

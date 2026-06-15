@@ -44,9 +44,6 @@ export interface FilterState {
 // 排序选项
 export type SortOption = 'name' | 'rating' | 'recent' | 'visits'
 
-// 主题
-export type ThemeMode = 'light' | 'dark'
-
 // 瓦片图层
 export type TileLayerStyle = 'standard' | 'light' | 'dark' | 'terrain'
 

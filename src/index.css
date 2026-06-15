@@ -84,34 +84,6 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
-  [data-theme="dark"] {
-    --color-bg: #0d0d1a;
-    --color-surface: #1a1a2e;
-    --color-text: #e8e8f0;
-    --color-text-dim: #9090b0;
-    --color-border: rgba(255, 255, 255, 0.06);
-    --color-glass: rgba(20, 20, 40, 0.88);
-
-    --accent-light: #3d1e2e;
-    --blue-light: #1a2435;
-    --amber-light: #352a18;
-    --purple-light: #281e2d;
-
-    --sidebar-bg: linear-gradient(180deg, #1a1020 0%, #101828 30%, #0d2025 60%, #1a1028 100%);
-    --sidebar-header-bg: linear-gradient(135deg, #901840, #6a2080, #184890);
-
-    --welcome-bg: #0d0d1a;
-    --color-washi: #1a1a2e;
-
-    --shadow-xs: 0 1px 3px rgba(0, 0, 0, 0.2);
-    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
-    --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.35);
-    --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.45);
-    --shadow-xl: 0 12px 56px rgba(0, 0, 0, 0.55);
-
-    color-scheme: dark;
-  }
-
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   body {
@@ -446,13 +418,6 @@ aside {
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(0, 0, 0, 0.2);
 }
-[data-theme="dark"] ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.12);
-}
-[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.2);
-}
-
 /* Firefox scrollbar */
 * {
   scrollbar-width: thin;
@@ -544,15 +509,6 @@ aside {
   animation: gleamSlide 0.7s var(--ease-smooth) forwards;
 }
 
-[data-theme="dark"] .location-card::after {
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.06) 50%,
-    transparent 100%
-  );
-}
-
 /* 骨架屏闪烁 */
 .skeleton-shimmer {
   background: linear-gradient(
@@ -564,16 +520,6 @@ aside {
   background-size: 200% 100%;
   animation: skeletonShimmer 1.8s ease-in-out infinite;
 }
-[data-theme="dark"] .skeleton-shimmer {
-  background: linear-gradient(
-    90deg,
-    rgba(255, 255, 255, 0.03) 0%,
-    rgba(255, 255, 255, 0.06) 40%,
-    rgba(255, 255, 255, 0.03) 80%
-  );
-  background-size: 200% 100%;
-}
-
 /* ================================================================
    Mobile Safe Area & Touch Optimization
    ================================================================ */
@@ -620,10 +566,6 @@ aside {
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(30px);
     -webkit-backdrop-filter: blur(30px);
-  }
-
-  [data-theme="dark"] .glass-strong {
-    background: rgba(20, 20, 40, 0.95);
   }
 
   .shadow-soft {
@@ -698,20 +640,12 @@ aside {
     --color-glass-blur: blur(12px);
     --color-glass: rgba(255, 255, 255, 0.92);
   }
-  [data-theme="dark"] {
-    --color-glass: rgba(20, 20, 40, 0.95);
-  }
-
   /* Glass-strong — reduce 30px -> 6px, near-opaque background */
   .glass-strong {
     backdrop-filter: blur(6px) !important;
     -webkit-backdrop-filter: blur(6px) !important;
     background: rgba(255, 255, 255, 0.97) !important;
   }
-  [data-theme="dark"] .glass-strong {
-    background: rgba(20, 20, 40, 0.97) !important;
-  }
-
   /* Popup close button — remove blur entirely, use solid bg */
   .maplibregl-popup-close-button {
     backdrop-filter: none !important;
@@ -733,12 +667,6 @@ aside {
     --shadow-glow-accent: 0 0 8px rgba(233, 30, 99, 0.18);
     --shadow-glow-blue: 0 0 8px rgba(33, 150, 243, 0.18);
     --shadow-glow-gold: 0 0 8px rgba(255, 152, 0, 0.18);
-  }
-
-  [data-theme="dark"] {
-    --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.40);
-    --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.45);
-    --shadow-xl: 0 4px 20px rgba(0, 0, 0, 0.50);
   }
 
   /* Marker dot — single-layer lightweight shadow */

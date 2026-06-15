@@ -8,7 +8,6 @@ import { FilterPanel } from './FilterPanel'
 import { SortControl } from './SortControl'
 import { CardList } from './CardList'
 import { SidebarToggle } from './SidebarToggle'
-import { ThemeToggle } from '../ui/ThemeToggle'
 import { cn } from '@/utils/cn'
 
 interface SidebarProps {
@@ -109,7 +108,6 @@ export function Sidebar({ locations, className }: SidebarProps) {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <ThemeToggle className="static h-9 w-9 z-auto" />
               <SidebarToggle collapsed={false} onClick={toggleSidebar} className="relative top-0 !border-white/20 !text-white" />
             </div>
           </div>

@@ -15,20 +15,12 @@ const CATEGORY_GRADIENTS: Record<string, string> = {
   mandarake: 'linear-gradient(135deg, #fff3e0, #fff8e1)',
 }
 
-const CATEGORY_DARK_GRADIENTS: Record<string, string> = {
-  animate: 'linear-gradient(135deg, #2d1520, #1a1020)',
-  melonbooks: 'linear-gradient(135deg, #152518, #101a10)',
-  mandarake: 'linear-gradient(135deg, #251a10, #1a1410)',
-}
-
 function getAccent(category: string): string {
   return CATEGORY_COLORS[category] || '#607d8b'
 }
 
-function getGradient(category: string, isDark: boolean): string {
-  return isDark
-    ? (CATEGORY_DARK_GRADIENTS[category] || CATEGORY_DARK_GRADIENTS.animate)
-    : (CATEGORY_GRADIENTS[category] || CATEGORY_GRADIENTS.animate)
+function getGradient(category: string): string {
+  return CATEGORY_GRADIENTS[category] || CATEGORY_GRADIENTS.animate
 }
 
 interface LocationCardProps {
@@ -44,8 +36,7 @@ export const LocationCard = memo(function LocationCard({ location }: LocationCar
   const flyToMarker = useMapStore((s) => s.flyToMarker)
 
   const accent = getAccent(location.category)
-  const isDark = typeof document !== 'undefined' && document.documentElement.dataset.theme === 'dark'
-  const gradient = getGradient(location.category, isDark)
+  const gradient = getGradient(location.category)
 
   useEffect(() => {
     if (isSelected && cardRef.current) {
