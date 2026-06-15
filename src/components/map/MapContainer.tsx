@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { useEffect, useRef, type ReactNode } from 'react'
 import maplibregl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { useMapStore } from '@/store/useMapStore'
@@ -6,38 +6,6 @@ import { DEFAULT_VIEWPORT, MIN_ZOOM, MAX_ZOOM, JAPAN_BOUNDS, TILE_STYLES } from 
 
 interface MapViewProps {
   children?: ReactNode
-}
-
-// 构建 MapLibre raster 样式对象 — 替代矢量瓦片 style JSON URL
-function buildRasterStyle(config: { url: string; attribution: string }) {
-  return {
-    version: 8 as const,
-    sources: {
-      'carto-tiles': {
-        type: 'raster' as const,
-        tiles: [
-          config.url.replace('{s}', 'a'),
-          config.url.replace('{s}', 'b'),
-          config.url.replace('{s}', 'c'),
-          config.url.replace('{s}', 'd'),
-        ],
-        tileSize: 512,
-        attribution: config.attribution,
-        maxzoom: 19,
-      },
-    },
-    // MarkersLayer 的 location-labels symbol 图层需要字体渲染
-    glyphs: 'https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf',
-    layers: [
-      {
-        id: 'carto-layer',
-        type: 'raster' as const,
-        source: 'carto-tiles',
-        minzoom: 0,
-        maxzoom: 22,
-      },
-    ],
-  }
 }
 
 export function MapView({ children }: MapViewProps) {
@@ -52,9 +20,6 @@ export function MapView({ children }: MapViewProps) {
   const tileLayer = useMapStore((s) => s.tileLayer)
   const setSelectedMarkerId = useMapStore((s) => s.setSelectedMarkerId)
 
-  // 瓦片加载状态
-  const [tilesLoading, setTilesLoading] = useState(false)
-
   // 初始化地图
   useEffect(() => {
     if (!mapContainer.current || mapRef.current) return
@@ -66,7 +31,7 @@ export function MapView({ children }: MapViewProps) {
 
     const map = new maplibregl.Map({
       container: mapContainer.current,
-      style: buildRasterStyle(styleConfig),
+      style: styleConfig.url,
       center: [DEFAULT_VIEWPORT.center[1], DEFAULT_VIEWPORT.center[0]],
       zoom: DEFAULT_VIEWPORT.zoom,
       minZoom: MIN_ZOOM,
@@ -99,14 +64,6 @@ export function MapView({ children }: MapViewProps) {
       'bottom-right'
     )
 
-    // 瓦片加载状态追踪
-    map.on('dataloading', (e: maplibregl.MapDataEvent) => {
-      if (e.dataType === 'source') setTilesLoading(true)
-    })
-    map.on('idle', () => {
-      setTilesLoading(false)
-    })
-
     map.on('load', () => {
       mapRef.current = map
       setMapInstance(map)
@@ -114,7 +71,21 @@ export function MapView({ children }: MapViewProps) {
       initialized.current = true
     })
 
-    // Raster 瓦片自带标签渲染，无需矢量瓦片的中文标签替换逻辑
+    // 矢量瓦片中文标签替换 — name:zh 优先
+    map.on('style.load', () => {
+      const style = map.getStyle()
+      if (!style?.layers) return
+      for (const layer of style.layers) {
+        if (layer.type === 'symbol' && layer.layout?.['text-field']) {
+          const textField = layer.layout['text-field']
+          if (typeof textField === 'string' && /\{name\b/.test(textField)) {
+            map.setLayoutProperty(layer.id, 'text-field',
+              ['coalesce', ['get', 'name:zh'], ['get', 'name']]
+            )
+          }
+        }
+      }
+    })
 
     // moveend：同步边界到 store
     map.on('moveend', () => {
@@ -157,20 +128,14 @@ export function MapView({ children }: MapViewProps) {
     }
   }, [])
 
-  // 图层切换 — raster style 即时替换
+  // 图层切换 — 矢量瓦片 style URL 直接替换
   useEffect(() => {
     if (!mapRef.current || !initialized.current) return
-    const styleConfig = TILE_STYLES[tileLayer]
-    mapRef.current.setStyle(buildRasterStyle(styleConfig))
+    mapRef.current.setStyle(TILE_STYLES[tileLayer].url)
   }, [tileLayer])
 
   return (
     <div ref={mapContainer} className="h-full w-full">
-      {tilesLoading && (
-        <div className="absolute top-16 left-1/2 -translate-x-1/2 z-50 bg-white/80 rounded-full px-3 py-1 text-xs text-gray-500 shadow-sm pointer-events-none">
-          加载中...
-        </div>
-      )}
       {children}
     </div>
   )

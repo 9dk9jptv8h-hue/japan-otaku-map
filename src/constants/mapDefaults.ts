@@ -17,12 +17,9 @@ export const JAPAN_BOUNDS: [[number, number], [number, number]] = [
 ]
 
 // ================================================================
-// 瓦片源：CartoDB Raster Tiles
+// 瓦片源：OpenFreeMap 矢量瓦片
 //
-// Fastly CDN 全球加速（亚洲节点：香港/新加坡/东京），国内延迟低
-// 浏览器只需渲染 PNG 图片，零 protobuf 解码 + 零 WebGL 矢量开销
-// 每张瓦片 ~20-40KB，比矢量瓦片轻量
-// {s} = 子域 (a/b/c/d) 并行下载，{z}/{x}/{y} = 标准瓦片坐标
+// 矢量瓦片缩放无模糊，支持中文标签自动检测（name:zh 优先）
 // ================================================================
 
 export const TILE_STYLES: Record<TileLayerStyle, {
@@ -30,19 +27,19 @@ export const TILE_STYLES: Record<TileLayerStyle, {
   attribution: string
 }> = {
   light: {
-    url: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png',
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>',
+    url: 'https://tiles.openfreemap.org/styles/positron',
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> contributors',
   },
   standard: {
-    url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}@2x.png',
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>',
+    url: 'https://tiles.openfreemap.org/styles/liberty',
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> contributors',
   },
   dark: {
-    url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png',
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>',
+    url: 'https://tiles.openfreemap.org/styles/dark',
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> contributors',
   },
   terrain: {
-    url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}@2x.png',
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>',
+    url: 'https://tiles.openfreemap.org/styles/positron',
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> contributors',
   },
 }

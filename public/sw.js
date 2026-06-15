@@ -1,10 +1,5 @@
 const TILE_CACHE = 'map-tiles-v3'
-const TILE_HOSTS = [
-  'a.basemaps.cartocdn.com',
-  'b.basemaps.cartocdn.com',
-  'c.basemaps.cartocdn.com',
-  'd.basemaps.cartocdn.com',
-]
+const TILE_HOSTS = ['tiles.openfreemap.org']
 
 self.addEventListener('install', () => self.skipWaiting())
 self.addEventListener('activate', (e) => {
@@ -22,7 +17,7 @@ self.addEventListener('activate', (e) => {
 self.addEventListener('fetch', (e) => {
   const url = new URL(e.request.url)
 
-  // Only cache tile requests from CartoDB hosts
+  // Only cache tile requests from OpenFreeMap
   if (!TILE_HOSTS.some(h => url.hostname === h)) return
 
   e.respondWith(
