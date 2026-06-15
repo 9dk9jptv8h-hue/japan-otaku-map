@@ -32,10 +32,11 @@ const CITY_DOTS = [
 ]
 
 function WelcomeScreen({ exiting }: { exiting: boolean }) {
-  const [count, setCount] = useState(0)
+  const [count, setCount] = useState(175)
 
-  /* 数字递增动画 — 0 → 175（用setInterval，headless也能跑） */
+  /* 数字递增动画 — 0 → 175 */
   useEffect(() => {
+    setCount(0)
     const target = 175
     let current = 0
     let intervalId: ReturnType<typeof setInterval>
@@ -51,6 +52,9 @@ function WelcomeScreen({ exiting }: { exiting: boolean }) {
     }, 400)
     return () => {
       clearTimeout(timer)
+      if (intervalId) clearInterval(intervalId)
+    }
+  }, [])
       if (intervalId) clearInterval(intervalId)
     }
   }, [])
