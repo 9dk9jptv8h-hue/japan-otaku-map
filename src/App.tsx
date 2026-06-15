@@ -67,7 +67,7 @@ function WelcomeScreen({ exiting }: { exiting: boolean }) {
       className="fixed inset-0 z-[9999] flex items-center justify-center overflow-hidden"
       style={{
         background: 'linear-gradient(135deg, #0a1628 0%, #1a0a2e 50%, #2e0a1a 100%)',
-        animation: exiting ? 'welcomeExit 0.6s ease-in forwards' : 'overlayFadeIn 0.6s ease-out',
+        animation: exiting ? 'welcomeExit 0.6s ease-in forwards' : undefined,
       }}
     >
       {/* —— 粒子层 —— */}
@@ -210,7 +210,10 @@ export default function App() {
     // 延迟500ms再加载地图，让欢迎动画先跑顺
     const mapTimer = setTimeout(() => setMapReady(true), 500)
     const show = setTimeout(() => setExiting(true), loadingTime)
-    const hide = setTimeout(() => setLoading(false), exitTime)
+    const hide = setTimeout(() => {
+      setLoading(false)
+      document.body.style.background = ''  // 清除inline暗色背景，恢复CSS控制
+    }, exitTime)
     return () => {
       clearTimeout(mapTimer)
       clearTimeout(show)
