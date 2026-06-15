@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react'
+import { useEffect, useState, useMemo, useRef } from 'react'
 import { mockLocations } from '@/constants/mockData'
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
 import { AppShell } from '@/components/layout/AppShell'
@@ -33,6 +33,7 @@ const CITY_DOTS = [
 
 function WelcomeScreen({ exiting }: { exiting: boolean }) {
   const [count, setCount] = useState(0)
+  const rafRef = useRef(0)
 
   /* 数字递增动画 — 0 → 175 */
   useEffect(() => {
@@ -42,10 +43,13 @@ function WelcomeScreen({ exiting }: { exiting: boolean }) {
     const tick = (now: number) => {
       const progress = Math.min((now - start) / duration, 1)
       setCount(Math.floor(progress * target))
-      if (progress < 1) requestAnimationFrame(tick)
+      if (progress < 1) rafRef.current = requestAnimationFrame(tick)
     }
-    const timer = setTimeout(() => requestAnimationFrame(tick), 800)
-    return () => clearTimeout(timer)
+    const timer = setTimeout(() => { rafRef.current = requestAnimationFrame(tick) }, 800)
+    return () => {
+      clearTimeout(timer)
+      cancelAnimationFrame(rafRef.current)
+    }
   }, [])
 
   /* 背景粒子 — 40个彩色光点 */

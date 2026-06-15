@@ -45,7 +45,7 @@ export interface FilterState {
 export type SortOption = 'name' | 'rating' | 'recent' | 'visits'
 
 // 瓦片图层
-export type TileLayerStyle = 'standard' | 'light' | 'dark' | 'terrain'
+export type TileLayerStyle = 'standard' | 'light' | 'dark'
 
 // 地图边界
 export interface MapBounds {

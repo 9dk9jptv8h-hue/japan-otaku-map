@@ -100,9 +100,9 @@ npm run preview
 ```
 src/
 ├── components/
-│   ├── layout/          # AppShell、桌面/移动端布局
-│   ├── map/             # MapContainer、MarkersLayer、TileLayerSwitch、MapControls
-│   ├── sidebar/         # FilterPanel、SearchBar、CardList、LocationCard、SortControl
+│   ├── layout/          # AppShell、DesktopLayout、MobileLayout
+│   ├── map/             # MapContainer、MarkersLayer、MapControls
+│   ├── sidebar/         # Sidebar、FilterPanel、SearchBar、CardList、LocationCard、SortControl、SidebarToggle
 │   └── ui/              # Badge、EmptyState、ErrorBoundary、Input
 ├── constants/
 │   ├── mockData.ts      # 175+ 个地点数据

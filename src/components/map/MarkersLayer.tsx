@@ -286,7 +286,7 @@ function renderPopupHTML(props: Record<string, unknown>): string {
   const visitHtml =
     visitCount != null && visitCount > 0
       ? `<span style="font-size:11px;font-weight:600;color:var(--color-text, #1a1a2e);opacity:0.7;flex-shrink:0;">
-          🔥 ${(visitCount / 10000).toFixed(1)}万
+          🔥 ${visitCount >= 1000 ? `${(visitCount / 10000).toFixed(1)}万` : visitCount}
         </span>`
       : ''
 

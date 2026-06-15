@@ -133,14 +133,6 @@
   100% { transform: scale(1);   opacity: 0; }
 }
 
-/* 侧边栏弹簧滑入 */
-@keyframes sidebarSpring {
-  0%   { transform: translateX(-100%); }
-  60%  { transform: translateX(4px); }
-  80%  { transform: translateX(-2px); }
-  100% { transform: translateX(0); }
-}
-
 /* 侧边栏卡片交错入场 */
 @keyframes cardSlideIn {
   from { opacity: 0; transform: translateY(8px); }
@@ -151,19 +143,6 @@
 @keyframes popIn {
   from { opacity: 0; transform: scale(0.85) translateY(12px); }
   to   { opacity: 1; transform: scale(1) translateY(0); }
-}
-
-/* 加载页退出 */
-@keyframes loaderExit {
-  0%   { opacity: 1; transform: scale(1); }
-  100% { opacity: 0; transform: scale(1.03); pointer-events: none; }
-}
-
-/* 渐变背景流动 */
-@keyframes bgShift {
-  0%   { background-position: 0% 50%; }
-  50%  { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
 }
 
 /* 头部渐变流动 */
@@ -183,12 +162,6 @@
 @keyframes skeletonShimmer {
   0%   { background-position: -200% 0; }
   100% { background-position: 200% 0; }
-}
-
-/* 底部安全区域弹入（移动端抽屉） */
-@keyframes drawerSlideUp {
-  from { transform: translateY(100%); }
-  to   { transform: translateY(0); }
 }
 
 /* 遮罩淡入 */

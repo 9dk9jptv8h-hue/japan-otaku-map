@@ -86,7 +86,7 @@ To add a new shop location, edit `src/constants/mockData.ts`:
   name: 'animate〇〇',                 // 中文名称
   nameJa: 'アニメイト〇〇',           // 日文名称
   description: '...',                 // Short description
-  category: 'animate',                // animate | melonbooks | mandarake | surugaya
+  category: 'animate',                // animate | melonbooks | mandarake | surugaya | gamers | lashinbang | kbooks
   latitude: 35.000,                   // Decimal degrees
   longitude: 139.000,                 // Decimal degrees
   imageUrl: IMG,                      // Use IMG constant

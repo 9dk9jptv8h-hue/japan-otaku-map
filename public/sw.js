@@ -31,17 +31,19 @@ self.addEventListener('fetch', (e) => {
 
   e.respondWith(
     caches.open(TILE_CACHE).then(cache =>
-      cache.match(e.request).then(cached =>
-        fetch(e.request)
-          .then(response => {
-            if (response.ok) {
-              cache.put(e.request, response.clone())
-              trimCache(cache)
-            }
-            return response
-          })
-          .catch(() => cached || new Response('', { status: 503, statusText: 'Service Unavailable' }))
-      )
+      cache.match(e.request).then(cached => {
+        // Background update regardless
+        const fetchPromise = fetch(e.request).then(response => {
+          if (response.ok) {
+            cache.put(e.request, response.clone())
+            trimCache(cache)
+          }
+          return response
+        }).catch(() => null)
+
+        // Return cache immediately if available, otherwise wait for network
+        return cached || fetchPromise
+      })
     )
   )
 })

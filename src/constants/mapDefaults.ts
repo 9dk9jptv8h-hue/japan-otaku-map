@@ -8,8 +8,6 @@ export const DEFAULT_VIEWPORT: ViewportState = {
 
 export const MIN_ZOOM = 4
 export const MAX_ZOOM = 22
-export const FLY_DURATION = 1200
-
 // 日本 bounding box [west, south, east, north] — MapLibre 格式
 export const JAPAN_BOUNDS: [[number, number], [number, number]] = [
   [118.0, 20.0],
@@ -36,10 +34,6 @@ export const TILE_STYLES: Record<TileLayerStyle, {
   },
   dark: {
     url: 'https://tiles.openfreemap.org/styles/dark',
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> contributors',
-  },
-  terrain: {
-    url: 'https://tiles.openfreemap.org/styles/liberty',
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> contributors',
   },
 }
