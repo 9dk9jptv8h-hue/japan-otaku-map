@@ -67,7 +67,7 @@ function WelcomeScreen({ exiting }: { exiting: boolean }) {
       className="fixed inset-0 z-[9999] flex items-center justify-center overflow-hidden"
       style={{
         background: 'linear-gradient(135deg, #0a1628 0%, #1a0a2e 50%, #2e0a1a 100%)',
-        animation: exiting ? 'welcomeExit 0.6s ease-in forwards' : undefined,
+        animation: exiting ? 'welcomeExit 0.6s ease-in forwards' : 'overlayFadeIn 0.6s ease-out',
       }}
     >
       {/* —— 粒子层 —— */}
