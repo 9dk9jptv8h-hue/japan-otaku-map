@@ -38,14 +38,18 @@ function WelcomeScreen({ exiting }: { exiting: boolean }) {
   /* 数字递增动画 — 0 → 175 */
   useEffect(() => {
     const target = 175
-    const duration = 1500
-    const start = performance.now()
-    const tick = (now: number) => {
-      const progress = Math.min((now - start) / duration, 1)
-      setCount(Math.floor(progress * target))
-      if (progress < 1) rafRef.current = requestAnimationFrame(tick)
-    }
-    const timer = setTimeout(() => { rafRef.current = requestAnimationFrame(tick) }, 800)
+    const duration = 1200
+    const timer = setTimeout(() => {
+      const start = performance.now()
+      const tick = (now: number) => {
+        const progress = Math.min((now - start) / duration, 1)
+        setCount(Math.floor(progress * target))
+        if (progress < 1) {
+          rafRef.current = requestAnimationFrame(tick)
+        }
+      }
+      rafRef.current = requestAnimationFrame(tick)
+    }, 400)
     return () => {
       clearTimeout(timer)
       cancelAnimationFrame(rafRef.current)
