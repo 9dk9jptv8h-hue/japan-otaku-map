@@ -49,5 +49,19 @@
       "offers": { "@type": "Offer", "price": "0" }
     }
     </script>
+
+    <!-- 百度自动推送：每次有人访问就自动通知百度收录 -->
+    <script>
+    (function(){
+        var bp = document.createElement('script');
+        if (window.location.protocol === 'https:') {
+            bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+        } else {
+            bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+        }
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(bp, s);
+    })();
+    </script>
   </body>
 </html>
