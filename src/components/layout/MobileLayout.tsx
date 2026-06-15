@@ -8,10 +8,9 @@ import { SortControl } from '@/components/sidebar/SortControl'
 import { CardList } from '@/components/sidebar/CardList'
 import { useUIStore } from '@/store/useUIStore'
 import { useFilterStore } from '@/store/useFilterStore'
-import { useDebounce } from '@/hooks/useDebounce'
+import { useFilteredLocations } from '@/hooks/useFilteredLocations'
 import { Menu, X } from 'lucide-react'
 import { cn } from '@/utils/cn'
-import { useMemo } from 'react'
 
 interface MobileLayoutProps {
   locations: LocationData[]
@@ -19,59 +18,14 @@ interface MobileLayoutProps {
 
 export function MobileLayout({ locations }: MobileLayoutProps) {
   const { sidebarOpen, setSidebarOpen } = useUIStore()
-  const { searchQuery, selectedCategories, sortBy, selectedRegion, setSelectedRegion } = useFilterStore()
-  const debouncedSearch = useDebounce(searchQuery, 300)
-
-  // 地区提取
-  const regions = useMemo(() => {
-    const set = new Set<string>()
-    locations.forEach(loc => {
-      const match = loc.address?.match(/^(京都府|大阪府|北海道|.{1,3}?[都道府県])/)
-      if (match) set.add(match[1])
-    })
-    return Array.from(set).sort()
-  }, [locations])
-
-  const filtered = useMemo(() => {
-    let result = [...locations]
-    if (debouncedSearch.trim()) {
-      const q = debouncedSearch.toLowerCase()
-      result = result.filter(
-        (loc) =>
-          loc.name.toLowerCase().includes(q) ||
-          loc.nameJa?.toLowerCase().includes(q) ||
-          loc.description.toLowerCase().includes(q) ||
-          loc.tags.some((t) => t.toLowerCase().includes(q))
-      )
-    }
-    if (selectedCategories.length > 0) {
-      result = result.filter((loc) => selectedCategories.includes(loc.category))
-    }
-    if (selectedRegion) {
-      result = result.filter(loc => loc.address?.startsWith(selectedRegion))
-    }
-    switch (sortBy) {
-      case 'rating':
-        result.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0))
-        break
-      case 'visits':
-        result.sort((a, b) => (b.visitCount ?? 0) - (a.visitCount ?? 0))
-        break
-      case 'recent':
-        result.sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
-        break
-      case 'name':
-        result.sort((a, b) => a.name.localeCompare(b.name, 'zh'))
-        break
-    }
-    return result
-  }, [locations, debouncedSearch, selectedCategories, sortBy, selectedRegion])
+  const { selectedRegion, setSelectedRegion } = useFilterStore()
+  const { filteredLocations, regionList } = useFilteredLocations()
 
   return (
     <div className="relative h-full w-full" style={{ touchAction: 'pan-x pan-y pinch-zoom' }}>
       {/* 地图全屏 */}
       <MapView>
-        <MarkersLayer locations={filtered} />
+        <MarkersLayer locations={filteredLocations} />
       </MapView>
 
       {/* 地图控件 */}
@@ -145,7 +99,7 @@ export function MobileLayout({ locations }: MobileLayoutProps) {
         </div>
 
         {/* 地区筛选 — 横向滚动 chips */}
-        {regions.length > 1 && (
+        {regionList.length > 1 && (
           <div className="shrink-0 px-3 py-3 border-b border-[var(--color-border)]">
             <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-0.5">
               <button
@@ -162,7 +116,7 @@ export function MobileLayout({ locations }: MobileLayoutProps) {
               >
                 全部
               </button>
-              {regions.map(region => (
+              {regionList.map(region => (
                 <button
                   key={region}
                   onClick={() => setSelectedRegion(region === selectedRegion ? null : region)}
@@ -185,7 +139,7 @@ export function MobileLayout({ locations }: MobileLayoutProps) {
 
         {/* 列表 */}
         <div className="flex-1 overflow-y-auto px-3 pt-2 pb-safe">
-          <CardList locations={filtered} total={locations.length} />
+          <CardList locations={filteredLocations} total={locations.length} />
         </div>
       </div>
     </div>

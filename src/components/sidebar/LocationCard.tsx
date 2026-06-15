@@ -1,17 +1,13 @@
 import { useRef, useEffect, memo } from 'react'
 import type { LocationData } from '@/types'
 import { useMapStore } from '@/store/useMapStore'
+import { CATEGORIES } from '@/constants/theme'
 import { cn } from '@/utils/cn'
 
-const CATEGORY_COLORS: Record<string, string> = {
-  animate: '#e91e63',
-  melonbooks: '#4caf50',
-  mandarake: '#ff9800',
-  surugaya: '#1565c0',
-  gamers: '#fbc02d',
-  lashinbang: '#7b1fa2',
-  kbooks: '#b71c1c',
-}
+// Issue 7: 从 theme.ts 的 CATEGORIES 派生颜色，不再硬编码
+const CATEGORY_COLORS: Record<string, string> = Object.fromEntries(
+  CATEGORIES.map(c => [c.key, c.color])
+)
 
 const CATEGORY_GRADIENTS: Record<string, string> = {
   animate: 'linear-gradient(135deg, #fce4ec, #fff5f5)',
@@ -109,7 +105,9 @@ export const LocationCard = memo(function LocationCard({ location }: LocationCar
           <span className="truncate">{location.address}</span>
           {location.visitCount != null && (
             <span className="shrink-0 font-semibold" style={{ color: accent }}>
-              🔥 {(location.visitCount / 10000).toFixed(1)}万
+              🔥 {location.visitCount < 1000
+                    ? location.visitCount
+                    : `${(location.visitCount / 10000).toFixed(1)}万`}
             </span>
           )}
         </div>
