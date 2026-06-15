@@ -95,23 +95,23 @@ export function MobileLayout({ locations }: MobileLayoutProps) {
       {/* 遮罩 — 点击关闭抽屉 */}
       <div
         className={cn(
-          'fixed inset-0 z-40 bg-black/40 backdrop-blur-sm transition-all duration-300',
+          'fixed inset-0 z-40 bg-black/40 transition-opacity duration-300',
           sidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
         )}
         onClick={() => setSidebarOpen(false)}
       />
 
-      {/* 左侧滑出抽屉 — GPU 加速 Transform 动画 */}
+      {/* 左侧滑出抽屉 — 弹簧动画 */}
       <div
         className={cn(
           'fixed top-0 left-0 bottom-0 z-50 w-[85vw] max-w-[360px]',
           'sidebar-gradient flex flex-col',
-          'gpu-layer',
-          'shadow-xl',
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+          'shadow-xl'
         )}
         style={{
-          transition: 'transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)',
+          transform: sidebarOpen ? 'translateX(0)' : 'translateX(-100%)',
+          transition: 'transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)',
+          willChange: 'transform',
           paddingTop: 'env(safe-area-inset-top, 0px)',
           paddingBottom: 'env(safe-area-inset-bottom, 0px)',
         }}
