@@ -11,13 +11,8 @@
 
 ### Fixed（修复）
 
-- **移除Google Fonts外部依赖** — `fonts.googleapis.com` 在国内被墙导致页面无法加载，改用系统本地字体（Microsoft YaHei / PingFang SC）
-- **AutoSec误拦白名单** — nino-pet目录下的Python脚本不再被行为链检测误判为"下载后执行攻击"
-
-### Changed（变更）
-
-- **守护升级v4** — 新增Windows定时任务（NinoGuardian），每60秒自动恢复settings.json完整配置（含hooks/thinking/URL/权限）
-- **字体栈优化** — `Noto Sans SC`(需CDN) → `Microsoft YaHei`(本地)，零网络依赖
+- **移除Google Fonts外部依赖** — `fonts.googleapis.com` 在国内被墙导致页面无法加载，改用系统本地字体
+- **字体栈优化** — `Noto Sans SC`(需CDN) → `Microsoft YaHei`(本地)，零网络依赖，不开VPN也能正常显示
 
 ---
 
