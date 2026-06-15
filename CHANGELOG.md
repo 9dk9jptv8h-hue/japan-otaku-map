@@ -15,6 +15,10 @@
 - 删除矢量瓦片中文标签替换逻辑（raster 瓦片自带标签）
 - 删除样式 JSON 预取（raster style 本地构建，零网络依赖）
 - Service Worker 缓存覆盖 CartoDB 全部子域（a/b/c/d），旧缓存自动清除
+- 启用 512px @2x retina 瓦片 — 同等视口 HTTP 请求数减少 75%，文字更锐利
+- MapLibre 渲染参数深度优化 — fadeDuration=0 瓦片直接显示、refreshExpiredTiles=false 缓存优先、桌面端瓦片内存缓存扩大至 200
+- 瓦片加载状态指示器 — 加载中显示轻量提示，idle 后自动消失
+- Service Worker 缓存升级至 v3 — 自动清除旧版 256px 瓦片缓存
 
 ---
 

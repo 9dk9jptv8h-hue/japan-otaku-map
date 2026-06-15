@@ -1,4 +1,4 @@
-import { useEffect, useRef, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import maplibregl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { useMapStore } from '@/store/useMapStore'
@@ -21,7 +21,7 @@ function buildRasterStyle(config: { url: string; attribution: string }) {
           config.url.replace('{s}', 'c'),
           config.url.replace('{s}', 'd'),
         ],
-        tileSize: 256,
+        tileSize: 512,
         attribution: config.attribution,
         maxzoom: 19,
       },
@@ -52,6 +52,9 @@ export function MapView({ children }: MapViewProps) {
   const tileLayer = useMapStore((s) => s.tileLayer)
   const setSelectedMarkerId = useMapStore((s) => s.setSelectedMarkerId)
 
+  // 瓦片加载状态
+  const [tilesLoading, setTilesLoading] = useState(false)
+
   // 初始化地图
   useEffect(() => {
     if (!mapContainer.current || mapRef.current) return
@@ -72,7 +75,8 @@ export function MapView({ children }: MapViewProps) {
       attributionControl: false,
       // 性能优化
       pixelRatio: isMobile ? 1 : window.devicePixelRatio,
-      fadeDuration: isMobile ? 0 : 300,
+      fadeDuration: 0,                    // 瓦片切换无淡入，直接显示
+      refreshExpiredTiles: false,         // 不刷新过期瓦片，缓存优先
       // CJK 文字本地渲染 — MarkersLayer 的 symbol 图层标签需要此配置
       localIdeographFontFamily: "'Noto Sans SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif",
       canvasContextAttributes: { antialias: false },
@@ -81,7 +85,9 @@ export function MapView({ children }: MapViewProps) {
       crossSourceCollisions: false,
       ...(isMobile ? {
         maxTileCacheSize: 50,
-      } : {}),
+      } : {
+        maxTileCacheSize: 200,
+      }),
     })
 
     // 添加地图归因（精简版）
@@ -92,6 +98,14 @@ export function MapView({ children }: MapViewProps) {
       }),
       'bottom-right'
     )
+
+    // 瓦片加载状态追踪
+    map.on('dataloading', (e: maplibregl.MapDataEvent) => {
+      if (e.dataType === 'source') setTilesLoading(true)
+    })
+    map.on('idle', () => {
+      setTilesLoading(false)
+    })
 
     map.on('load', () => {
       mapRef.current = map
@@ -152,6 +166,11 @@ export function MapView({ children }: MapViewProps) {
 
   return (
     <div ref={mapContainer} className="h-full w-full">
+      {tilesLoading && (
+        <div className="absolute top-16 left-1/2 -translate-x-1/2 z-50 bg-white/80 rounded-full px-3 py-1 text-xs text-gray-500 shadow-sm pointer-events-none">
+          加载中...
+        </div>
+      )}
       {children}
     </div>
   )

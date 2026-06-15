@@ -1,4 +1,4 @@
-const TILE_CACHE = 'map-tiles-v2'
+const TILE_CACHE = 'map-tiles-v3'
 const TILE_HOSTS = [
   'a.basemaps.cartocdn.com',
   'b.basemaps.cartocdn.com',
