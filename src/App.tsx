@@ -4,16 +4,15 @@ import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
 import { AppShell } from '@/components/layout/AppShell'
 
 /* ================================================================
-   Welcome Screen — 欢迎界面 — 日本旅游地图
-   Sakura • Sumi-e • Brand Dots
+   Welcome Screen — 欢迎界面 — 东京霓虹 × 日式美学
+   Neon • Particles • City Lights • CountUp
    ================================================================ */
 
 const TITLE_CHARS = '日本旅游地图'.split('')
-const SUBTITLE = '175+ 动漫店铺 · 7大连锁 · 全国覆盖'
 
 const BRANDS = [
   { name: 'Animate', color: '#e91e63' },
-  { name: 'Melonbooks', color: '#009688' },
+  { name: 'Melonbooks', color: '#4caf50' },
   { name: 'Mandarake', color: '#ff9800' },
   { name: 'Suruga-ya', color: '#1565c0' },
   { name: 'GAMERS', color: '#fbc02d' },
@@ -21,124 +20,118 @@ const BRANDS = [
   { name: 'K-Books', color: '#b71c1c' },
 ]
 
-interface PetalData {
-  id: number
-  left: string
-  delay: string
-  duration: string
-  size: number
-  sway: string
-  rotate: string
-  opacity: number
-}
-
-function generatePetals(count: number): PetalData[] {
-  return Array.from({ length: count }, (_, i) => ({
-    id: i,
-    left: `${((i / count) * 94 + Math.random() * 6) % 96}%`,
-    delay: `${Math.random() * 2.2}s`,
-    duration: `${2.8 + Math.random() * 3.4}s`,
-    size: 0.55 + Math.random() * 0.7,
-    sway: `${(Math.random() - 0.5) * 140}px`,
-    rotate: `${360 + Math.random() * 540}deg`,
-    opacity: 0.45 + Math.random() * 0.45,
-  }))
-}
+/* 城市光点 — 日本地图上7大城市群的位置 */
+const CITY_DOTS = [
+  { name: '东京', top: '48%', left: '72%', delay: 0, size: 12 },
+  { name: '大阪', top: '62%', left: '52%', delay: 0.3, size: 10 },
+  { name: '名古屋', top: '58%', left: '58%', delay: 0.5, size: 8 },
+  { name: '福冈', top: '72%', left: '32%', delay: 0.7, size: 8 },
+  { name: '札幌', top: '18%', left: '65%', delay: 0.9, size: 8 },
+  { name: '仙台', top: '35%', left: '70%', delay: 1.1, size: 6 },
+  { name: '广岛', top: '65%', left: '40%', delay: 1.3, size: 6 },
+]
 
 function WelcomeScreen({ exiting }: { exiting: boolean }) {
-  const [isMobile] = useState(() => window.innerWidth < 768)
-  const petalCount = isMobile ? 14 : 20
-  const petals = useMemo(() => generatePetals(petalCount), [petalCount])
+  const [count, setCount] = useState(0)
+
+  /* 数字递增动画 — 0 → 175 */
+  useEffect(() => {
+    const target = 175
+    const duration = 1500
+    const start = performance.now()
+    const tick = (now: number) => {
+      const progress = Math.min((now - start) / duration, 1)
+      setCount(Math.floor(progress * target))
+      if (progress < 1) requestAnimationFrame(tick)
+    }
+    const timer = setTimeout(() => requestAnimationFrame(tick), 800)
+    return () => clearTimeout(timer)
+  }, [])
+
+  /* 背景粒子 — 40个彩色光点 */
+  const particles = useMemo(() =>
+    Array.from({ length: 40 }, (_, i) => ({
+      id: i,
+      left: `${Math.random() * 100}%`,
+      top: `${Math.random() * 100}%`,
+      size: 1 + Math.random() * 3,
+      opacity: 0.1 + Math.random() * 0.4,
+      duration: `${3 + Math.random() * 4}s`,
+      delay: `${Math.random() * 3}s`,
+      color: BRANDS[i % BRANDS.length].color,
+    }))
+  , [])
 
   return (
     <div
       className="fixed inset-0 z-[9999] flex items-center justify-center overflow-hidden"
       style={{
-        background: '#f7f3ee',
-        animation: exiting ? 'loaderExit 0.45s ease-in forwards' : undefined,
+        background: 'linear-gradient(135deg, #0a1628 0%, #1a0a2e 50%, #2e0a1a 100%)',
+        animation: exiting ? 'welcomeExit 0.6s ease-in forwards' : undefined,
       }}
     >
-      {/* —— 水墨背景层 —— */}
-      <div className="absolute inset-0" style={{ background: 'var(--welcome-bg, #f7f3ee)' }} />
-      {/* 墨韵光晕 */}
-      <div
-        className="absolute top-1/2 left-1/2 w-[140vmax] h-[140vmax] rounded-full"
-        style={{
-          background:
-            'radial-gradient(circle, rgba(233,30,99,0.06) 0%, rgba(156,39,176,0.05) 25%, rgba(33,150,243,0.04) 50%, transparent 70%)',
-          transform: 'translate(-50%, -50%)',
-          animation: `mapBreathe ${isMobile ? 8 : 4}s ease-in-out infinite`,
-        }}
-      />
-
-      {/* —— 和纸纹理 —— */}
-      <div
-        className="absolute inset-0 opacity-[0.035]"
-        style={{
-          backgroundImage:
-            'radial-gradient(circle at 20% 50%, #000 1px, transparent 1px), radial-gradient(circle at 80% 30%, #000 1px, transparent 1px), radial-gradient(circle at 50% 80%, #000 0.5px, transparent 0.5px)',
-          backgroundSize: '80px 80px, 100px 100px, 60px 60px',
-          backgroundPosition: '0 0, 20px 30px, 10px 15px',
-        }}
-      />
-
-      {/* —— 日本地图轮廓 —— */}
-      <div
-        className="absolute top-1/2 left-1/2 text-[min(48vw,56vh)] leading-none select-none pointer-events-none"
-        style={{
-          transform: 'translate(-50%, -50%)',
-          opacity: 0.06,
-          filter: 'blur(1px)',
-          animation: `mapBreathe ${isMobile ? 10 : 5}s ease-in-out infinite`,
-        }}
-      >
-        🗾
-      </div>
-
-      {/* —— 樱花花瓣 —— */}
-      {petals.map((p) => (
+      {/* —— 粒子层 —— */}
+      {particles.map(p => (
         <span
           key={p.id}
+          className="absolute rounded-full"
           aria-hidden
-          className="absolute top-0 pointer-events-none select-none gpu-layer"
           style={{
             left: p.left,
-            fontSize: `${p.size}rem`,
+            top: p.top,
+            width: `${p.size}px`,
+            height: `${p.size}px`,
+            backgroundColor: p.color,
             opacity: 0,
-            animationName: 'sakuraFall',
-            animationDuration: p.duration,
-            animationDelay: p.delay,
-            animationTimingFunction: 'linear',
-            animationIterationCount: 'infinite',
-            '--petal-sway': p.sway,
-            '--petal-rotate': p.rotate,
+            '--particle-opacity': p.opacity,
+            animation: `particleFloat ${p.duration} ${p.delay} ease-in-out infinite`,
           } as React.CSSProperties}
-        >
-          🌸
-        </span>
+        />
       ))}
 
-      {/* —— 主内容区 —— */}
-      <div
-        className="relative z-10 flex flex-col items-center px-6 w-full max-w-[440px]"
-        style={{
-          animation: exiting ? 'loaderExit 0.4s ease-in forwards' : 'inkBloom 0.9s 0.2s ease-out both',
-        }}
-      >
-        {/* 标题 — 毛笔字逐个浮现 */}
-        <h1 className="flex flex-wrap justify-center gap-[0.03em] mb-3 text-[clamp(22px,5.5vw,42px)] font-bold leading-tight">
+      {/* —— 日本地图 + 城市发光圆点 —— */}
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none">
+        <div
+          className="relative"
+          style={{
+            fontSize: 'min(60vw, 50vh)',
+            lineHeight: 1,
+            opacity: 0.08,
+            filter: 'blur(1px)',
+          }}
+        >
+          🗾
+          {CITY_DOTS.map(dot => (
+            <div
+              key={dot.name}
+              className="absolute rounded-full"
+              style={{
+                top: dot.top,
+                left: dot.left,
+                width: `${dot.size}px`,
+                height: `${dot.size}px`,
+                background: '#e91e63',
+                boxShadow: '0 0 20px #e91e63, 0 0 40px #e91e6380',
+                animation: `cityPulse 2s ${dot.delay}s ease-out both, pulse 2.5s ${dot.delay + 1}s ease-in-out infinite`,
+              }}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* —— 主内容 —— */}
+      <div className="relative z-10 flex flex-col items-center px-6 w-full max-w-[480px]">
+
+        {/* 标题 — 逐字滑入 */}
+        <h1 className="flex flex-wrap justify-center gap-[0.05em] mb-6 text-[clamp(28px,7vw,52px)] font-black leading-tight">
           {TITLE_CHARS.map((char, i) => (
             <span
               key={i}
-              className="inline-block gpu-layer"
+              className="inline-block"
               style={{
-                animation: `charReveal 0.55s ${0.15 + i * 0.06}s var(--ease-spring) both`,
-                background: 'linear-gradient(135deg, #e91e63 0%, #9c27b0 40%, #2196f3 80%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-                textShadow: 'none',
-                filter: 'drop-shadow(0 2px 4px rgba(233,30,99,0.15))',
+                color: 'white',
+                animation: `slideUp 0.5s ${0.3 + i * 0.08}s ease-out both`,
+                textShadow: '0 0 30px rgba(233,30,99,0.3), 0 0 60px rgba(33,150,243,0.2)',
               }}
             >
               {char}
@@ -146,52 +139,54 @@ function WelcomeScreen({ exiting }: { exiting: boolean }) {
           ))}
         </h1>
 
-        {/* 副标题 */}
-        <p
-          className="text-[13px] tracking-[0.15em] text-[#888] mb-7 font-medium gpu-layer"
-          style={{
-            animation: `charReveal 0.5s ${0.7}s var(--ease-spring) both`,
-          }}
-        >
-          {SUBTITLE}
-        </p>
+        {/* 数据统计 — 动态计数器 */}
+        <div className="flex gap-8 mb-8" style={{ animation: 'fadeInUp 0.6s 1s ease-out both' }}>
+          <div className="text-center">
+            <div className="text-3xl font-black text-white">{count}+</div>
+            <div className="text-xs text-white/50 mt-1">动漫店铺</div>
+          </div>
+          <div className="text-center">
+            <div className="text-3xl font-black text-white">7</div>
+            <div className="text-xs text-white/50 mt-1">大连锁</div>
+          </div>
+          <div className="text-center">
+            <div className="text-3xl font-black text-white">全国</div>
+            <div className="text-xs text-white/50 mt-1">覆盖</div>
+          </div>
+        </div>
 
-        {/* 品牌列表 — 彩色圆点 + 名称 */}
+        {/* 品牌展示 — 彩色圆点 + 名称 */}
         <div
-          className="flex flex-wrap justify-center gap-x-4 gap-y-2 mb-8 max-w-[380px]"
-          style={{ animation: `charReveal 0.5s 0.8s var(--ease-spring) both` }}
+          className="flex flex-wrap justify-center gap-x-4 gap-y-2 mb-10 max-w-[400px]"
+          style={{ animation: 'fadeInUp 0.5s 1.3s ease-out both' }}
         >
           {BRANDS.map((brand, i) => (
             <span
               key={brand.name}
-              className="inline-flex items-center gap-1.5 text-[12px] font-medium text-[#666] gpu-layer"
-              style={{
-                animation: `charReveal 0.4s ${0.9 + i * 0.08}s var(--ease-spring) both`,
-              }}
+              className="inline-flex items-center gap-1.5 text-[12px] font-medium text-white/60"
+              style={{ animation: `fadeInUp 0.4s ${1.4 + i * 0.06}s ease-out both` }}
             >
               <span
                 className="inline-block w-2 h-2 rounded-full"
-                style={{ backgroundColor: brand.color }}
+                style={{ backgroundColor: brand.color, boxShadow: `0 0 8px ${brand.color}60` }}
               />
               {brand.name}
             </span>
           ))}
         </div>
 
-        {/* 加载指示点 */}
-        <div className="flex gap-2.5" style={{ animation: `charReveal 0.4s 1.5s var(--ease-spring) both` }}>
-          {['#e91e63', '#1565c0', '#7b1fa2'].map((color, i) => (
+        {/* 进度条 */}
+        <div className="w-full max-w-[200px]" style={{ animation: 'fadeInUp 0.4s 1.6s ease-out both' }}>
+          <div className="h-[2px] bg-white/10 rounded-full overflow-hidden">
             <div
-              key={color}
-              className="w-2.5 h-2.5 rounded-full gpu-layer"
+              className="h-full rounded-full"
               style={{
-                backgroundColor: color,
-                animation: `dotBounce 1.2s ease-in-out infinite`,
-                animationDelay: `${i * 0.2}s`,
-                boxShadow: `0 0 12px ${color}40`,
+                background: 'linear-gradient(90deg, #e91e63, #1565c0, #7b1fa2)',
+                animation: 'progressFill 2s 0.5s ease-out both',
               }}
             />
-          ))}
+          </div>
+          <p className="text-center text-[10px] text-white/30 mt-2">正在加载地图...</p>
         </div>
       </div>
     </div>
@@ -212,8 +207,6 @@ export default function App() {
   const exitTime = isMobile ? 2800 : 3200
 
   useEffect(() => {
-    document.documentElement.style.setProperty('--welcome-bg', '#f7f3ee')
-
     // 延迟500ms再加载地图，让欢迎动画先跑顺
     const mapTimer = setTimeout(() => setMapReady(true), 500)
     const show = setTimeout(() => setExiting(true), loadingTime)
@@ -222,7 +215,6 @@ export default function App() {
       clearTimeout(mapTimer)
       clearTimeout(show)
       clearTimeout(hide)
-      document.documentElement.style.removeProperty('--welcome-bg')
     }
   }, [loadingTime, exitTime])
 

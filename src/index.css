@@ -31,9 +31,6 @@
     --color-gold: #c4a35a;
     --color-washi: #f7f3ed;
 
-    /* Welcome 页面 */
-    --welcome-bg: #f7f3ee;
-
     --color-bg: #f0edf4;
     --color-surface: #ffffff;
     --color-text: #1a1a2e;
@@ -201,122 +198,46 @@
 }
 
 /* ================================================================
-   Welcome Page Keyframes — Sakura • Sumi-e • Hanko
+   Welcome Page Keyframes — Neon • Particles • City Lights
    ================================================================ */
 
-/* 樱花飘落 — 旋转 + 水平摇曳 + 淡入淡出 */
-@keyframes sakuraFall {
-  0% {
-    transform: translateY(-5vh) rotate(0deg) translateX(0);
-    opacity: 0;
-  }
-  8% {
-    opacity: 0.85;
-  }
-  85% {
-    opacity: 0.7;
-  }
-  100% {
-    transform: translateY(105vh) rotate(var(--petal-rotate, 540deg)) translateX(var(--petal-sway, 60px));
-    opacity: 0;
-  }
+/* 欢迎页退出 — 向上滑出 + 轻微缩小 */
+@keyframes welcomeExit {
+  0%   { opacity: 1; transform: translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateY(-30px) scale(0.97); pointer-events: none; }
 }
 
-/* 花瓣水平飘摇 — 叠加在 fall 上用独立的 timing */
-@keyframes sakuraDrift {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(30px); }
-  75% { transform: translateX(-25px); }
+/* 标题逐字上滑 */
+@keyframes slideUp {
+  0%   { opacity: 0; transform: translateY(20px); }
+  100% { opacity: 1; transform: translateY(0); }
 }
 
-/* 水墨晕染 — 背景从模糊到清晰 */
-@keyframes inkBloom {
-  0% {
-    opacity: 0;
-    filter: blur(16px) saturate(0.4);
-    transform: scale(0.92);
-  }
-  100% {
-    opacity: 1;
-    filter: blur(0) saturate(1);
-    transform: scale(1);
-  }
+/* 通用淡入上滑 */
+@keyframes fadeInUp {
+  0%   { opacity: 0; transform: translateY(12px); }
+  100% { opacity: 1; transform: translateY(0); }
 }
 
-/* 水墨晕染（移动端） — 降低blur起始值，减少GPU负担 */
-@keyframes inkBloomMobile {
-  0% {
-    opacity: 0;
-    filter: blur(8px) saturate(0.6);
-    transform: scale(0.95);
-  }
-  100% {
-    opacity: 1;
-    filter: blur(0) saturate(1);
-    transform: scale(1);
-  }
+/* 粒子漂浮 — 淡入淡出 + 上下浮动 */
+@keyframes particleFloat {
+  0%, 100% { opacity: 0; transform: translateY(0); }
+  20%      { opacity: var(--particle-opacity, 0.3); }
+  80%      { opacity: var(--particle-opacity, 0.3); }
+  50%      { transform: translateY(-20px); }
 }
 
-/* 毛笔字逐个浮现 — 从下往上 + 淡入 */
-@keyframes charReveal {
-  0% {
-    opacity: 0;
-    transform: translateY(18px) scale(0.9);
-    filter: blur(6px);
-  }
-  60% {
-    opacity: 0.9;
-    filter: blur(0);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-    filter: blur(0);
-  }
+/* 城市光点出现 — 从无到有 + 弹性 */
+@keyframes cityPulse {
+  0%   { opacity: 0; transform: scale(0); }
+  50%  { opacity: 1; transform: scale(1.5); }
+  100% { opacity: 0.8; transform: scale(1); }
 }
 
-/* 判子印章砸入 — 弹性过冲 */
-@keyframes stampIn {
-  0% {
-    opacity: 0;
-    transform: scale(0) rotate(-20deg);
-  }
-  55% {
-    opacity: 1;
-    transform: scale(1.15) rotate(4deg);
-  }
-  75% {
-    transform: scale(0.92) rotate(-1deg);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1) rotate(0deg);
-  }
-}
-
-/* 地图轮廓呼吸 */
-@keyframes mapBreathe {
-  0%, 100% {
-    opacity: 0.06;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.12;
-    transform: scale(1.02);
-  }
-}
-
-/* 加载点跳动 */
-@keyframes dotBounce {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  40% {
-    transform: translateY(-10px);
-  }
-  60% {
-    transform: translateY(-3px);
-  }
+/* 进度条填充 */
+@keyframes progressFill {
+  0%   { width: 0%; }
+  100% { width: 100%; }
 }
 
 /* ================================================================
@@ -739,49 +660,12 @@ aside {
     animation-duration: 2.5s !important;
   }
 
-  /* Sakura petals — reduce will-change, simplify timing */
-  .sakura-petal,
-  [class*="sakura-petal"] {
-    animation-duration: 8s !important;
-    will-change: auto !important;
-  }
-
-  /* Ink bloom — use lighter blur for mobile GPU (8px vs 16px desktop) */
-  .ink-bloom,
-  [class*="ink-bloom"] {
-    animation-name: inkBloomMobile !important;
-  }
-
-  /* Override inkBloom keyframe for mobile — inline style references pick this up */
-  @keyframes inkBloom {
-    0% {
-      opacity: 0;
-      filter: blur(8px) saturate(0.6);
-      transform: scale(0.95);
-    }
-    100% {
-      opacity: 1;
-      filter: blur(0) saturate(1);
-      transform: scale(1);
-    }
-  }
-
-  /* Map outline breathe — keep but slow down to reduce frame cost */
-  .map-breathe,
-  [class*="map-breathe"] {
-    animation: mapBreathe 8s ease-in-out infinite !important;
-  }
-
-  /* Override mapBreathe keyframe for mobile — gentler movement */
-  @keyframes mapBreathe {
-    0%, 100% {
-      opacity: 0.06;
-      transform: scale(1);
-    }
-    50% {
-      opacity: 0.09;
-      transform: scale(1.01);
-    }
+  /* Welcome page particles — reduce count effect on mobile */
+  @keyframes particleFloat {
+    0%, 100% { opacity: 0; transform: translateY(0); }
+    20%      { opacity: var(--particle-opacity, 0.2); }
+    80%      { opacity: var(--particle-opacity, 0.2); }
+    50%      { transform: translateY(-12px); }
   }
 
   /* Map canvas — release permanent will-change layer */
