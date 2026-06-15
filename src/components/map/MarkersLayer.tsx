@@ -84,7 +84,7 @@ function MarkersLayerInner({ locations }: MarkersLayerProps) {
         offset: 15,
         maxWidth: '300px',
         closeButton: true,
-        closeOnClick: false,
+        closeOnClick: true,
         className: 'maplibre-popup-card',
       })
         .setLngLat(coords)
