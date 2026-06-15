@@ -45,6 +45,14 @@ const STAMPS: StampData[] = [
     border: '#ffcc80',
     shadow: '0 0 24px rgba(255,152,0,0.3)',
   },
+  {
+    label: '駿河屋',
+    sub: 'Suruga-ya',
+    color: '#1565c0',
+    bg: '#e3f2fd',
+    border: '#90caf9',
+    shadow: '0 0 24px rgba(21,101,192,0.3)',
+  },
 ]
 
 interface PetalData {
