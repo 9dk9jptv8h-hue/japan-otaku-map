@@ -8,7 +8,6 @@ import { FilterPanel } from './FilterPanel'
 import { SortControl } from './SortControl'
 import { CardList } from './CardList'
 import { SidebarToggle } from './SidebarToggle'
-import { TileLayerSwitch } from '@/components/map/TileLayerSwitch'
 import { cn } from '@/utils/cn'
 
 interface SidebarProps {
@@ -159,11 +158,6 @@ export function Sidebar({ locations, className }: SidebarProps) {
             </div>
           </div>
         )}
-
-        {/* 地图样式切换 */}
-        <div className="shrink-0 px-4 py-3 border-b border-[var(--color-border)]">
-          <TileLayerSwitch />
-        </div>
 
         {/* 卡片列表 */}
         <div className="flex-1 overflow-y-auto px-3 pb-6 pt-2">
