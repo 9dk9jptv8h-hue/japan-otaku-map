@@ -78,7 +78,10 @@ export function MobileLayout({ locations }: MobileLayoutProps) {
         'absolute top-0 left-0 right-0 z-[1000] p-2 pt-safe pointer-events-none transition-opacity duration-200',
         sidebarOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'
       )}>
-        <div className="flex items-center gap-2 pointer-events-auto">
+        <div className={cn(
+          'flex items-center gap-2',
+          sidebarOpen ? 'pointer-events-none' : 'pointer-events-auto'
+        )}>
           <button
             onClick={() => setSidebarOpen(true)}
             className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl glass shadow-soft border border-[var(--color-border)] active:scale-95 transition-transform"
@@ -86,7 +89,10 @@ export function MobileLayout({ locations }: MobileLayoutProps) {
           >
             <Menu className="h-5 w-5 text-[var(--color-text-dim)]" />
           </button>
-          <div className="flex-1 glass rounded-xl shadow-soft border border-[var(--color-border)] pointer-events-auto">
+          <div className={cn(
+            'flex-1 glass rounded-xl shadow-soft border border-[var(--color-border)]',
+            sidebarOpen ? 'pointer-events-none' : 'pointer-events-auto'
+          )}>
             <SearchBar />
           </div>
         </div>
