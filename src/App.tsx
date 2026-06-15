@@ -75,7 +75,7 @@ function WelcomeScreen({ exiting }: { exiting: boolean }) {
       className="fixed inset-0 z-[9999] flex items-center justify-center overflow-hidden"
       style={{
         background: 'linear-gradient(135deg, #0a1628 0%, #1a0a2e 50%, #2e0a1a 100%)',
-        animation: exiting ? 'welcomeExit 0.6s ease-in forwards' : undefined,
+        animation: exiting ? 'welcomeExit 0.8s ease-out forwards' : undefined,
       }}
     >
       {/* —— 粒子层 —— */}
@@ -212,7 +212,7 @@ export default function App() {
   const [isMobile] = useState(() => window.innerWidth < 768)
 
   const loadingTime = isMobile ? 2200 : 2500
-  const exitTime = isMobile ? 2800 : 3200
+  const exitTime = isMobile ? 3000 : 3300
 
   useEffect(() => {
     // 延迟500ms再加载地图，让欢迎动画先跑顺

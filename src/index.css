@@ -174,10 +174,12 @@
    Welcome Page Keyframes — Neon • Particles • City Lights
    ================================================================ */
 
-/* 欢迎页退出 — 向上滑出 + 轻微缩小 */
+/* 欢迎页退出 — 缩放淡出 + 亮度过渡（暗→亮自然衔接） */
 @keyframes welcomeExit {
-  0%   { opacity: 1; transform: translateY(0) scale(1); }
-  100% { opacity: 0; transform: translateY(-30px) scale(0.97); pointer-events: none; }
+  0%   { opacity: 1; transform: scale(1); filter: brightness(1); }
+  30%  { opacity: 0.7; transform: scale(1.02); filter: brightness(1.2); }
+  70%  { opacity: 0.3; transform: scale(1.06); filter: brightness(1.8); }
+  100% { opacity: 0; transform: scale(1.1); filter: brightness(2.5); pointer-events: none; }
 }
 
 /* 标题逐字上滑 */
