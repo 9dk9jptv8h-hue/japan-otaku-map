@@ -7,6 +7,17 @@
 
 ---
 
+## [1.6.0] - 2026-06-15
+
+### Performance（性能优化）
+- 瓦片从 OpenFreeMap 矢量切换为 CartoDB raster — 加载速度提升数倍，渲染零 GPU 开销
+- Fastly CDN 亚洲节点（香港/新加坡/东京），国内延迟显著降低
+- 删除矢量瓦片中文标签替换逻辑（raster 瓦片自带标签）
+- 删除样式 JSON 预取（raster style 本地构建，零网络依赖）
+- Service Worker 缓存覆盖 CartoDB 全部子域（a/b/c/d），旧缓存自动清除
+
+---
+
 ## [1.5.0] - 2026-06-15
 
 ### Performance（性能优化）

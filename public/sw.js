@@ -1,15 +1,28 @@
-const TILE_CACHE = 'map-tiles-v1'
-const TILE_HOSTS = ['tiles.openfreemap.org', 'basemaps.cartocdn.com']
+const TILE_CACHE = 'map-tiles-v2'
+const TILE_HOSTS = [
+  'a.basemaps.cartocdn.com',
+  'b.basemaps.cartocdn.com',
+  'c.basemaps.cartocdn.com',
+  'd.basemaps.cartocdn.com',
+]
 
 self.addEventListener('install', () => self.skipWaiting())
 self.addEventListener('activate', (e) => {
-  e.waitUntil(self.clients.claim())
+  // 清除旧版缓存
+  e.waitUntil(
+    caches.keys().then(keys =>
+      Promise.all([
+        self.clients.claim(),
+        ...keys.filter(k => k !== TILE_CACHE).map(k => caches.delete(k)),
+      ])
+    )
+  )
 })
 
 self.addEventListener('fetch', (e) => {
   const url = new URL(e.request.url)
 
-  // Only cache tile and style requests from tile hosts
+  // Only cache tile requests from CartoDB hosts
   if (!TILE_HOSTS.some(h => url.hostname === h)) return
 
   e.respondWith(
