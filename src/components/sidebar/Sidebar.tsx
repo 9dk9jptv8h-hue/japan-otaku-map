@@ -62,7 +62,7 @@ export function Sidebar({ locations, className }: SidebarProps) {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <SidebarToggle collapsed={false} onClick={toggleSidebar} className="relative top-0 !border-white/20 !text-white" />
+              <SidebarToggle collapsed={false} onClick={toggleSidebar} className="relative top-0 !bg-white/20 hover:!bg-white/30 !border-transparent !text-white !backdrop-blur-none" />
             </div>
           </div>
         </div>
