@@ -47,7 +47,7 @@ function generatePetals(count: number): PetalData[] {
 
 function WelcomeScreen({ exiting }: { exiting: boolean }) {
   const [isMobile] = useState(() => window.innerWidth < 768)
-  const petalCount = isMobile ? 6 : 10
+  const petalCount = isMobile ? 14 : 20
   const petals = useMemo(() => generatePetals(petalCount), [petalCount])
 
   return (
@@ -60,13 +60,14 @@ function WelcomeScreen({ exiting }: { exiting: boolean }) {
     >
       {/* —— 水墨背景层 —— */}
       <div className="absolute inset-0" style={{ background: 'var(--welcome-bg, #f7f3ee)' }} />
-      {/* 墨韵光晕 — 静态 */}
+      {/* 墨韵光晕 */}
       <div
         className="absolute top-1/2 left-1/2 w-[140vmax] h-[140vmax] rounded-full"
         style={{
           background:
             'radial-gradient(circle, rgba(233,30,99,0.06) 0%, rgba(156,39,176,0.05) 25%, rgba(33,150,243,0.04) 50%, transparent 70%)',
           transform: 'translate(-50%, -50%)',
+          animation: `mapBreathe ${isMobile ? 8 : 4}s ease-in-out infinite`,
         }}
       />
 
@@ -81,12 +82,14 @@ function WelcomeScreen({ exiting }: { exiting: boolean }) {
         }}
       />
 
-      {/* —— 日本地图轮廓 — 静态 —— */}
+      {/* —— 日本地图轮廓 —— */}
       <div
         className="absolute top-1/2 left-1/2 text-[min(48vw,56vh)] leading-none select-none pointer-events-none"
         style={{
           transform: 'translate(-50%, -50%)',
           opacity: 0.06,
+          filter: 'blur(1px)',
+          animation: `mapBreathe ${isMobile ? 10 : 5}s ease-in-out infinite`,
         }}
       >
         🗾
@@ -119,7 +122,7 @@ function WelcomeScreen({ exiting }: { exiting: boolean }) {
       <div
         className="relative z-10 flex flex-col items-center px-6 w-full max-w-[440px]"
         style={{
-          animation: exiting ? 'loaderExit 0.4s ease-in forwards' : 'charReveal 0.6s 0.2s ease-out both',
+          animation: exiting ? 'loaderExit 0.4s ease-in forwards' : 'inkBloom 0.9s 0.2s ease-out both',
         }}
       >
         {/* 标题 — 毛笔字逐个浮现 */}
@@ -135,6 +138,7 @@ function WelcomeScreen({ exiting }: { exiting: boolean }) {
                 WebkitTextFillColor: 'transparent',
                 backgroundClip: 'text',
                 textShadow: 'none',
+                filter: 'drop-shadow(0 2px 4px rgba(233,30,99,0.15))',
               }}
             >
               {char}
