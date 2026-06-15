@@ -7,6 +7,13 @@
 
 ---
 
+## [1.0.4] - 2026-06-15
+
+### Added（新增）
+- **SEO优化** — meta标签、sitemap、robots.txt、结构化数据，支持百度/Google搜索引擎收录
+
+---
+
 ## [1.0.3] - 2026-06-15
 
 ### Added（新增）
@@ -98,6 +105,7 @@
 
 ---
 
+[1.0.4]: https://github.com/9dk9jptv8h-hue/japan-otaku-map/compare/v1.0.3...v1.0.4
 [1.0.3]: https://github.com/9dk9jptv8h-hue/japan-otaku-map/compare/v1.0.2...v1.0.3
 [1.0.2]: https://github.com/9dk9jptv8h-hue/japan-otaku-map/compare/v1.0.1...v1.0.2
 [1.0.1]: https://github.com/9dk9jptv8h-hue/japan-otaku-map/compare/v1.0.0...v1.0.1

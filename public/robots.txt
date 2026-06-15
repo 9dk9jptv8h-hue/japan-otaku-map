@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://9dk9jptv8h-hue.github.io/japan-otaku-map/sitemap.xml
