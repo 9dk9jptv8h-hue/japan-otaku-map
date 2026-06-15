@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo, useRef } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { mockLocations } from '@/constants/mockData'
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
 import { AppShell } from '@/components/layout/AppShell'
@@ -33,26 +33,25 @@ const CITY_DOTS = [
 
 function WelcomeScreen({ exiting }: { exiting: boolean }) {
   const [count, setCount] = useState(0)
-  const rafRef = useRef(0)
 
-  /* 数字递增动画 — 0 → 175 */
+  /* 数字递增动画 — 0 → 175（用setInterval，headless也能跑） */
   useEffect(() => {
     const target = 175
-    const duration = 1200
+    let current = 0
+    let intervalId: ReturnType<typeof setInterval>
     const timer = setTimeout(() => {
-      const start = performance.now()
-      const tick = (now: number) => {
-        const progress = Math.min((now - start) / duration, 1)
-        setCount(Math.floor(progress * target))
-        if (progress < 1) {
-          rafRef.current = requestAnimationFrame(tick)
+      intervalId = setInterval(() => {
+        current += 6
+        if (current >= target) {
+          current = target
+          clearInterval(intervalId)
         }
-      }
-      rafRef.current = requestAnimationFrame(tick)
+        setCount(current)
+      }, 40)
     }, 400)
     return () => {
       clearTimeout(timer)
-      cancelAnimationFrame(rafRef.current)
+      if (intervalId) clearInterval(intervalId)
     }
   }, [])
 
