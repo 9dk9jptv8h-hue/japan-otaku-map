@@ -56,16 +56,6 @@ const KEYFRAMES = `
   0%, 80%, 100% { transform: translateY(0); }
   40%           { transform: translateY(-6px); }
 }
-
-@keyframes chat-panel-in {
-  from { transform: scale(0.95); opacity: 0; }
-  to   { transform: scale(1);   opacity: 1; }
-}
-
-@keyframes chat-panel-out {
-  from { transform: scale(1);   opacity: 1; }
-  to   { transform: scale(0.95); opacity: 0; }
-}
 `
 
 /* ------------------------------------------------------------------ */
@@ -75,7 +65,6 @@ const KEYFRAMES = `
 export function ChatAssistant() {
   /* ---- state ---- */
   const [isOpen, setIsOpen] = useState(false)
-  const [isVisible, setIsVisible] = useState(false)
   const [messages, setMessages] = useState<DisplayMessage[]>([WELCOME_MESSAGE])
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -95,10 +84,10 @@ export function ChatAssistant() {
 
   // Focus input when panel opens
   useEffect(() => {
-    if (isVisible) {
-      setTimeout(() => inputRef.current?.focus(), 320)
+    if (isOpen) {
+      setTimeout(() => inputRef.current?.focus(), 300)
     }
-  }, [isVisible])
+  }, [isOpen])
 
   // Clear error after 4 seconds
   useEffect(() => {
@@ -107,26 +96,13 @@ export function ChatAssistant() {
     return () => clearTimeout(t)
   }, [error])
 
-  /* ---- panel open / close with animation ---- */
+  /* ---- panel open / close ---- */
 
-  const openPanel = useCallback(() => {
-    setIsOpen(true)
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => setIsVisible(true))
-    })
-  }, [])
-
-  const closePanel = useCallback(() => {
-    setIsVisible(false)
-    setTimeout(() => {
-      setIsOpen(false)
-    }, 300)
-  }, [])
+  const closePanel = useCallback(() => setIsOpen(false), [])
 
   const togglePanel = useCallback(() => {
-    if (isOpen) closePanel()
-    else openPanel()
-  }, [isOpen, openPanel, closePanel])
+    setIsOpen((prev) => !prev)
+  }, [])
 
   /* ---- chat logic ---- */
 
@@ -340,28 +316,33 @@ export function ChatAssistant() {
       <style>{KEYFRAMES}</style>
 
       {/* ---------- Chat Panel ---------- */}
-      {isOpen && (
-        <div
-          ref={panelRef}
-          role="dialog"
-          aria-label="AI 聊天助手"
-          onKeyDown={handleKeyDown}
-          className={cn(
-            'fixed z-50 flex flex-col overflow-hidden',
-            'inset-0 w-full h-full rounded-none',
-            'md:inset-auto md:bottom-[216px] md:right-4 md:w-[400px] md:h-[500px] md:rounded-[var(--radius-2xl)]',
-          )}
-          style={{
-            background: 'rgba(255,255,255,0.92)',
-            backdropFilter: 'blur(20px)',
-            WebkitBackdropFilter: 'blur(20px)',
-            border: '1px solid var(--color-border)',
-            boxShadow: 'var(--shadow-xl)',
-            animation: isVisible
-              ? 'chat-panel-in 300ms var(--ease-out-expo) forwards'
-              : 'chat-panel-out 280ms var(--ease-out-expo) forwards',
-          }}
-        >
+      <div
+        ref={panelRef}
+        role="dialog"
+        aria-label="AI 聊天助手"
+        aria-hidden={!isOpen}
+        onKeyDown={handleKeyDown}
+        className={cn(
+          'fixed z-50 flex flex-col overflow-hidden',
+          // 过渡动画
+          'transition-all duration-[250ms] ease-out origin-bottom-right',
+          // 显隐控制
+          isOpen
+            ? 'opacity-100 scale-100'
+            : 'opacity-0 scale-[0.9] pointer-events-none',
+          // 移动端全屏
+          'inset-0 w-full h-full rounded-none',
+          // 桌面端：缩小尺寸 360x440
+          'md:inset-auto md:bottom-[216px] md:right-4 md:w-[360px] md:h-[440px] md:rounded-[var(--radius-2xl)]',
+        )}
+        style={{
+          background: 'rgba(255,255,255,0.92)',
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
+          border: '1px solid var(--color-border)',
+          boxShadow: 'var(--shadow-xl)',
+        }}
+      >
           {/* ---- Header ---- */}
           <div
             className="shrink-0 flex items-center gap-3 px-4"
@@ -498,7 +479,6 @@ export function ChatAssistant() {
             </button>
           </div>
         </div>
-      )}
 
       {/* ---------- Floating Button ---------- */}
       <button
