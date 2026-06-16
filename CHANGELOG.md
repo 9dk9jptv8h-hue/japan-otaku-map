@@ -7,6 +7,14 @@
 
 ---
 
+## [2.5.0] - 2026-06-16
+
+### Performance（性能优化）
+- 移动端地图切换为CartoDB raster瓦片 — 零GPU渲染开销，加载更快
+- 桌面端保持OpenFreeMap矢量瓦片不变
+
+---
+
 ## [2.4.0] - 2026-06-16
 
 ### Added（新增）
@@ -293,6 +301,7 @@
 
 ---
 
+[2.5.0]: https://github.com/9dk9jptv8h-hue/japan-otaku-map/compare/v2.4.0...v2.5.0
 [2.4.0]: https://github.com/9dk9jptv8h-hue/japan-otaku-map/compare/v2.3.0...v2.4.0
 [2.3.0]: https://github.com/9dk9jptv8h-hue/japan-otaku-map/compare/v2.2.0...v2.3.0
 [2.2.0]: https://github.com/9dk9jptv8h-hue/japan-otaku-map/compare/v2.1.0...v2.2.0

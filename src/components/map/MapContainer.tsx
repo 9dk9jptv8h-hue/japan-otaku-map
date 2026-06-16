@@ -29,9 +29,42 @@ export function MapView({ children }: MapViewProps) {
     // 移动端检测 — 降低 GPU 负载 + 禁用不必要的动画
     const isMobile = window.innerWidth < 768
 
+    // 移动端用 CartoDB raster 瓦片（零 GPU 渲染开销，加载快）
+    const buildRasterStyle = (): maplibregl.StyleSpecification => ({
+      version: 8,
+      sources: {
+        'carto-tiles': {
+          type: 'raster',
+          tiles: [
+            'https://a.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}@2x.png',
+            'https://b.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}@2x.png',
+            'https://c.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}@2x.png',
+            'https://d.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}@2x.png',
+          ],
+          tileSize: 512,
+          attribution: '&copy; <a href="https://carto.com/">CARTO</a>',
+          maxzoom: 19,
+        },
+      },
+      layers: [
+        {
+          id: 'carto-layer',
+          type: 'raster',
+          source: 'carto-tiles',
+          minzoom: 0,
+          maxzoom: 22,
+        },
+      ],
+      // glyphs URL — location-labels symbol 图层需要
+      glyphs: 'https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf',
+    })
+
+    // 桌面端矢量瓦片（缩放清晰、支持中文标签）| 移动端 raster 瓦片（轻量快速）
+    const mapStyle = isMobile ? buildRasterStyle() : styleConfig.url
+
     const map = new maplibregl.Map({
       container: mapContainer.current,
-      style: styleConfig.url,
+      style: mapStyle,
       center: [DEFAULT_VIEWPORT.center[1], DEFAULT_VIEWPORT.center[0]],
       zoom: DEFAULT_VIEWPORT.zoom,
       minZoom: MIN_ZOOM,
@@ -71,21 +104,23 @@ export function MapView({ children }: MapViewProps) {
       initialized.current = true
     })
 
-    // 矢量瓦片中文标签替换 — name:zh 优先
-    map.on('style.load', () => {
-      const style = map.getStyle()
-      if (!style?.layers) return
-      for (const layer of style.layers) {
-        if (layer.type === 'symbol' && layer.layout?.['text-field']) {
-          const textField = layer.layout['text-field']
-          if (typeof textField === 'string' && /\{name\b/.test(textField)) {
-            map.setLayoutProperty(layer.id, 'text-field',
-              ['coalesce', ['get', 'name:zh'], ['get', 'name']]
-            )
+    // 矢量瓦片中文标签替换 — name:zh 优先（仅桌面端矢量瓦片需要）
+    if (!isMobile) {
+      map.on('style.load', () => {
+        const style = map.getStyle()
+        if (!style?.layers) return
+        for (const layer of style.layers) {
+          if (layer.type === 'symbol' && layer.layout?.['text-field']) {
+            const textField = layer.layout['text-field']
+            if (typeof textField === 'string' && /\{name\b/.test(textField)) {
+              map.setLayoutProperty(layer.id, 'text-field',
+                ['coalesce', ['get', 'name:zh'], ['get', 'name']]
+              )
+            }
           }
         }
-      }
-    })
+      })
+    }
 
     // moveend：同步边界到 store
     map.on('moveend', () => {
@@ -128,10 +163,12 @@ export function MapView({ children }: MapViewProps) {
     }
   }, [])
 
-  // 图层切换 — 矢量瓦片 style URL 直接替换
+  // 图层切换 — 仅桌面端矢量瓦片执行 style URL 替换（移动端 raster 固定不切换）
   useEffect(() => {
     if (!mapRef.current || !initialized.current) return
-    mapRef.current.setStyle(TILE_STYLES[tileLayer].url)
+    if (window.innerWidth >= 768) {
+      mapRef.current.setStyle(TILE_STYLES[tileLayer].url)
+    }
   }, [tileLayer])
 
   return (
