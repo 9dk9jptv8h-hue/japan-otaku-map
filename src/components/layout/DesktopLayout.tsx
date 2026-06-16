@@ -20,7 +20,7 @@ export function DesktopLayout({ locations }: DesktopLayoutProps) {
           <MarkersLayer locations={filteredLocations} />
         </MapView>
         {/* 地图控件 */}
-        <div className="absolute bottom-10 right-4 z-[1000]">
+        <div className="absolute top-4 right-4 z-[1000]">
           <MapControls />
         </div>
       </div>

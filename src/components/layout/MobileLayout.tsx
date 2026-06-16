@@ -29,7 +29,7 @@ export function MobileLayout({ locations }: MobileLayoutProps) {
       </MapView>
 
       {/* 地图控件 */}
-      <MapControls className="absolute bottom-12 right-3 z-[999]" />
+      <MapControls className="absolute top-16 right-3 z-[999]" />
 
       {/* 顶部搜索栏 — 侧边栏打开时完全不渲染 */}
       {!sidebarOpen && (

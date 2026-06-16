@@ -333,7 +333,7 @@ export function ChatAssistant() {
           // 移动端全屏
           'inset-0 w-full h-full rounded-none',
           // 桌面端：缩小尺寸 360x440
-          'md:inset-auto md:bottom-[216px] md:right-4 md:w-[360px] md:h-[440px] md:rounded-[var(--radius-2xl)]',
+          'md:inset-auto md:bottom-[84px] md:right-4 md:w-[360px] md:h-[440px] md:rounded-[var(--radius-2xl)]',
         )}
         style={{
           background: 'rgba(255,255,255,0.92)',
@@ -486,8 +486,8 @@ export function ChatAssistant() {
         onClick={togglePanel}
         className={cn(
           'fixed z-50 flex items-center justify-center rounded-full transition-all duration-200',
-          'bottom-[180px] right-3 w-[52px] h-[52px]',
-          'md:bottom-[172px] md:right-4 md:w-[56px] md:h-[56px]',
+          'bottom-6 right-3 w-[52px] h-[52px]',
+          'md:bottom-5 md:right-4 md:w-[56px] md:h-[56px]',
         )}
         style={{
           background: 'var(--color-accent)',
