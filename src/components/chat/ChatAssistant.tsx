@@ -400,7 +400,7 @@ export function ChatAssistant() {
             // Mobile: full-screen
             'inset-0 w-full h-full rounded-none',
             // Desktop: floating panel
-            'md:inset-auto md:bottom-20 md:right-5 md:w-[400px] md:h-[500px] md:rounded-[var(--radius-2xl)]',
+            'md:inset-auto md:bottom-[216px] md:right-4 md:w-[400px] md:h-[500px] md:rounded-[var(--radius-2xl)]',
           )}
           style={{
             background: 'rgba(255,255,255,0.92)',
@@ -646,10 +646,10 @@ export function ChatAssistant() {
         onClick={togglePanel}
         className={cn(
           'fixed z-50 flex items-center justify-center rounded-full transition-all duration-200',
-          // Mobile
-          'bottom-4 right-4 w-[52px] h-[52px]',
-          // Desktop
-          'md:bottom-5 md:right-5 md:w-[56px] md:h-[56px]',
+          // Mobile: above MapControls (bottom-6 + 120px controls + gap)
+          'bottom-[156px] right-3 w-[52px] h-[52px]',
+          // Desktop: above MapControls (bottom-4 + 120px controls + gap)
+          'md:bottom-[148px] md:right-4 md:w-[56px] md:h-[56px]',
         )}
         style={{
           background: 'var(--color-accent)',
