@@ -7,6 +7,13 @@
 
 ---
 
+## [2.5.1] - 2026-06-16
+
+### Changed（变更）
+- 回退移动端raster瓦片，统一使用OpenFreeMap矢量瓦片
+
+---
+
 ## [2.5.0] - 2026-06-16
 
 ### Performance（性能优化）
@@ -301,6 +308,7 @@
 
 ---
 
+[2.5.1]: https://github.com/9dk9jptv8h-hue/japan-otaku-map/compare/v2.5.0...v2.5.1
 [2.5.0]: https://github.com/9dk9jptv8h-hue/japan-otaku-map/compare/v2.4.0...v2.5.0
 [2.4.0]: https://github.com/9dk9jptv8h-hue/japan-otaku-map/compare/v2.3.0...v2.4.0
 [2.3.0]: https://github.com/9dk9jptv8h-hue/japan-otaku-map/compare/v2.2.0...v2.3.0
