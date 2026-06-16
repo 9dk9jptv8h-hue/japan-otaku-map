@@ -1,4 +1,4 @@
-import { memo, useEffect, useRef } from 'react'
+import { memo, useEffect, useRef, useMemo } from 'react'
 import maplibregl from 'maplibre-gl'
 import { useMapStore } from '@/store/useMapStore'
 import { CATEGORIES } from '@/constants/theme'
@@ -15,22 +15,34 @@ interface MarkersLayerProps {
  * 替代旧版 DOM Marker 方案（每个 marker 一个 DOM 元素）。
  * WebGL 图层与地图瓦片同步渲染，消除 pan/zoom 时标记拖尾。
  * 100+ 标记零延迟，GPU 合批绘制。
+ *
+ * Hover 放大使用 feature-state + interpolate(顶层) + case(内层) 写法。
  */
 function MarkersLayerInner({ locations }: MarkersLayerProps) {
   const mapInstance = useMapStore((s) => s.mapInstance)
   const setSelectedMarkerId = useMapStore((s) => s.setSelectedMarkerId)
+  const hoveredMarkerId = useMapStore((s) => s.hoveredMarkerId)
   const popupRef = useRef<maplibregl.Popup | null>(null)
+  const hoveredFeatureIdRef = useRef<number | null>(null)
+
+  // 字符串 location.id → 数字 feature index 映射
+  const idToIndexMap = useMemo(() => {
+    const m = new Map<string, number>()
+    locations.forEach((loc, i) => m.set(loc.id, i))
+    return m
+  }, [locations])
 
   useEffect(() => {
     if (!mapInstance) return
 
     const map = mapInstance
 
-    // 构建 GeoJSON FeatureCollection
+    // 构建 GeoJSON FeatureCollection — 每个 feature 必须有数字顶层 id
     const buildGeoJSON = () => ({
       type: 'FeatureCollection',
-      features: locations.map((loc) => ({
+      features: locations.map((loc, index) => ({
         type: 'Feature' as const,
+        id: index, // 数字顶层 ID，feature-state 必须
         geometry: {
           type: 'Point' as const,
           coordinates: [loc.longitude, loc.latitude],
@@ -101,17 +113,48 @@ function MarkersLayerInner({ locations }: MarkersLayerProps) {
       })
     }
 
-    // ─── 鼠标 hover → 仅改变光标为手型（保守方案，不使用 feature-state）───
-    const handleMouseEnter = () => {
+    // ─── 鼠标 hover → feature-state 驱动放大 + 光标 ───
+    const handleMouseMove = (e: maplibregl.MapLayerMouseEvent) => {
       map.getCanvas().style.cursor = 'pointer'
+      if (e.features && e.features[0]) {
+        const fid = e.features[0].id as number
+        if (hoveredFeatureIdRef.current === fid) return
+        // 清除上一个
+        if (hoveredFeatureIdRef.current !== null) {
+          map.setFeatureState(
+            { source: 'locations', id: hoveredFeatureIdRef.current },
+            { hover: false }
+          )
+        }
+        // 设置新的
+        hoveredFeatureIdRef.current = fid
+        map.setFeatureState(
+          { source: 'locations', id: fid },
+          { hover: true }
+        )
+        // 同步 store（侧边栏卡片高亮）
+        const locId = e.features[0].properties?.id as string
+        if (locId) {
+          useMapStore.getState().setHoveredMarkerId(locId)
+        }
+      }
     }
+
     const handleMouseLeave = () => {
       map.getCanvas().style.cursor = ''
+      if (hoveredFeatureIdRef.current !== null) {
+        map.setFeatureState(
+          { source: 'locations', id: hoveredFeatureIdRef.current },
+          { hover: false }
+        )
+        hoveredFeatureIdRef.current = null
+      }
+      useMapStore.getState().setHoveredMarkerId(null)
     }
 
     // 事件绑定
     map.on('click', 'location-dots', handleClick)
-    map.on('mouseenter', 'location-dots', handleMouseEnter)
+    map.on('mousemove', 'location-dots', handleMouseMove)
     map.on('mouseleave', 'location-dots', handleMouseLeave)
 
     const setupLayers = () => {
@@ -129,7 +172,7 @@ function MarkersLayerInner({ locations }: MarkersLayerProps) {
         data: geojson,
       })
 
-      // ─── Circle Layer（标记圆点）— 简单 interpolate，无 feature-state ───
+      // ─── Circle Layer（标记圆点）— interpolate 顶层 + case 内层（feature-state hover）───
       map.addLayer({
         id: 'location-dots',
         type: 'circle',
@@ -137,10 +180,10 @@ function MarkersLayerInner({ locations }: MarkersLayerProps) {
         paint: {
           'circle-radius': [
             'interpolate', ['linear'], ['zoom'],
-            4, 3,
-            8, 5,
-            12, 7,
-            16, 9,
+            4, ['case', ['boolean', ['feature-state', 'hover'], false], 5, 3],
+            8, ['case', ['boolean', ['feature-state', 'hover'], false], 8, 5],
+            12, ['case', ['boolean', ['feature-state', 'hover'], false], 11, 7],
+            16, ['case', ['boolean', ['feature-state', 'hover'], false], 14, 9],
           ],
           'circle-color': [
             'match',
@@ -157,8 +200,8 @@ function MarkersLayerInner({ locations }: MarkersLayerProps) {
           'circle-stroke-color': '#ffffff',
           'circle-stroke-width': [
             'interpolate', ['linear'], ['zoom'],
-            4, 1,
-            12, 2,
+            4, ['case', ['boolean', ['feature-state', 'hover'], false], 2, 1],
+            12, ['case', ['boolean', ['feature-state', 'hover'], false], 3, 2],
           ],
           'circle-opacity': 0.9,
         },
@@ -210,7 +253,7 @@ function MarkersLayerInner({ locations }: MarkersLayerProps) {
 
     return () => {
       map.off('click', 'location-dots', handleClick)
-      map.off('mouseenter', 'location-dots', handleMouseEnter)
+      map.off('mousemove', 'location-dots', handleMouseMove)
       map.off('mouseleave', 'location-dots', handleMouseLeave)
       map.off('style.load', setupLayers)
       map.off('styledata', handleStyleData)
@@ -228,6 +271,50 @@ function MarkersLayerInner({ locations }: MarkersLayerProps) {
       }
     }
   }, [mapInstance, locations, setSelectedMarkerId])
+
+  // ─── 侧边栏 hover 联动：监听 store.hoveredMarkerId → 设置 feature-state ───
+  useEffect(() => {
+    if (!mapInstance) return
+    // 确保 source 已存在
+    if (!mapInstance.getSource('locations')) return
+
+    // 清除之前由侧边栏触发的 hover 状态
+    // 注意：如果是地图 mousemove 触发的，hoveredFeatureIdRef 已经由事件处理器管理
+    // 这里只处理侧边栏发起的变更
+    if (hoveredMarkerId) {
+      const targetIdx = idToIndexMap.get(hoveredMarkerId)
+      if (targetIdx !== undefined && hoveredFeatureIdRef.current !== targetIdx) {
+        // 清除旧的
+        if (hoveredFeatureIdRef.current !== null) {
+          try {
+            mapInstance.setFeatureState(
+              { source: 'locations', id: hoveredFeatureIdRef.current },
+              { hover: false }
+            )
+          } catch { /* source 可能不存在 */ }
+        }
+        // 设置新的
+        try {
+          mapInstance.setFeatureState(
+            { source: 'locations', id: targetIdx },
+            { hover: true }
+          )
+        } catch { /* source 可能不存在 */ }
+        hoveredFeatureIdRef.current = targetIdx
+      }
+    } else {
+      // hoveredMarkerId 为 null → 清除所有 hover
+      if (hoveredFeatureIdRef.current !== null) {
+        try {
+          mapInstance.setFeatureState(
+            { source: 'locations', id: hoveredFeatureIdRef.current },
+            { hover: false }
+          )
+        } catch { /* source 可能不存在 */ }
+        hoveredFeatureIdRef.current = null
+      }
+    }
+  }, [hoveredMarkerId, mapInstance, idToIndexMap])
 
   // 纯 WebGL 渲染 — 无 DOM 输出
   return null
