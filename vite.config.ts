@@ -4,7 +4,7 @@ import tailwindcss from '@tailwindcss/vite'
 import path from 'node:path'
 
 export default defineConfig({
-  base: '/japan-otaku-map/',
+  base: process.env.GITHUB_PAGES ? '/japan-otaku-map/' : '/',
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {
