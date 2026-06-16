@@ -74,11 +74,12 @@ export function MapView({ children }: MapViewProps) {
       initialized.current = true
     })
 
-    // 矢量瓦片中文标签替换 — name:zh 优先
+    // 矢量瓦片中文标签替换 + 移除3D建筑层
     map.on('style.load', () => {
       const style = map.getStyle()
       if (!style?.layers) return
       for (const layer of style.layers) {
+        // 中文标签替换
         if (layer.type === 'symbol' && layer.layout?.['text-field']) {
           const textField = layer.layout['text-field']
           if (typeof textField === 'string' && /\{name\b/.test(textField)) {
@@ -86,6 +87,10 @@ export function MapView({ children }: MapViewProps) {
               ['coalesce', ['get', 'name:zh'], ['get', 'name']]
             )
           }
+        }
+        // 移除3D建筑物层（fill-extrusion）
+        if (layer.type === 'fill-extrusion') {
+          map.removeLayer(layer.id)
         }
       }
     })
