@@ -7,6 +7,22 @@
 
 ---
 
+## [2.8.0] - 2026-06-16
+
+### Fixed（修复）
+- 欢迎页计数器目标值175→176，与实际数据一致
+- Android弃用API替换（WindowInsetsController/OnBackPressedCallback）
+- 删除30行死CSS（旧DOM Marker移动端样式）
+- sitemap日期更新至2026-06-16
+
+### Changed（变更）
+- 删除tileLayer/setTileLayer死代码，地图样式硬编码standard
+- 删除未使用的FilterState接口、icon字段、tile-proxy.js
+- APK版本号2.5→2.7
+- CHANGELOG补全版本比较链接
+
+---
+
 ## [2.7.0] - 2026-06-16
 
 ### Added（新增）
