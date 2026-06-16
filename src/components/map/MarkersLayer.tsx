@@ -158,7 +158,6 @@ function MarkersLayerInner({ locations }: MarkersLayerProps) {
             // 正常大小
             ['interpolate', ['linear'], ['zoom'], 4, 3, 8, 5, 12, 7, 16, 9],
           ],
-          'circle-radius-transition': { duration: 150, delay: 0 },
           'circle-color': [
             'match',
             ['get', 'category'],
