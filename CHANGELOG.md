@@ -7,6 +7,15 @@
 
 ---
 
+## [2.6.0] - 2026-06-16
+
+### Added（新增）
+- Android APK安装包 — WebView全屏应用，加载GitHub Pages在线地址
+- GitHub Actions自动构建APK（workflow_dispatch手动触发）
+- 网站更新后App自动获取最新内容，无需重新安装
+
+---
+
 ## [2.5.1] - 2026-06-16
 
 ### Changed（变更）
