@@ -278,7 +278,7 @@ export function ChatAssistant() {
           <div>
             <div
               className={cn(
-                'px-3.5 py-2.5 text-sm leading-relaxed',
+                'px-3.5 py-2.5 text-sm leading-relaxed whitespace-pre-wrap break-words',
                 isUser
                   ? 'rounded-2xl rounded-br-md'
                   : 'rounded-2xl rounded-bl-md',
