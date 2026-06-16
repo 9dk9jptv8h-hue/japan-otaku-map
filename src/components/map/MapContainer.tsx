@@ -49,6 +49,13 @@ export function MapView({ children }: MapViewProps) {
       collectResourceTiming: false,
       crossSourceCollisions: false,
       maxTileCacheSize: isMobile ? 50 : 200,
+      // 2D平面模式 — 禁止倾斜和旋转，降低GPU负担
+      pitch: 0,
+      maxPitch: 0,
+      bearing: 0,
+      dragRotate: false,
+      pitchWithRotate: false,
+      touchPitch: false,
     })
 
     // 添加地图归因（精简版）
