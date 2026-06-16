@@ -101,26 +101,12 @@ function MarkersLayerInner({ locations }: MarkersLayerProps) {
       })
     }
 
-    let hoveredId: string | null = null
-
-    // ─── 鼠标 hover 指针 + 放大效果 ───
-    const handleMouseEnter = (e: maplibregl.MapLayerMouseEvent) => {
+    // ─── 鼠标 hover 指针 ───
+    const handleMouseEnter = () => {
       map.getCanvas().style.cursor = 'pointer'
-      if (e.features && e.features[0]) {
-        const id = e.features[0].properties?.id
-        if (id && hoveredId !== id) {
-          if (hoveredId) map.setFeatureState({ source: 'locations', id: hoveredId }, { hover: false })
-          hoveredId = id
-          map.setFeatureState({ source: 'locations', id }, { hover: true })
-        }
-      }
     }
     const handleMouseLeave = () => {
       map.getCanvas().style.cursor = ''
-      if (hoveredId) {
-        map.setFeatureState({ source: 'locations', id: hoveredId }, { hover: false })
-        hoveredId = null
-      }
     }
 
     // 事件只在 useEffect 顶层绑定一次
@@ -141,7 +127,6 @@ function MarkersLayerInner({ locations }: MarkersLayerProps) {
       map.addSource('locations', {
         type: 'geojson',
         data: geojson,
-        promoteId: 'id',  // 用properties.id作为feature标识，支持feature state
       })
 
       // ─── Circle Layer（标记圆点）───
@@ -151,12 +136,13 @@ function MarkersLayerInner({ locations }: MarkersLayerProps) {
         source: 'locations',
         paint: {
           'circle-radius': [
-            'case',
-            ['boolean', ['feature-state', 'hover'], false],
-            // hover时放大1.6倍
-            ['interpolate', ['linear'], ['zoom'], 4, 5, 8, 8, 12, 11, 16, 14],
-            // 正常大小
-            ['interpolate', ['linear'], ['zoom'], 4, 3, 8, 5, 12, 7, 16, 9],
+            'interpolate',
+            ['linear'],
+            ['zoom'],
+            4, 3,
+            8, 5,
+            12, 7,
+            16, 9,
           ],
           'circle-color': [
             'match',
