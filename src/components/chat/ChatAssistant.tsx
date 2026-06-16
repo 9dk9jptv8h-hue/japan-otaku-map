@@ -6,17 +6,9 @@ import {
   AlertTriangle,
   Bot,
   User,
-  Key,
-  Trash2,
 } from 'lucide-react'
 import { cn } from '@/utils/cn'
-import {
-  chat,
-  getStoredApiKey,
-  setStoredApiKey,
-  removeStoredApiKey,
-  SYSTEM_PROMPT,
-} from '@/services/aiService'
+import { chat, SYSTEM_PROMPT } from '@/services/aiService'
 import { scanInput, getSafetyMessage } from '@/services/promptShield'
 import type { ChatMessage } from '@/services/aiService'
 
@@ -47,11 +39,6 @@ const MAX_HISTORY = 20
 
 function generateId(): string {
   return Date.now().toString(36) + Math.random().toString(36).slice(2)
-}
-
-function maskApiKey(key: string): string {
-  if (key.length <= 8) return '****'
-  return `${key.slice(0, 3)}****...${key.slice(-4)}`
 }
 
 /* ------------------------------------------------------------------ */
@@ -92,9 +79,6 @@ export function ChatAssistant() {
   const [messages, setMessages] = useState<DisplayMessage[]>([WELCOME_MESSAGE])
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  const [showSettings, setShowSettings] = useState(false)
-  const [apiKey, setApiKey] = useState('')
-  const [apiKeyDraft, setApiKeyDraft] = useState('')
   const [error, setError] = useState<string | null>(null)
 
   /* ---- refs ---- */
@@ -104,12 +88,6 @@ export function ChatAssistant() {
 
   /* ---- effects ---- */
 
-  // Load API key on mount
-  useEffect(() => {
-    const stored = getStoredApiKey()
-    if (stored) setApiKey(stored)
-  }, [])
-
   // Auto-scroll on new messages or loading change
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -117,10 +95,10 @@ export function ChatAssistant() {
 
   // Focus input when panel opens
   useEffect(() => {
-    if (isVisible && !showSettings) {
+    if (isVisible) {
       setTimeout(() => inputRef.current?.focus(), 320)
     }
-  }, [isVisible, showSettings])
+  }, [isVisible])
 
   // Clear error after 4 seconds
   useEffect(() => {
@@ -133,7 +111,6 @@ export function ChatAssistant() {
 
   const openPanel = useCallback(() => {
     setIsOpen(true)
-    // Two rAF frames so the DOM paints at scale(0.95) first
     requestAnimationFrame(() => {
       requestAnimationFrame(() => setIsVisible(true))
     })
@@ -143,7 +120,6 @@ export function ChatAssistant() {
     setIsVisible(false)
     setTimeout(() => {
       setIsOpen(false)
-      setShowSettings(false)
     }, 300)
   }, [])
 
@@ -158,14 +134,7 @@ export function ChatAssistant() {
     const text = input.trim()
     if (!text || isLoading) return
 
-    // 1. API key check
-    if (!apiKey) {
-      setShowSettings(true)
-      setError('请先设置 API Key')
-      return
-    }
-
-    // 2. Prompt shield
+    // 1. Prompt shield
     const scanResult = scanInput(text)
     if (!scanResult.allowed) {
       const safetyMsg = getSafetyMessage(scanResult)
@@ -190,7 +159,7 @@ export function ChatAssistant() {
       return
     }
 
-    // 3. Add user message
+    // 2. Add user message
     const userMsg: DisplayMessage = {
       id: generateId(),
       role: 'user',
@@ -203,7 +172,7 @@ export function ChatAssistant() {
     setError(null)
 
     try {
-      // 4. Build history (limit to last MAX_HISTORY messages)
+      // 3. Build history (limit to last MAX_HISTORY messages)
       const recentMessages = [...messages, userMsg]
         .filter((m) => !m.blocked && m.role !== 'system')
         .slice(-MAX_HISTORY)
@@ -216,10 +185,10 @@ export function ChatAssistant() {
         })),
       ]
 
-      // 5. Call AI
-      const response = await chat(chatMessages, { apiKey })
+      // 4. Call AI (no API key needed — Worker handles it)
+      const response = await chat(chatMessages)
 
-      // 6. Add assistant message
+      // 5. Add assistant message
       setMessages((prev) => [
         ...prev,
         {
@@ -237,7 +206,7 @@ export function ChatAssistant() {
       setIsLoading(false)
       setTimeout(() => inputRef.current?.focus(), 50)
     }
-  }, [input, isLoading, apiKey, messages])
+  }, [input, isLoading, messages])
 
   /* ---- key handling ---- */
 
@@ -253,24 +222,6 @@ export function ChatAssistant() {
     },
     [handleSend, closePanel],
   )
-
-  /* ---- settings handlers ---- */
-
-  const handleSaveKey = useCallback(() => {
-    const trimmed = apiKeyDraft.trim()
-    if (!trimmed) return
-    setStoredApiKey(trimmed)
-    setApiKey(trimmed)
-    setApiKeyDraft('')
-    setShowSettings(false)
-    setError(null)
-  }, [apiKeyDraft])
-
-  const handleClearKey = useCallback(() => {
-    removeStoredApiKey()
-    setApiKey('')
-    setApiKeyDraft('')
-  }, [])
 
   /* ---- render helpers ---- */
 
@@ -397,9 +348,7 @@ export function ChatAssistant() {
           onKeyDown={handleKeyDown}
           className={cn(
             'fixed z-50 flex flex-col overflow-hidden',
-            // Mobile: full-screen
             'inset-0 w-full h-full rounded-none',
-            // Desktop: floating panel
             'md:inset-auto md:bottom-[216px] md:right-4 md:w-[400px] md:h-[500px] md:rounded-[var(--radius-2xl)]',
           )}
           style={{
@@ -431,13 +380,6 @@ export function ChatAssistant() {
               </div>
             </div>
             <button
-              aria-label="设置 API Key"
-              className="p-1.5 rounded-lg hover:bg-white/15 transition-colors"
-              onClick={() => setShowSettings((v) => !v)}
-            >
-              <Key size={18} color="#fff" />
-            </button>
-            <button
               aria-label="关闭聊天面板"
               className="p-1.5 rounded-lg hover:bg-white/15 transition-colors"
               onClick={closePanel}
@@ -445,89 +387,6 @@ export function ChatAssistant() {
               <X size={18} color="#fff" />
             </button>
           </div>
-
-          {/* ---- Settings Overlay ---- */}
-          {showSettings && (
-            <div
-              className="absolute inset-0 z-10 flex flex-col items-center justify-center px-6"
-              style={{
-                top: 56,
-                background: 'rgba(255,255,255,0.96)',
-                backdropFilter: 'blur(12px)',
-              }}
-            >
-              <div className="w-full max-w-xs flex flex-col gap-4">
-                <h3
-                  className="text-base font-semibold text-center"
-                  style={{ color: 'var(--color-text)' }}
-                >
-                  设置 DeepSeek API Key
-                </h3>
-
-                {apiKey ? (
-                  <div className="flex flex-col gap-3">
-                    <div
-                      className="text-sm text-center px-3 py-2 rounded-lg"
-                      style={{
-                        background: 'var(--color-bg)',
-                        color: 'var(--color-text-dim)',
-                        fontFamily: 'monospace',
-                      }}
-                    >
-                      {maskApiKey(apiKey)}
-                    </div>
-                    <button
-                      onClick={handleClearKey}
-                      className="flex items-center justify-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors"
-                      style={{
-                        background: 'rgba(239,68,68,0.1)',
-                        color: '#dc2626',
-                      }}
-                      aria-label="清除 API Key"
-                    >
-                      <Trash2 size={14} />
-                      清除 Key
-                    </button>
-                  </div>
-                ) : (
-                  <div className="flex flex-col gap-3">
-                    <input
-                      type="password"
-                      placeholder="sk-..."
-                      value={apiKeyDraft}
-                      onChange={(e) => setApiKeyDraft(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') handleSaveKey()
-                      }}
-                      className="w-full px-4 py-2.5 rounded-lg text-sm outline-none transition-shadow"
-                      style={{
-                        background: 'var(--color-bg)',
-                        color: 'var(--color-text)',
-                        border: '1px solid var(--color-border)',
-                      }}
-                      aria-label="输入 API Key"
-                    />
-                    <button
-                      onClick={handleSaveKey}
-                      disabled={!apiKeyDraft.trim()}
-                      className="px-4 py-2.5 rounded-full text-sm font-medium text-white transition-opacity disabled:opacity-40"
-                      style={{ background: 'var(--color-accent)' }}
-                    >
-                      保存
-                    </button>
-                  </div>
-                )}
-
-                <button
-                  onClick={() => setShowSettings(false)}
-                  className="text-xs underline self-center"
-                  style={{ color: 'var(--color-text-dim)' }}
-                >
-                  返回对话
-                </button>
-              </div>
-            </div>
-          )}
 
           {/* ---- Messages ---- */}
           <div
@@ -646,9 +505,7 @@ export function ChatAssistant() {
         onClick={togglePanel}
         className={cn(
           'fixed z-50 flex items-center justify-center rounded-full transition-all duration-200',
-          // Mobile: above MapControls (bottom-6 + 120px controls + gap)
           'bottom-[156px] right-3 w-[52px] h-[52px]',
-          // Desktop: above MapControls (bottom-4 + 120px controls + gap)
           'md:bottom-[148px] md:right-4 md:w-[56px] md:h-[56px]',
         )}
         style={{

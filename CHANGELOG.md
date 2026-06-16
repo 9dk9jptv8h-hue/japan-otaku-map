@@ -7,6 +7,18 @@
 
 ---
 
+## [3.1.0] - 2026-06-16
+
+### Changed（变更）
+- AI小助手改为Cloudflare Worker代理架构 — 用户无需输入API Key即可使用
+- 删除前端API Key输入面板、localStorage存储逻辑
+- 新增 `worker/` 目录 — Cloudflare Worker项目，代理转发DeepSeek API请求
+- Worker服务端注入API Key，前端零敏感信息暴露
+- 支持通过环境变量 `VITE_AI_WORKER_URL` 配置Worker地址
+- Worker限制请求体10KB + max_tokens 800，防滥用控成本
+
+---
+
 ## [3.0.0] - 2026-06-16
 
 ### Added（新增）
@@ -356,6 +368,7 @@
 
 ---
 
+[3.1.0]: https://github.com/9dk9jptv8h-hue/japan-otaku-map/compare/v3.0.0...v3.1.0
 [3.0.0]: https://github.com/9dk9jptv8h-hue/japan-otaku-map/compare/v2.8.0...v3.0.0
 [2.8.0]: https://github.com/9dk9jptv8h-hue/japan-otaku-map/compare/v2.7.0...v2.8.0
 [2.7.0]: https://github.com/9dk9jptv8h-hue/japan-otaku-map/compare/v2.6.0...v2.7.0

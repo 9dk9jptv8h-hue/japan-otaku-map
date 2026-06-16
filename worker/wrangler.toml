@@ -1,0 +1,6 @@
+name = "japan-map-ai"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+
+[vars]
+# DEEPSEEK_API_KEY 通过 wrangler secret put 设置，不写在代码里

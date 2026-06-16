@@ -3,13 +3,6 @@ export interface ChatMessage {
   content: string
 }
 
-export interface AIServiceConfig {
-  apiKey: string
-  model?: string
-  temperature?: number
-  maxTokens?: number
-}
-
 export const SYSTEM_PROMPT = `你是「日本动漫店铺地图」的AI小助手。你帮助用户了解日本的动漫店铺和旅游信息。
 
 你了解以下7大动漫连锁店：
@@ -32,38 +25,18 @@ export const SYSTEM_PROMPT = `你是「日本动漫店铺地图」的AI小助手
 
 回答要简洁友好，用中文回答。如果用户问的不是日本旅游/动漫店铺相关的问题，友好地引导回来。`
 
-const API_URL = 'https://api.deepseek.com/v1/chat/completions'
-const DEFAULT_MODEL = 'deepseek-chat'
-const DEFAULT_TEMPERATURE = 0.7
-const DEFAULT_MAX_TOKENS = 1000
+// Worker 部署后替换，或通过 .env 文件设置 VITE_AI_WORKER_URL
+const WORKER_URL =
+  import.meta.env.VITE_AI_WORKER_URL || 'https://japan-map-ai.workers.dev'
 
-export async function chat(
-  messages: ChatMessage[],
-  config: AIServiceConfig
-): Promise<string> {
-  const { apiKey, model, temperature, maxTokens } = config
-
-  if (!apiKey) {
-    throw new Error('未提供 API Key，请先设置 DeepSeek API Key')
-  }
-
-  const requestBody = {
-    model: model ?? DEFAULT_MODEL,
-    messages,
-    temperature: temperature ?? DEFAULT_TEMPERATURE,
-    max_tokens: maxTokens ?? DEFAULT_MAX_TOKENS,
-  }
-
+export async function chat(messages: ChatMessage[]): Promise<string> {
   let response: Response
 
   try {
-    response = await fetch(API_URL, {
+    response = await fetch(WORKER_URL, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify(requestBody),
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messages }),
     })
   } catch (err) {
     throw new Error(
@@ -74,40 +47,28 @@ export async function chat(
 
   if (!response.ok) {
     let errorDetail = ''
-
     try {
-      const errorData = await response.json()
-      errorDetail = errorData?.error?.message ?? JSON.stringify(errorData)
+      const errorData = (await response.json()) as { error?: string }
+      errorDetail = errorData?.error ?? ''
     } catch {
       errorDetail = await response.text().catch(() => '无法读取错误详情')
     }
 
     switch (response.status) {
-      case 401:
-        throw new Error('API Key 无效或已过期，请检查后重新设置')
       case 429:
         throw new Error('请求过于频繁，请稍后再试')
-      case 400:
-        throw new Error(`请求参数错误：${errorDetail}`)
-      case 402:
-        throw new Error('API 余额不足，请充值后重试')
-      case 500:
-      case 502:
       case 503:
-        throw new Error('DeepSeek 服务暂时不可用，请稍后再试')
+        throw new Error('AI服务暂时不可用，请稍后再试')
       default:
-        throw new Error(
-          `API 请求失败（状态码 ${response.status}）：${errorDetail}`
-        )
+        throw new Error(errorDetail || `请求失败（状态码 ${response.status}）`)
     }
   }
 
   let data: unknown
-
   try {
     data = await response.json()
   } catch {
-    throw new Error('无法解析 API 响应，请稍后重试')
+    throw new Error('无法解析响应，请稍后重试')
   }
 
   const content = (data as Record<string, unknown[]>)?.choices?.[0] as
@@ -115,30 +76,8 @@ export async function chat(
     | undefined
 
   if (!content?.message?.content) {
-    throw new Error('API 返回了空的响应内容')
+    throw new Error('AI返回了空的响应内容')
   }
 
   return content.message.content
-}
-
-// ---------------------------------------------------------------------------
-// API Key 本地存储管理
-// ---------------------------------------------------------------------------
-
-const API_KEY_STORAGE_KEY = 'otaku-map-deepseek-key'
-
-export function getStoredApiKey(): string | null {
-  try {
-    return localStorage.getItem(API_KEY_STORAGE_KEY)
-  } catch {
-    return null
-  }
-}
-
-export function setStoredApiKey(key: string): void {
-  localStorage.setItem(API_KEY_STORAGE_KEY, key)
-}
-
-export function removeStoredApiKey(): void {
-  localStorage.removeItem(API_KEY_STORAGE_KEY)
 }
