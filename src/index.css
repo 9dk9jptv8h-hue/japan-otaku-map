@@ -216,7 +216,11 @@
   will-change: transform;
 }
 
-/* 归因控件样式 */
+/* 归因控件样式 — 移到左下角避免和缩放键重叠 */
+.maplibregl-ctrl-bottom-right {
+  left: 0 !important;
+  right: auto !important;
+}
 .maplibregl-ctrl-attrib {
   font-size: 10px !important;
   background: var(--color-glass) !important;
