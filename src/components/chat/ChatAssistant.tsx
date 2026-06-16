@@ -469,6 +469,7 @@ export function ChatAssistant() {
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && !e.shiftKey) {
                   e.preventDefault()
+                  e.stopPropagation()
                   handleSend()
                 }
               }}
