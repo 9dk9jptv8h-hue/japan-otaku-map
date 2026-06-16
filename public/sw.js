@@ -39,7 +39,7 @@ self.addEventListener('fetch', (e) => {
             trimCache(cache)
           }
           return response
-        }).catch(() => null)
+        }).catch(() => new Response('', { status: 503, statusText: 'Offline' }))
 
         // Return cache immediately if available, otherwise wait for network
         return cached || fetchPromise

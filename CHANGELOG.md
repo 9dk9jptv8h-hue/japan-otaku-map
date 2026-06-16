@@ -7,6 +7,13 @@
 
 ---
 
+## [2.4.0] - 2026-06-16
+
+### Added（新增）
+- 地图标记hover放大效果 — 鼠标悬停圆点放大1.6倍+描边加粗，侧边栏卡片hover联动地图标记
+
+---
+
 ## [2.3.0] - 2026-06-15
 
 ### Fixed（修复）
@@ -286,6 +293,7 @@
 
 ---
 
+[2.4.0]: https://github.com/9dk9jptv8h-hue/japan-otaku-map/compare/v2.3.0...v2.4.0
 [2.3.0]: https://github.com/9dk9jptv8h-hue/japan-otaku-map/compare/v2.2.0...v2.3.0
 [2.2.0]: https://github.com/9dk9jptv8h-hue/japan-otaku-map/compare/v2.1.0...v2.2.0
 [2.1.0]: https://github.com/9dk9jptv8h-hue/japan-otaku-map/compare/v2.0.0...v2.1.0

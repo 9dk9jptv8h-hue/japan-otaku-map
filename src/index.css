@@ -120,12 +120,6 @@
   100% { opacity: 1; transform: scale(1) translateY(0); }
 }
 
-/* 标记呼吸 */
-@keyframes markerBreath {
-  0%, 100% { transform: scale(1);   opacity: 0.9; }
-  50%      { transform: scale(1.3); opacity: 0; }
-}
-
 /* 悬浮光环脉冲 */
 @keyframes pulse {
   0%   { transform: scale(1);   opacity: 0.7; }
@@ -156,12 +150,6 @@
 @keyframes gleamSlide {
   0%   { left: -200%; }
   100% { left: 200%; }
-}
-
-/* 骨架屏闪烁 */
-@keyframes skeletonShimmer {
-  0%   { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
 }
 
 /* 遮罩淡入 */
@@ -321,52 +309,6 @@
   display: none;
 }
 
-/* ================================================================
-   Component-Specific Animations
-   ================================================================ */
-
-/* ================================================================
-   自定义标记 — CSS 自定义属性驱动，避免 JS innerHTML 更新
-   ================================================================ */
-.custom-marker-el {
-  --marker-size: 30px;
-  --marker-color: #607d8b;
-  --marker-radius: 12px;
-  --marker-border: 2px;
-  --marker-shadow: 0 4px 14px rgba(96, 125, 139, 0.33);
-  cursor: pointer;
-  will-change: transform;
-  /* 仅在 hover/click 时触发 transform 变化，不会触发 layout */
-  transition: transform 0.3s var(--ease-spring);
-}
-.custom-marker-el:hover {
-  transform: scale(1.2);
-}
-
-/* 标记主体圆点 — 所有动态尺寸/颜色通过 CSS 变量注入 */
-.marker-dot {
-  width: var(--marker-size);
-  height: var(--marker-size);
-  background: var(--marker-color);
-  border: var(--marker-border) solid white;
-  border-radius: var(--marker-radius);
-  box-shadow: var(--marker-shadow);
-  /* 精确指定过渡属性，不用 all */
-  transition: width 0.3s var(--ease-spring),
-              height 0.3s var(--ease-spring),
-              box-shadow 0.3s var(--ease-spring),
-              transform 0.3s var(--ease-spring);
-}
-
-/* 选中状态脉冲光环 */
-.marker-pulse-ring {
-  width: var(--marker-size);
-  height: var(--marker-size);
-  border-radius: var(--marker-radius);
-  border: 2.5px solid var(--marker-color);
-  animation: pulse 1.6s ease-out infinite;
-}
-
 /* 卡片悬停光条扫过（Gleam Effect） */
 .location-card {
   position: relative;
@@ -397,17 +339,6 @@
   animation: gleamSlide 0.7s var(--ease-smooth) forwards;
 }
 
-/* 骨架屏闪烁 */
-.skeleton-shimmer {
-  background: linear-gradient(
-    90deg,
-    rgba(0, 0, 0, 0.04) 0%,
-    rgba(0, 0, 0, 0.08) 40%,
-    rgba(0, 0, 0, 0.04) 80%
-  );
-  background-size: 200% 100%;
-  animation: skeletonShimmer 1.8s ease-in-out infinite;
-}
 /* ================================================================
    Mobile Safe Area & Touch Optimization
    ================================================================ */
