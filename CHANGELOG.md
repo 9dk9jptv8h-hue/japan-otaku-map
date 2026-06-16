@@ -7,6 +7,16 @@
 
 ---
 
+## [3.1.1] - 2026-06-16
+
+### Fixed（修复）
+- AI小助手回复格式优化 — Markdown渲染改为纯文本，消除多余换行和格式符号
+- 修复聊天面板重复消息问题 — 防止同一请求触发多次发送
+- 归因文字「Powered by DeepSeek」位置调整，不再遮挡缩放控件
+- 缩放按钮（+/-）在聊天面板展开时自动上移避让
+
+---
+
 ## [3.1.0] - 2026-06-16
 
 ### Changed（变更）
@@ -368,6 +378,7 @@
 
 ---
 
+[3.1.1]: https://github.com/9dk9jptv8h-hue/japan-otaku-map/compare/v3.1.0...v3.1.1
 [3.1.0]: https://github.com/9dk9jptv8h-hue/japan-otaku-map/compare/v3.0.0...v3.1.0
 [3.0.0]: https://github.com/9dk9jptv8h-hue/japan-otaku-map/compare/v2.8.0...v3.0.0
 [2.8.0]: https://github.com/9dk9jptv8h-hue/japan-otaku-map/compare/v2.7.0...v2.8.0
