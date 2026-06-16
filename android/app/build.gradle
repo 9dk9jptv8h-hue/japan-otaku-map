@@ -1,5 +1,5 @@
 plugins {
-    id 'com.android.application'
+    id 'com.android.application' version '8.2.2'
 }
 
 android {
@@ -11,13 +11,11 @@ android {
         minSdk 24
         targetSdk 34
         versionCode 1
-        versionName "2.5.0"
+        versionName "2.5"
     }
 
     buildTypes {
-        release {
-            minifyEnabled false
-        }
+        debug {}
     }
 
     compileOptions {
