@@ -7,6 +7,18 @@
 
 ---
 
+## [3.0.0] - 2026-06-16
+
+### Added（新增）
+- AI小助手聊天功能 — 右下角浮动按钮，点击展开聊天面板，接入DeepSeek API
+- AutoSec-QC提示词注入检测 — 用户输入发送前经过35+条安全规则扫描（10个攻击类别）
+- 支持自定义API Key — 用户自行输入DeepSeek API Key，localStorage本地存储
+- 系统提示词内置176家店铺知识 — AI了解7大连锁品牌及热门区域推荐
+- 聊天面板移动端全屏适配 — 桌面端400x500浮动面板，移动端全屏聊天
+- 消息安全拦截 — HIGH/CRITICAL级别注入攻击自动拦截并提示用户
+
+---
+
 ## [2.8.0] - 2026-06-16
 
 ### Fixed（修复）
@@ -344,6 +356,8 @@
 
 ---
 
+[3.0.0]: https://github.com/9dk9jptv8h-hue/japan-otaku-map/compare/v2.8.0...v3.0.0
+[2.8.0]: https://github.com/9dk9jptv8h-hue/japan-otaku-map/compare/v2.7.0...v2.8.0
 [2.7.0]: https://github.com/9dk9jptv8h-hue/japan-otaku-map/compare/v2.6.0...v2.7.0
 [2.6.0]: https://github.com/9dk9jptv8h-hue/japan-otaku-map/compare/v2.5.1...v2.6.0
 [2.5.1]: https://github.com/9dk9jptv8h-hue/japan-otaku-map/compare/v2.5.0...v2.5.1

@@ -1,0 +1,1653 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>日本动漫店铺地图 - 路演 PPT</title>
+<style>
+/* ===== Reset & Base ===== */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-snap-type: y mandatory; scroll-behavior: smooth; font-size: 16px; }
+body {
+  font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', system-ui, -apple-system, sans-serif;
+  background: #0a0a12;
+  color: #e0e0e8;
+  overflow-x: hidden;
+  line-height: 1.6;
+}
+
+/* ===== Brand Colors ===== */
+:root {
+  --animate: #e91e63;
+  --melonbooks: #4caf50;
+  --mandarake: #ff9800;
+  --surugaya: #1565c0;
+  --gamers: #fbc02d;
+  --lashinbang: #7b1fa2;
+  --kbooks: #b71c1c;
+  --neon-primary: #e91e63;
+  --neon-secondary: #7b1fa2;
+  --glass-bg: rgba(255, 255, 255, 0.04);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-bg-hover: rgba(255, 255, 255, 0.07);
+  --text-primary: #f0f0f8;
+  --text-secondary: #a0a0b8;
+  --text-dim: #606078;
+  --bg-deep: #0a0a12;
+}
+
+/* ===== Slide Container ===== */
+.slide {
+  min-height: 100vh;
+  scroll-snap-align: start;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  padding: 60px 40px;
+}
+.slide-inner {
+  max-width: 1200px;
+  width: 100%;
+  position: relative;
+  z-index: 2;
+}
+
+/* ===== Ambient Background ===== */
+.ambient-orb {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(120px);
+  opacity: 0.12;
+  pointer-events: none;
+  z-index: 0;
+  animation: float-orb 20s ease-in-out infinite;
+}
+.orb-1 { width: 600px; height: 600px; background: var(--animate); top: -200px; left: -200px; }
+.orb-2 { width: 500px; height: 500px; background: var(--surugaya); bottom: -150px; right: -150px; animation-delay: -7s; }
+.orb-3 { width: 400px; height: 400px; background: var(--lashinbang); top: 40%; left: 60%; animation-delay: -14s; }
+
+@keyframes float-orb {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  25% { transform: translate(30px, -40px) scale(1.05); }
+  50% { transform: translate(-20px, 20px) scale(0.95); }
+  75% { transform: translate(40px, 30px) scale(1.03); }
+}
+
+/* ===== Particle Canvas ===== */
+#particles {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* ===== Typography ===== */
+.title-mega {
+  font-size: clamp(2.5rem, 6vw, 5rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  background: linear-gradient(135deg, #fff 0%, #e0e0f0 40%, var(--neon-primary) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.title-large {
+  font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+  color: var(--text-primary);
+}
+.title-section {
+  font-size: clamp(1.1rem, 1.8vw, 1.4rem);
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+}
+.subtitle {
+  font-size: clamp(1rem, 1.8vw, 1.25rem);
+  color: var(--text-secondary);
+  font-weight: 400;
+  line-height: 1.5;
+}
+.label-tag {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  padding: 5px 14px;
+  border-radius: 100px;
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+}
+
+/* ===== Neon Glow ===== */
+.neon-glow {
+  text-shadow:
+    0 0 10px rgba(233, 30, 99, 0.5),
+    0 0 40px rgba(233, 30, 99, 0.2),
+    0 0 80px rgba(233, 30, 99, 0.1);
+}
+.neon-line {
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--neon-primary), var(--neon-secondary), transparent);
+  border-radius: 2px;
+  margin: 20px auto;
+  width: 180px;
+  box-shadow: 0 0 12px rgba(233, 30, 99, 0.4);
+}
+
+/* ===== Glass Card ===== */
+.glass-card {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.glass-card:hover {
+  background: var(--glass-bg-hover);
+  border-color: rgba(255, 255, 255, 0.12);
+  transform: translateY(-4px);
+  box-shadow: 0 20px 60px -15px rgba(0, 0, 0, 0.5);
+}
+
+/* ===== Animation Base ===== */
+.anim-item {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1),
+              transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.anim-item.visible { opacity: 1; transform: translateY(0); }
+.stagger-1 { transition-delay: 0.05s; }
+.stagger-2 { transition-delay: 0.12s; }
+.stagger-3 { transition-delay: 0.2s; }
+.stagger-4 { transition-delay: 0.3s; }
+.stagger-5 { transition-delay: 0.4s; }
+.stagger-6 { transition-delay: 0.5s; }
+.stagger-7 { transition-delay: 0.6s; }
+.stagger-8 { transition-delay: 0.7s; }
+
+/* ===== Navigation Dots ===== */
+.nav-dots {
+  position: fixed;
+  right: 28px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.nav-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+}
+.nav-dot:hover { background: rgba(255, 255, 255, 0.3); transform: scale(1.3); }
+.nav-dot.active {
+  background: var(--neon-primary);
+  border-color: var(--neon-primary);
+  box-shadow: 0 0 12px rgba(233, 30, 99, 0.6);
+  transform: scale(1.3);
+}
+.nav-dot .dot-label {
+  position: absolute;
+  right: 24px; top: 50%;
+  transform: translateY(-50%);
+  white-space: nowrap;
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  opacity: 0;
+  transition: opacity 0.2s;
+  pointer-events: none;
+  background: rgba(10, 10, 18, 0.9);
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--glass-border);
+}
+.nav-dot:hover .dot-label { opacity: 1; }
+
+/* ===== Progress Bar ===== */
+.progress-bar {
+  position: fixed; top: 0; left: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--animate), var(--lashinbang), var(--surugaya));
+  z-index: 200;
+  transition: width 0.3s ease;
+  box-shadow: 0 0 10px rgba(233, 30, 99, 0.5);
+}
+
+/* Page Counter */
+.page-counter {
+  position: fixed; bottom: 28px; right: 28px;
+  z-index: 100;
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ============================================
+   SLIDE 1: COVER
+   ============================================ */
+.cover-content {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+.cover-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 18px;
+  border-radius: 100px;
+  background: linear-gradient(135deg, rgba(233, 30, 99, 0.1), rgba(123, 31, 162, 0.1));
+  border: 1px solid rgba(233, 30, 99, 0.2);
+  font-size: 0.78rem;
+  color: var(--animate);
+  font-weight: 500;
+}
+.cover-stats {
+  display: flex;
+  gap: 40px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+.cover-stat { text-align: center; }
+.cover-stat-num {
+  font-size: 2rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #fff, var(--neon-primary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.cover-stat-label {
+  font-size: 0.7rem;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-top: 4px;
+}
+.cover-url {
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  letter-spacing: 0.03em;
+  margin-top: 16px;
+}
+.cover-url a {
+  color: var(--text-secondary);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  transition: all 0.3s;
+}
+.cover-url a:hover { color: var(--animate); border-color: var(--animate); }
+
+.brand-dots {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 4px;
+}
+.brand-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+.brand-dot:nth-child(1) { background: var(--animate); animation-delay: 0s; }
+.brand-dot:nth-child(2) { background: var(--melonbooks); animation-delay: 0.15s; }
+.brand-dot:nth-child(3) { background: var(--mandarake); animation-delay: 0.3s; }
+.brand-dot:nth-child(4) { background: var(--surugaya); animation-delay: 0.45s; }
+.brand-dot:nth-child(5) { background: var(--gamers); animation-delay: 0.6s; }
+.brand-dot:nth-child(6) { background: var(--lashinbang); animation-delay: 0.75s; }
+.brand-dot:nth-child(7) { background: var(--kbooks); animation-delay: 0.9s; }
+
+@keyframes pulse-dot {
+  0%, 100% { transform: scale(1); opacity: 0.7; }
+  50% { transform: scale(1.5); opacity: 1; }
+}
+
+/* ============================================
+   SLIDE 2: PAIN POINTS
+   ============================================ */
+.pain-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+  margin-top: 48px;
+}
+.pain-card {
+  padding: 40px 28px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.pain-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 60px; height: 2px;
+  border-radius: 2px;
+}
+.pain-card:nth-child(1)::before { background: var(--animate); box-shadow: 0 0 12px var(--animate); }
+.pain-card:nth-child(2)::before { background: var(--mandarake); box-shadow: 0 0 12px var(--mandarake); }
+.pain-card:nth-child(3)::before { background: var(--surugaya); box-shadow: 0 0 12px var(--surugaya); }
+.pain-icon { font-size: 2.2rem; margin-bottom: 20px; display: block; }
+.pain-number {
+  font-size: clamp(2.5rem, 5vw, 3.5rem);
+  font-weight: 900;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+.pain-card:nth-child(1) .pain-number { color: var(--animate); text-shadow: 0 0 30px rgba(233, 30, 99, 0.3); }
+.pain-card:nth-child(2) .pain-number { color: var(--mandarake); text-shadow: 0 0 30px rgba(255, 152, 0, 0.3); }
+.pain-card:nth-child(3) .pain-number { color: var(--surugaya); text-shadow: 0 0 30px rgba(21, 101, 192, 0.3); }
+.pain-unit {
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  margin-bottom: 16px;
+  font-weight: 500;
+}
+.pain-desc {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+/* ============================================
+   SLIDE 3: SOLUTION
+   ============================================ */
+.solution-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  align-items: center;
+}
+.solution-screenshot {
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 30px 80px -20px rgba(0, 0, 0, 0.6);
+  position: relative;
+}
+.solution-screenshot img { width: 100%; display: block; }
+.solution-screenshot::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 16px;
+  background: linear-gradient(180deg, transparent 60%, rgba(10, 10, 18, 0.4));
+  pointer-events: none;
+}
+.solution-features {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.feature-item {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  padding: 18px;
+  border-radius: 12px;
+  transition: all 0.3s;
+}
+.feature-item:hover { background: var(--glass-bg); }
+.feature-icon-box {
+  width: 44px; height: 44px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  flex-shrink: 0;
+}
+.feature-text h4 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 3px;
+}
+.feature-text p {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+/* ============================================
+   SLIDE 4: PRODUCT DATA
+   ============================================ */
+.data-hero {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-bottom: 40px;
+}
+.data-hero-card {
+  text-align: center;
+  padding: 32px 20px;
+}
+.data-hero-num {
+  font-size: clamp(2.5rem, 5vw, 3.8rem);
+  font-weight: 900;
+  line-height: 1;
+  background: linear-gradient(135deg, #fff, var(--neon-primary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.data-hero-label {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-top: 8px;
+  font-weight: 500;
+}
+.bar-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+  height: 220px;
+  padding: 0 20px;
+  justify-content: center;
+  margin-top: 8px;
+}
+.bar-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  max-width: 100px;
+}
+.bar-value {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+.bar-fill {
+  width: 100%;
+  border-radius: 8px 8px 4px 4px;
+  min-height: 4px;
+  transition: height 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+.bar-fill::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.15) 0%, transparent 100%);
+}
+.bar-name {
+  font-size: 0.65rem;
+  color: var(--text-secondary);
+  text-align: center;
+  font-weight: 500;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+/* ============================================
+   SLIDE 5: COMPETITIVE ANALYSIS
+   ============================================ */
+.funnel-visual {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  margin-top: 36px;
+  padding: 24px;
+  border-radius: 12px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+}
+.funnel-step { text-align: center; flex: 1; }
+.funnel-step-label {
+  font-size: 0.7rem;
+  color: var(--text-dim);
+  margin-bottom: 4px;
+}
+.funnel-step-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.funnel-arrow-sm {
+  font-size: 1.5rem;
+  color: var(--text-dim);
+  margin: 0 12px;
+}
+.compare-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin-top: 36px;
+  font-size: 0.85rem;
+}
+.compare-table thead th {
+  padding: 14px 16px;
+  text-align: center;
+  font-weight: 600;
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--glass-border);
+}
+.compare-table thead th:first-child { text-align: left; }
+.compare-table thead th.our-col {
+  color: var(--animate);
+  position: relative;
+}
+.compare-table thead th.our-col::after {
+  content: '';
+  position: absolute;
+  bottom: -1px; left: 10%; width: 80%; height: 2px;
+  background: var(--animate);
+  box-shadow: 0 0 8px var(--animate);
+}
+.compare-table tbody td {
+  padding: 12px 16px;
+  text-align: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  color: var(--text-secondary);
+}
+.compare-table tbody td:first-child {
+  text-align: left;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+.compare-table tbody tr:hover { background: var(--glass-bg); }
+.check { color: var(--melonbooks); font-size: 1.1rem; }
+.cross { color: #ef4444; font-size: 1.1rem; }
+.partial { color: var(--gamers); font-size: 1.1rem; }
+.our-col-cell { background: rgba(233, 30, 99, 0.04); }
+
+/* ============================================
+   SLIDE 6: TECH STACK
+   ============================================ */
+.tech-flow {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+.tech-layer {
+  padding: 24px 20px;
+  text-align: center;
+}
+.tech-icon { font-size: 1.8rem; display: block; margin-bottom: 10px; }
+.tech-name {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 3px;
+}
+.tech-version {
+  font-size: 0.7rem;
+  color: var(--text-dim);
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+.tech-desc {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+.tech-connectors {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  margin: 12px 0;
+}
+.tech-connector {
+  width: 1px; height: 32px;
+  background: linear-gradient(180deg, var(--glass-border), transparent);
+}
+
+/* ============================================
+   SLIDE 7: BUSINESS MODEL
+   ============================================ */
+.biz-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-top: 36px;
+}
+.biz-card {
+  padding: 28px 20px;
+  text-align: center;
+}
+.biz-icon { font-size: 1.8rem; margin-bottom: 14px; display: block; }
+.biz-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+.biz-desc {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+.biz-tag {
+  display: inline-block;
+  font-size: 0.6rem;
+  padding: 3px 10px;
+  border-radius: 100px;
+  margin-top: 12px;
+  font-weight: 600;
+}
+
+/* ============================================
+   SLIDE 8: ROADMAP
+   ============================================ */
+.timeline {
+  position: relative;
+  margin-top: 56px;
+  padding: 0 20px;
+}
+.timeline-line {
+  position: absolute;
+  top: 24px;
+  left: 40px; right: 40px;
+  height: 2px;
+  background: linear-gradient(90deg, var(--animate), var(--melonbooks), var(--surugaya), var(--lashinbang));
+  border-radius: 2px;
+}
+.timeline-nodes {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  position: relative;
+  z-index: 2;
+}
+.timeline-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+.timeline-dot-wrap {
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-deep);
+  border: 2px solid var(--glass-border);
+  margin-bottom: 20px;
+  transition: all 0.3s;
+  position: relative;
+}
+.timeline-node.current .timeline-dot-wrap {
+  border-color: var(--animate);
+  box-shadow: 0 0 20px rgba(233, 30, 99, 0.4);
+}
+.timeline-node.current .timeline-dot-wrap::after {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 2px solid rgba(233, 30, 99, 0.3);
+  animation: pulse-ring 2s ease-in-out infinite;
+}
+@keyframes pulse-ring {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.15); opacity: 0.5; }
+}
+.timeline-dot-icon { font-size: 1.2rem; }
+.timeline-date {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--text-dim);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.timeline-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+.timeline-items {
+  list-style: none;
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+.timeline-node.done { opacity: 0.5; }
+
+/* ============================================
+   SLIDE 9: TEAM
+   ============================================ */
+.team-card {
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 48px 40px;
+  text-align: center;
+}
+.team-avatar {
+  width: 100px; height: 100px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--animate), var(--lashinbang));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  margin: 0 auto 24px;
+  border: 3px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 40px rgba(233, 30, 99, 0.2);
+}
+.team-name {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+.team-role {
+  font-size: 1rem;
+  color: var(--neon-primary);
+  font-weight: 500;
+  margin-bottom: 20px;
+}
+.team-bio {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  margin-bottom: 24px;
+}
+.team-skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+.team-skill-tag {
+  font-size: 0.7rem;
+  padding: 5px 14px;
+  border-radius: 100px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+/* ============================================
+   SLIDE 10: CONTACT / END
+   ============================================ */
+.end-content {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+.end-thanks {
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  font-weight: 900;
+  background: linear-gradient(135deg, #fff 0%, var(--animate) 50%, var(--lashinbang) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.end-links {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.end-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 28px;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s;
+  cursor: pointer;
+}
+.end-link-primary {
+  background: linear-gradient(135deg, var(--animate), var(--lashinbang));
+  color: #fff;
+  border: none;
+}
+.end-link-primary:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 40px rgba(233, 30, 99, 0.3);
+}
+.end-link-secondary {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  color: var(--text-primary);
+}
+.end-link-secondary:hover {
+  background: var(--glass-bg-hover);
+  transform: translateY(-3px);
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 900px) {
+  .slide { padding: 40px 20px; }
+  .pain-grid { grid-template-columns: 1fr; gap: 16px; }
+  .solution-layout { grid-template-columns: 1fr; gap: 32px; }
+  .data-hero { grid-template-columns: 1fr; }
+  .compare-table { font-size: 0.75rem; }
+  .tech-flow { grid-template-columns: 1fr 1fr; }
+  .biz-grid { grid-template-columns: 1fr; }
+  .timeline-nodes { grid-template-columns: repeat(2, 1fr); gap: 28px; }
+  .timeline-line { display: none; }
+  .nav-dots { display: none; }
+  .bar-chart { height: 160px; gap: 8px; }
+}
+@media (max-width: 600px) {
+  .cover-stats { gap: 24px; }
+  .timeline-nodes { grid-template-columns: 1fr; }
+  .tech-flow { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- Ambient Orbs -->
+<div class="ambient-orb orb-1"></div>
+<div class="ambient-orb orb-2"></div>
+<div class="ambient-orb orb-3"></div>
+
+<!-- Particle Canvas -->
+<canvas id="particles"></canvas>
+
+<!-- Progress Bar -->
+<div class="progress-bar" id="progressBar"></div>
+
+<!-- Navigation Dots -->
+<nav class="nav-dots" id="navDots">
+  <div class="nav-dot active" data-slide="0"><span class="dot-label">封面</span></div>
+  <div class="nav-dot" data-slide="1"><span class="dot-label">痛点</span></div>
+  <div class="nav-dot" data-slide="2"><span class="dot-label">解决方案</span></div>
+  <div class="nav-dot" data-slide="3"><span class="dot-label">产品数据</span></div>
+  <div class="nav-dot" data-slide="4"><span class="dot-label">竞争分析</span></div>
+  <div class="nav-dot" data-slide="5"><span class="dot-label">技术架构</span></div>
+  <div class="nav-dot" data-slide="6"><span class="dot-label">商业模式</span></div>
+  <div class="nav-dot" data-slide="7"><span class="dot-label">发展路线</span></div>
+  <div class="nav-dot" data-slide="8"><span class="dot-label">团队</span></div>
+  <div class="nav-dot" data-slide="9"><span class="dot-label">联系方式</span></div>
+</nav>
+
+<!-- Page Counter -->
+<div class="page-counter" id="pageCounter">01 / 10</div>
+
+<!-- ================================================
+     SLIDE 1: COVER
+     ================================================ -->
+<section class="slide" id="slide-0">
+  <div class="slide-inner cover-content">
+    <div class="anim-item stagger-1">
+      <div class="cover-badge">
+        <span>🎌</span>
+        <span>v2.8.0 — 开源项目</span>
+      </div>
+    </div>
+    <h1 class="title-mega neon-glow anim-item stagger-2">日本动漫店铺地图</h1>
+    <div class="neon-line anim-item stagger-3"></div>
+    <p class="subtitle anim-item stagger-3" style="max-width:600px;">
+      176家动漫店铺 · 7大连锁品牌 · 全日本覆盖
+    </p>
+    <div class="cover-stats anim-item stagger-4">
+      <div class="cover-stat">
+        <div class="cover-stat-num" data-count="176">0</div>
+        <div class="cover-stat-label">店铺总数</div>
+      </div>
+      <div class="cover-stat">
+        <div class="cover-stat-num" data-count="7">0</div>
+        <div class="cover-stat-label">连锁品牌</div>
+      </div>
+      <div class="cover-stat">
+        <div class="cover-stat-num" data-count="47">0</div>
+        <div class="cover-stat-label">都道府县</div>
+      </div>
+    </div>
+    <div class="brand-dots anim-item stagger-5">
+      <div class="brand-dot"></div><div class="brand-dot"></div><div class="brand-dot"></div>
+      <div class="brand-dot"></div><div class="brand-dot"></div><div class="brand-dot"></div>
+      <div class="brand-dot"></div>
+    </div>
+    <div class="cover-url anim-item stagger-6">
+      <a href="https://zhiyuheng.net.cn" target="_blank">zhiyuheng.net.cn</a>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================
+     SLIDE 2: PAIN POINTS
+     ================================================ -->
+<section class="slide" id="slide-1">
+  <div class="slide-inner">
+    <div style="text-align:center;">
+      <div class="label-tag anim-item stagger-1">PROBLEM</div>
+      <h2 class="title-large anim-item stagger-2">市场痛点</h2>
+      <p class="subtitle anim-item stagger-2" style="max-width:560px;margin:12px auto 0;">
+        中国赴日游客中的动漫爱好者，缺乏一个专业的店铺导航工具
+      </p>
+    </div>
+    <div class="pain-grid">
+      <div class="glass-card pain-card anim-item stagger-3">
+        <span class="pain-icon">✈️</span>
+        <div class="pain-number" data-count="960">0</div>
+        <div class="pain-unit">万人次 · 2019年</div>
+        <p class="pain-desc">中国赴日游客总量，疫后持续强劲恢复</p>
+      </div>
+      <div class="glass-card pain-card anim-item stagger-4">
+        <span class="pain-icon">🎌</span>
+        <div class="pain-number">30-40<span style="font-size:0.5em">%</span></div>
+        <div class="pain-unit">动漫相关旅游占比</div>
+        <p class="pain-desc">近四成游客会前往动漫相关店铺或景点消费</p>
+      </div>
+      <div class="glass-card pain-card anim-item stagger-5">
+        <span class="pain-icon">🗺️</span>
+        <div class="pain-number" data-count="0">0</div>
+        <div class="pain-unit">专业动漫店铺地图</div>
+        <p class="pain-desc">市场上没有一款聚合全日本动漫店铺的中文地图工具</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================
+     SLIDE 3: SOLUTION
+     ================================================ -->
+<section class="slide" id="slide-2">
+  <div class="slide-inner">
+    <div style="text-align:center;margin-bottom:48px;">
+      <div class="label-tag anim-item stagger-1">SOLUTION</div>
+      <h2 class="title-large anim-item stagger-2">我们的解决方案</h2>
+    </div>
+    <div class="solution-layout">
+      <div class="solution-screenshot anim-item stagger-3">
+        <img src="https://raw.githubusercontent.com/9dk9jptv8h-hue/japan-otaku-map/master/public/screenshots/map-interface.png"
+             alt="日本动漫店铺地图截图"
+             onerror="this.parentElement.innerHTML='<div style=&quot;padding:80px 40px;text-align:center;background:linear-gradient(135deg,#12121e,#1a1a2e);color:#606078&quot;><div style=&quot;font-size:4rem;margin-bottom:16px&quot;>🗾</div><div>产品界面预览</div></div>'" />
+      </div>
+      <div class="solution-features">
+        <div class="feature-item anim-item stagger-3">
+          <div class="feature-icon-box" style="background:rgba(233,30,99,0.12);color:var(--animate);">🗾</div>
+          <div class="feature-text">
+            <h4>矢量瓦片地图</h4>
+            <p>基于 MapLibre GL 的高性能矢量地图，流畅缩放与交互</p>
+          </div>
+        </div>
+        <div class="feature-item anim-item stagger-4">
+          <div class="feature-icon-box" style="background:rgba(76,175,80,0.12);color:var(--melonbooks);">🎨</div>
+          <div class="feature-text">
+            <h4>品牌色彩标记</h4>
+            <p>7大连锁品牌独立配色，一眼识别店铺类型</p>
+          </div>
+        </div>
+        <div class="feature-item anim-item stagger-5">
+          <div class="feature-icon-box" style="background:rgba(21,101,192,0.12);color:var(--surugaya);">🔍</div>
+          <div class="feature-text">
+            <h4>搜索与筛选</h4>
+            <p>按品牌、区域、名称快速定位目标店铺</p>
+          </div>
+        </div>
+        <div class="feature-item anim-item stagger-6">
+          <div class="feature-icon-box" style="background:rgba(123,31,162,0.12);color:var(--lashinbang);">📱</div>
+          <div class="feature-text">
+            <h4>全平台支持</h4>
+            <p>响应式设计 + PWA + Android APK，随时随地使用</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================
+     SLIDE 4: PRODUCT DATA
+     ================================================ -->
+<section class="slide" id="slide-3">
+  <div class="slide-inner">
+    <div style="text-align:center;margin-bottom:36px;">
+      <div class="label-tag anim-item stagger-1">DATA</div>
+      <h2 class="title-large anim-item stagger-2">产品数据</h2>
+    </div>
+    <div class="data-hero">
+      <div class="glass-card data-hero-card anim-item stagger-3">
+        <div class="data-hero-num" data-count="176">0</div>
+        <div class="data-hero-label">店铺总数</div>
+      </div>
+      <div class="glass-card data-hero-card anim-item stagger-4">
+        <div class="data-hero-num" data-count="7">0</div>
+        <div class="data-hero-label">连锁品牌</div>
+      </div>
+      <div class="glass-card data-hero-card anim-item stagger-5">
+        <div class="data-hero-num" data-count="47">0</div>
+        <div class="data-hero-label">覆盖都道府县</div>
+      </div>
+    </div>
+    <div class="glass-card anim-item stagger-6" style="padding:28px 20px;">
+      <div style="text-align:center;margin-bottom:20px;">
+        <div class="title-section">各品牌店铺分布</div>
+      </div>
+      <div class="bar-chart" id="barChart">
+        <div class="bar-col">
+          <div class="bar-value">53</div>
+          <div class="bar-fill" data-height="100" style="height:0;background:var(--animate);"></div>
+          <div class="bar-name">Animate</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-value">37</div>
+          <div class="bar-fill" data-height="70" style="height:0;background:var(--surugaya);"></div>
+          <div class="bar-name">Suruga-ya</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-value">30</div>
+          <div class="bar-fill" data-height="57" style="height:0;background:var(--lashinbang);"></div>
+          <div class="bar-name">Lashinbang</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-value">25</div>
+          <div class="bar-fill" data-height="47" style="height:0;background:var(--melonbooks);"></div>
+          <div class="bar-name">Melonbooks</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-value">14</div>
+          <div class="bar-fill" data-height="26" style="height:0;background:var(--gamers);"></div>
+          <div class="bar-name">GAMERS</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-value">9</div>
+          <div class="bar-fill" data-height="17" style="height:0;background:var(--mandarake);"></div>
+          <div class="bar-name">Mandarake</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-value">7</div>
+          <div class="bar-fill" data-height="13" style="height:0;background:var(--kbooks);"></div>
+          <div class="bar-name">K-Books</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================
+     SLIDE 5: COMPETITIVE ANALYSIS
+     ================================================ -->
+<section class="slide" id="slide-4">
+  <div class="slide-inner">
+    <div style="text-align:center;margin-bottom:16px;">
+      <div class="label-tag anim-item stagger-1">COMPETITION</div>
+      <h2 class="title-large anim-item stagger-2">竞争分析</h2>
+    </div>
+    <div class="glass-card anim-item stagger-3" style="padding:8px;overflow-x:auto;">
+      <table class="compare-table">
+        <thead>
+          <tr>
+            <th>功能维度</th>
+            <th class="our-col">🗾 我们</th>
+            <th>Anitabi</th>
+            <th>Google Maps</th>
+            <th>小红书</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>动漫店铺聚合</td>
+            <td class="our-col-cell"><span class="check">✅</span> 176家</td>
+            <td><span class="cross">✕</span></td>
+            <td><span class="partial">△</span> 分散</td>
+            <td><span class="partial">△</span> UGC</td>
+          </tr>
+          <tr>
+            <td>中文界面</td>
+            <td class="our-col-cell"><span class="check">✅</span></td>
+            <td><span class="check">✅</span></td>
+            <td><span class="partial">△</span></td>
+            <td><span class="check">✅</span></td>
+          </tr>
+          <tr>
+            <td>实时地图导航</td>
+            <td class="our-col-cell"><span class="check">✅</span> 矢量</td>
+            <td><span class="check">✅</span></td>
+            <td><span class="check">✅</span></td>
+            <td><span class="cross">✕</span></td>
+          </tr>
+          <tr>
+            <td>品牌分类筛选</td>
+            <td class="our-col-cell"><span class="check">✅</span> 7大品牌</td>
+            <td><span class="cross">✕</span></td>
+            <td><span class="cross">✕</span></td>
+            <td><span class="cross">✕</span></td>
+          </tr>
+          <tr>
+            <td>离线使用</td>
+            <td class="our-col-cell"><span class="check">✅</span> PWA</td>
+            <td><span class="cross">✕</span></td>
+            <td><span class="partial">△</span></td>
+            <td><span class="cross">✕</span></td>
+          </tr>
+          <tr>
+            <td>开源免费</td>
+            <td class="our-col-cell"><span class="check">✅</span> MIT</td>
+            <td><span class="cross">✕</span></td>
+            <td><span class="cross">✕</span></td>
+            <td><span class="check">✅</span></td>
+          </tr>
+          <tr>
+            <td>店铺详细信息</td>
+            <td class="our-col-cell"><span class="check">✅</span></td>
+            <td><span class="cross">✕</span></td>
+            <td><span class="partial">△</span></td>
+            <td><span class="partial">△</span></td>
+          </tr>
+          <tr>
+            <td>区域筛选</td>
+            <td class="our-col-cell"><span class="check">✅</span> 47县</td>
+            <td><span class="partial">△</span></td>
+            <td><span class="check">✅</span></td>
+            <td><span class="cross">✕</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="anim-item stagger-4" style="text-align:center;margin-top:16px;font-size:0.78rem;color:var(--text-dim);">
+      ✅ 完全支持 &nbsp; △ 部分支持 &nbsp; ✕ 不支持
+    </p>
+  </div>
+</section>
+
+<!-- ================================================
+     SLIDE 6: TECH STACK
+     ================================================ -->
+<section class="slide" id="slide-5">
+  <div class="slide-inner">
+    <div style="text-align:center;margin-bottom:16px;">
+      <div class="label-tag anim-item stagger-1">TECHNOLOGY</div>
+      <h2 class="title-large anim-item stagger-2">技术架构</h2>
+      <p class="subtitle anim-item stagger-2" style="max-width:500px;margin:12px auto 0;">现代前端技术栈，零服务器成本</p>
+    </div>
+
+    <div style="text-align:center;margin-bottom:6px;">
+      <span class="label-tag anim-item stagger-3" style="background:rgba(233,30,99,0.08);border-color:rgba(233,30,99,0.2);color:var(--animate);">前端框架</span>
+    </div>
+    <div class="tech-flow anim-item stagger-3">
+      <div class="glass-card tech-layer">
+        <span class="tech-icon">⚛️</span>
+        <div class="tech-name">React</div>
+        <div class="tech-version">v19</div>
+        <div class="tech-desc">UI 组件框架</div>
+      </div>
+      <div class="glass-card tech-layer">
+        <span class="tech-icon">🔷</span>
+        <div class="tech-name">TypeScript</div>
+        <div class="tech-version">v6</div>
+        <div class="tech-desc">类型安全</div>
+      </div>
+      <div class="glass-card tech-layer">
+        <span class="tech-icon">🎨</span>
+        <div class="tech-name">TailwindCSS</div>
+        <div class="tech-version">v4</div>
+        <div class="tech-desc">原子化样式</div>
+      </div>
+    </div>
+
+    <div class="tech-connectors anim-item stagger-4">
+      <div class="tech-connector"></div>
+      <div class="tech-connector"></div>
+      <div class="tech-connector"></div>
+    </div>
+
+    <div style="text-align:center;margin-bottom:6px;">
+      <span class="label-tag anim-item stagger-4" style="background:rgba(21,101,192,0.08);border-color:rgba(21,101,192,0.2);color:var(--surugaya);">核心能力</span>
+    </div>
+    <div class="tech-flow anim-item stagger-5">
+      <div class="glass-card tech-layer">
+        <span class="tech-icon">🗺️</span>
+        <div class="tech-name">MapLibre GL JS</div>
+        <div class="tech-version">v5</div>
+        <div class="tech-desc">开源矢量地图引擎</div>
+      </div>
+      <div class="glass-card tech-layer">
+        <span class="tech-icon">🌍</span>
+        <div class="tech-name">OpenFreeMap</div>
+        <div class="tech-version">免费瓦片</div>
+        <div class="tech-desc">零成本地图瓦片服务</div>
+      </div>
+      <div class="glass-card tech-layer">
+        <span class="tech-icon">🐻</span>
+        <div class="tech-name">Zustand</div>
+        <div class="tech-version">v5</div>
+        <div class="tech-desc">轻量状态管理</div>
+      </div>
+    </div>
+
+    <div class="tech-connectors anim-item stagger-6">
+      <div class="tech-connector"></div>
+      <div class="tech-connector"></div>
+      <div class="tech-connector"></div>
+    </div>
+
+    <div style="text-align:center;margin-bottom:6px;">
+      <span class="label-tag anim-item stagger-6" style="background:rgba(76,175,80,0.08);border-color:rgba(76,175,80,0.2);color:var(--melonbooks);">基础设施</span>
+    </div>
+    <div class="tech-flow anim-item stagger-7">
+      <div class="glass-card tech-layer">
+        <span class="tech-icon">⚡</span>
+        <div class="tech-name">Vite</div>
+        <div class="tech-version">v8</div>
+        <div class="tech-desc">闪电构建工具</div>
+      </div>
+      <div class="glass-card tech-layer">
+        <span class="tech-icon">⚙️</span>
+        <div class="tech-name">Service Worker</div>
+        <div class="tech-version">PWA</div>
+        <div class="tech-desc">离线缓存与加速</div>
+      </div>
+      <div class="glass-card tech-layer">
+        <span class="tech-icon">🚀</span>
+        <div class="tech-name">GitHub Pages</div>
+        <div class="tech-version">CI/CD</div>
+        <div class="tech-desc">零成本静态托管</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================
+     SLIDE 7: BUSINESS MODEL
+     ================================================ -->
+<section class="slide" id="slide-6">
+  <div class="slide-inner">
+    <div style="text-align:center;">
+      <div class="label-tag anim-item stagger-1">BUSINESS</div>
+      <h2 class="title-large anim-item stagger-2">商业模式</h2>
+      <p class="subtitle anim-item stagger-2" style="max-width:500px;margin:12px auto 0;">从免费工具到多元变现</p>
+    </div>
+    <div class="biz-grid">
+      <div class="glass-card biz-card anim-item stagger-3">
+        <span class="biz-icon">🏪</span>
+        <div class="biz-title">店铺导流合作</div>
+        <p class="biz-desc">为动漫店铺提供精准用户导流，按点击或到店付费</p>
+        <span class="biz-tag" style="background:rgba(233,30,99,0.12);color:var(--animate);">CPC / CPA</span>
+      </div>
+      <div class="glass-card biz-card anim-item stagger-4">
+        <span class="biz-icon">👑</span>
+        <div class="biz-title">会员订阅</div>
+        <p class="biz-desc">高级功能订阅：路线规划、库存提醒、独家折扣</p>
+        <span class="biz-tag" style="background:rgba(123,31,162,0.12);color:var(--lashinbang);">SaaS</span>
+      </div>
+      <div class="glass-card biz-card anim-item stagger-5">
+        <span class="biz-icon">🤝</span>
+        <div class="biz-title">联盟营销</div>
+        <p class="biz-desc">与旅行社、交通卡、酒店合作，佣金分成</p>
+        <span class="biz-tag" style="background:rgba(255,152,0,0.12);color:var(--mandarake);">佣金</span>
+      </div>
+      <div class="glass-card biz-card anim-item stagger-6">
+        <span class="biz-icon">📊</span>
+        <div class="biz-title">数据服务</div>
+        <p class="biz-desc">用户行为洞察报告，赋能品牌方营销决策</p>
+        <span class="biz-tag" style="background:rgba(21,101,192,0.12);color:var(--surugaya);">B2B</span>
+      </div>
+      <div class="glass-card biz-card anim-item stagger-7">
+        <span class="biz-icon">📢</span>
+        <div class="biz-title">品牌推广位</div>
+        <p class="biz-desc">首页推荐、地图标注高亮等原生广告位</p>
+        <span class="biz-tag" style="background:rgba(76,175,80,0.12);color:var(--melonbooks);">广告</span>
+      </div>
+    </div>
+    <div class="funnel-visual anim-item stagger-8" style="margin-top:28px;">
+      <div class="funnel-step">
+        <div class="funnel-step-label">100%</div>
+        <div class="funnel-step-name">免费用户</div>
+      </div>
+      <div class="funnel-arrow-sm">→</div>
+      <div class="funnel-step">
+        <div class="funnel-step-label">30%</div>
+        <div class="funnel-step-name">活跃用户</div>
+      </div>
+      <div class="funnel-arrow-sm">→</div>
+      <div class="funnel-step">
+        <div class="funnel-step-label">5%</div>
+        <div class="funnel-step-name">付费转化</div>
+      </div>
+      <div class="funnel-arrow-sm">→</div>
+      <div class="funnel-step">
+        <div class="funnel-step-label">💰</div>
+        <div class="funnel-step-name">持续收入</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================
+     SLIDE 8: ROADMAP
+     ================================================ -->
+<section class="slide" id="slide-7">
+  <div class="slide-inner">
+    <div style="text-align:center;">
+      <div class="label-tag anim-item stagger-1">ROADMAP</div>
+      <h2 class="title-large anim-item stagger-2">发展路线图</h2>
+    </div>
+    <div class="timeline anim-item stagger-3">
+      <div class="timeline-line"></div>
+      <div class="timeline-nodes">
+        <div class="timeline-node done anim-item stagger-3">
+          <div class="timeline-dot-wrap">
+            <span class="timeline-dot-icon">✅</span>
+          </div>
+          <div class="timeline-date">2026 Q2</div>
+          <div class="timeline-title">MVP 上线</div>
+          <ul class="timeline-items">
+            <li>· 176家店铺数据</li>
+            <li>· 矢量地图引擎</li>
+            <li>· 7大品牌覆盖</li>
+            <li>· GitHub Pages 部署</li>
+          </ul>
+        </div>
+        <div class="timeline-node current anim-item stagger-4">
+          <div class="timeline-dot-wrap">
+            <span class="timeline-dot-icon">🔥</span>
+          </div>
+          <div class="timeline-date">2026 Q3</div>
+          <div class="timeline-title">增长期</div>
+          <ul class="timeline-items">
+            <li>· 用户评价系统</li>
+            <li>· 路线规划功能</li>
+            <li>· Android APK</li>
+            <li>· 店铺数据扩展</li>
+          </ul>
+        </div>
+        <div class="timeline-node anim-item stagger-5">
+          <div class="timeline-dot-wrap">
+            <span class="timeline-dot-icon">🎯</span>
+          </div>
+          <div class="timeline-date">2026 Q4</div>
+          <div class="timeline-title">商业化</div>
+          <ul class="timeline-items">
+            <li>· 店铺合作洽谈</li>
+            <li>· 会员体系上线</li>
+            <li>· 数据分析平台</li>
+            <li>· B端合作推广</li>
+          </ul>
+        </div>
+        <div class="timeline-node anim-item stagger-6">
+          <div class="timeline-dot-wrap">
+            <span class="timeline-dot-icon">🚀</span>
+          </div>
+          <div class="timeline-date">2027 Q1</div>
+          <div class="timeline-title">规模化</div>
+          <ul class="timeline-items">
+            <li>· 500+ 店铺覆盖</li>
+            <li>· 多语言支持</li>
+            <li>· 社区生态建设</li>
+            <li>· 融资扩张</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================
+     SLIDE 9: TEAM
+     ================================================ -->
+<section class="slide" id="slide-8">
+  <div class="slide-inner">
+    <div style="text-align:center;margin-bottom:36px;">
+      <div class="label-tag anim-item stagger-1">TEAM</div>
+      <h2 class="title-large anim-item stagger-2">创始团队</h2>
+    </div>
+    <div class="glass-card team-card anim-item stagger-3">
+      <div class="team-avatar">👨‍💻</div>
+      <div class="team-name">支宇珩</div>
+      <div class="team-role">创始人 · 全栈开发者</div>
+      <p class="team-bio">
+        独立开发者，热爱日本动漫文化与地理信息技术。
+        从零构建了日本动漫店铺地图项目，从数据采集、前端开发到部署运维全栈覆盖。
+        致力于用技术连接动漫爱好者与线下体验。
+      </p>
+      <div class="team-skills">
+        <span class="team-skill-tag">React</span>
+        <span class="team-skill-tag">TypeScript</span>
+        <span class="team-skill-tag">MapLibre</span>
+        <span class="team-skill-tag">GIS</span>
+        <span class="team-skill-tag">Node.js</span>
+        <span class="team-skill-tag">UI/UX</span>
+        <span class="team-skill-tag">PWA</span>
+        <span class="team-skill-tag">Android</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================
+     SLIDE 10: CONTACT / END
+     ================================================ -->
+<section class="slide" id="slide-9">
+  <div class="slide-inner end-content">
+    <div class="label-tag anim-item stagger-1">THANK YOU</div>
+    <div class="end-thanks anim-item stagger-2 neon-glow">感谢观看</div>
+    <div class="neon-line anim-item stagger-3"></div>
+    <p class="subtitle anim-item stagger-3" style="max-width:480px;">
+      176家店铺 · 7大品牌 · 一张地图<br>连接每一位动漫旅行者
+    </p>
+    <div class="brand-dots anim-item stagger-4">
+      <div class="brand-dot"></div><div class="brand-dot"></div><div class="brand-dot"></div>
+      <div class="brand-dot"></div><div class="brand-dot"></div><div class="brand-dot"></div>
+      <div class="brand-dot"></div>
+    </div>
+    <div class="end-links anim-item stagger-5">
+      <a class="end-link end-link-primary" href="https://github.com/9dk9jptv8h-hue/japan-otaku-map" target="_blank">⭐ GitHub 仓库</a>
+      <a class="end-link end-link-secondary" href="https://zhiyuheng.net.cn" target="_blank">🌐 在线体验</a>
+    </div>
+    <div class="cover-url anim-item stagger-6" style="margin-top:8px;">
+      <a href="https://zhiyuheng.net.cn" target="_blank">zhiyuheng.net.cn →</a>
+    </div>
+  </div>
+</section>
+
+<!-- ===== JavaScript ===== -->
+<script>
+(function() {
+  'use strict';
+
+  /* ───── Particle System ───── */
+  var canvas = document.getElementById('particles');
+  var ctx = canvas.getContext('2d');
+  var particles = [];
+  var PARTICLE_COUNT = 60;
+
+  function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+
+  function Particle() { this.reset(); }
+  Particle.prototype.reset = function() {
+    this.x = Math.random() * canvas.width;
+    this.y = Math.random() * canvas.height;
+    this.size = Math.random() * 2 + 0.5;
+    this.speedX = (Math.random() - 0.5) * 0.3;
+    this.speedY = (Math.random() - 0.5) * 0.3;
+    this.opacity = Math.random() * 0.4 + 0.1;
+    this.pulse = Math.random() * Math.PI * 2;
+  };
+  Particle.prototype.update = function() {
+    this.x += this.speedX;
+    this.y += this.speedY;
+    this.pulse += 0.015;
+    if (this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) this.reset();
+  };
+  Particle.prototype.draw = function() {
+    var o = this.opacity * (0.6 + 0.4 * Math.sin(this.pulse));
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(255,255,255,' + o + ')';
+    ctx.fill();
+  };
+
+  for (var i = 0; i < PARTICLE_COUNT; i++) particles.push(new Particle());
+
+  function animateParticles() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for (var i = 0; i < particles.length; i++) {
+      particles[i].update();
+      particles[i].draw();
+    }
+    // Draw connections
+    for (var i = 0; i < particles.length; i++) {
+      for (var j = i + 1; j < particles.length; j++) {
+        var dx = particles[i].x - particles[j].x;
+        var dy = particles[i].y - particles[j].y;
+        var dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 120) {
+          ctx.beginPath();
+          ctx.moveTo(particles[i].x, particles[i].y);
+          ctx.lineTo(particles[j].x, particles[j].y);
+          ctx.strokeStyle = 'rgba(255,255,255,' + (0.03 * (1 - dist / 120)) + ')';
+          ctx.lineWidth = 0.5;
+          ctx.stroke();
+        }
+      }
+    }
+    requestAnimationFrame(animateParticles);
+  }
+  animateParticles();
+
+  /* ───── Intersection Observer ───── */
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) entry.target.classList.add('visible');
+    });
+  }, { threshold: 0.15 });
+
+  document.querySelectorAll('.anim-item').forEach(function(el) { observer.observe(el); });
+
+  /* ───── Counter Animation ───── */
+  var counterObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting && !entry.target.dataset.counted) {
+        entry.target.dataset.counted = 'true';
+        var target = parseInt(entry.target.dataset.count);
+        if (isNaN(target)) return;
+        var duration = 2000;
+        var start = performance.now();
+        function ease(t) { return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t; }
+        function update(now) {
+          var elapsed = now - start;
+          var progress = Math.min(elapsed / duration, 1);
+          var current = Math.round(ease(progress) * target);
+          entry.target.textContent = current.toLocaleString();
+          if (progress < 1) requestAnimationFrame(update);
+        }
+        requestAnimationFrame(update);
+      }
+    });
+  }, { threshold: 0.5 });
+
+  document.querySelectorAll('[data-count]').forEach(function(el) { counterObserver.observe(el); });
+
+  /* ───── Bar Chart Animation ───── */
+  var barObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting && !entry.target.dataset.animated) {
+        entry.target.dataset.animated = 'true';
+        var bars = entry.target.querySelectorAll('.bar-fill');
+        bars.forEach(function(bar, i) {
+          setTimeout(function() {
+            bar.style.height = (bar.dataset.height / 100 * 180) + 'px';
+          }, i * 100);
+        });
+      }
+    });
+  }, { threshold: 0.3 });
+
+  var barChart = document.getElementById('barChart');
+  if (barChart) barObserver.observe(barChart);
+
+  /* ───── Slide Navigation ───── */
+  var slides = document.querySelectorAll('.slide');
+  var dots = document.querySelectorAll('.nav-dot');
+  var progressBar = document.getElementById('progressBar');
+  var pageCounter = document.getElementById('pageCounter');
+  var totalSlides = slides.length;
+
+  function updateNav() {
+    var currentIndex = 0;
+    var scrollY = window.scrollY;
+    var vh = window.innerHeight;
+    slides.forEach(function(slide, i) {
+      if (scrollY >= slide.offsetTop - vh * 0.4) currentIndex = i;
+    });
+    dots.forEach(function(dot, i) {
+      dot.classList.toggle('active', i === currentIndex);
+    });
+    progressBar.style.width = ((currentIndex + 1) / totalSlides * 100) + '%';
+    pageCounter.textContent = String(currentIndex + 1).padStart(2, '0') + ' / ' + String(totalSlides).padStart(2, '0');
+  }
+
+  window.addEventListener('scroll', updateNav, { passive: true });
+  updateNav();
+
+  dots.forEach(function(dot) {
+    dot.addEventListener('click', function() {
+      var idx = parseInt(this.dataset.slide);
+      slides[idx].scrollIntoView({ behavior: 'smooth' });
+    });
+  });
+
+  /* ───── Keyboard Navigation ───── */
+  var currentSlide = 0;
+  document.addEventListener('keydown', function(e) {
+    if (e.code === 'ArrowDown' || e.code === 'ArrowRight' || e.code === 'Space' || e.code === 'PageDown') {
+      e.preventDefault();
+      currentSlide = Math.min(currentSlide + 1, totalSlides - 1);
+      slides[currentSlide].scrollIntoView({ behavior: 'smooth' });
+    } else if (e.code === 'ArrowUp' || e.code === 'ArrowLeft' || e.code === 'PageUp') {
+      e.preventDefault();
+      currentSlide = Math.max(currentSlide - 1, 0);
+      slides[currentSlide].scrollIntoView({ behavior: 'smooth' });
+    } else if (e.code === 'Home') {
+      e.preventDefault();
+      currentSlide = 0;
+      slides[0].scrollIntoView({ behavior: 'smooth' });
+    } else if (e.code === 'End') {
+      e.preventDefault();
+      currentSlide = totalSlides - 1;
+      slides[totalSlides - 1].scrollIntoView({ behavior: 'smooth' });
+    }
+  });
+
+  // Sync currentSlide on scroll
+  window.addEventListener('scroll', function() {
+    var scrollY = window.scrollY;
+    var vh = window.innerHeight;
+    slides.forEach(function(slide, i) {
+      if (scrollY >= slide.offsetTop - vh * 0.4) currentSlide = i;
+    });
+  }, { passive: true });
+
+})();
+</script>
+</body>
+</html>
