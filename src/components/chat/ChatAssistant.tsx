@@ -506,8 +506,8 @@ export function ChatAssistant() {
         onClick={togglePanel}
         className={cn(
           'fixed z-50 flex items-center justify-center rounded-full transition-all duration-200',
-          'bottom-[156px] right-3 w-[52px] h-[52px]',
-          'md:bottom-[148px] md:right-4 md:w-[56px] md:h-[56px]',
+          'bottom-[180px] right-3 w-[52px] h-[52px]',
+          'md:bottom-[172px] md:right-4 md:w-[56px] md:h-[56px]',
         )}
         style={{
           background: 'var(--color-accent)',
