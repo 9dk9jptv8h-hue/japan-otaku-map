@@ -20,17 +20,19 @@ function MarkersLayerInner({ locations }: MarkersLayerProps) {
   const mapInstance = useMapStore((s) => s.mapInstance)
   const setSelectedMarkerId = useMapStore((s) => s.setSelectedMarkerId)
   const popupRef = useRef<maplibregl.Popup | null>(null)
+  const hoveredIdRef = useRef<number | null>(null)
 
   useEffect(() => {
     if (!mapInstance) return
 
     const map = mapInstance
 
-    // 构建 GeoJSON FeatureCollection
+    // 构建 GeoJSON FeatureCollection — 每个 feature 顶层添加数字 id
     const buildGeoJSON = () => ({
       type: 'FeatureCollection',
-      features: locations.map((loc) => ({
+      features: locations.map((loc, index) => ({
         type: 'Feature' as const,
+        id: index,  // 数字ID放在顶层，MapLibre feature-state 要求
         geometry: {
           type: 'Point' as const,
           coordinates: [loc.longitude, loc.latitude],
@@ -101,26 +103,42 @@ function MarkersLayerInner({ locations }: MarkersLayerProps) {
       })
     }
 
-    // ─── 鼠标 hover → 高亮层显示对应圆点 ───
-    const handleMouseEnter = (e: maplibregl.MapLayerMouseEvent) => {
+    // ─── 鼠标 hover → feature-state 驱动放大效果 ───
+    const handleMouseMove = (e: maplibregl.MapLayerMouseEvent) => {
       map.getCanvas().style.cursor = 'pointer'
-      if (e.features && e.features[0]) {
-        const id = e.features[0].properties?.id
-        if (id && map.getLayer('location-dots-hover')) {
-          map.setFilter('location-dots-hover', ['==', ['get', 'id'], id])
+      if (e.features && e.features.length > 0) {
+        const featureId = e.features[0].id as number
+        // 如果还是同一个feature，不重复操作
+        if (hoveredIdRef.current === featureId) return
+        // 清除上一个hover状态
+        if (hoveredIdRef.current !== null) {
+          map.setFeatureState(
+            { source: 'locations', id: hoveredIdRef.current },
+            { hover: false }
+          )
         }
+        // 设置新的hover状态
+        hoveredIdRef.current = featureId
+        map.setFeatureState(
+          { source: 'locations', id: featureId },
+          { hover: true }
+        )
       }
     }
     const handleMouseLeave = () => {
       map.getCanvas().style.cursor = ''
-      if (map.getLayer('location-dots-hover')) {
-        map.setFilter('location-dots-hover', ['==', ['get', 'id'], ''])
+      if (hoveredIdRef.current !== null) {
+        map.setFeatureState(
+          { source: 'locations', id: hoveredIdRef.current },
+          { hover: false }
+        )
+        hoveredIdRef.current = null
       }
     }
 
     // 事件只在 useEffect 顶层绑定一次
     map.on('click', 'location-dots', handleClick)
-    map.on('mouseenter', 'location-dots', handleMouseEnter)
+    map.on('mousemove', 'location-dots', handleMouseMove)
     map.on('mouseleave', 'location-dots', handleMouseLeave)
 
     const setupLayers = () => {
@@ -138,20 +156,19 @@ function MarkersLayerInner({ locations }: MarkersLayerProps) {
         data: geojson,
       })
 
-      // ─── Circle Layer（标记圆点）───
+      // ─── Circle Layer（标记圆点）— hover 时通过 feature-state 放大 ───
       map.addLayer({
         id: 'location-dots',
         type: 'circle',
         source: 'locations',
         paint: {
           'circle-radius': [
-            'interpolate',
-            ['linear'],
-            ['zoom'],
-            4, 3,
-            8, 5,
-            12, 7,
-            16, 9,
+            'case',
+            ['boolean', ['feature-state', 'hover'], false],
+            // hover状态：放大约1.6倍
+            ['interpolate', ['linear'], ['zoom'], 4, 5, 8, 8, 12, 11, 16, 14],
+            // 默认状态
+            ['interpolate', ['linear'], ['zoom'], 4, 3, 8, 5, 12, 7, 16, 9],
           ],
           'circle-color': [
             'match',
@@ -167,47 +184,17 @@ function MarkersLayerInner({ locations }: MarkersLayerProps) {
           ],
           'circle-stroke-color': '#ffffff',
           'circle-stroke-width': [
-            'interpolate',
-            ['linear'],
-            ['zoom'],
-            4, 1,
-            12, 2,
+            'case',
+            ['boolean', ['feature-state', 'hover'], false],
+            3,  // hover时描边加粗
+            ['interpolate', ['linear'], ['zoom'], 4, 1, 12, 2],
           ],
-          'circle-opacity': 0.9,
-        },
-      })
-
-      // ─── Hover高亮层（放大效果）───
-      map.addLayer({
-        id: 'location-dots-hover',
-        type: 'circle',
-        source: 'locations',
-        filter: ['==', ['get', 'id'], ''],  // 初始不显示任何点
-        paint: {
-          'circle-radius': [
-            'interpolate',
-            ['linear'],
-            ['zoom'],
-            4, 5,
-            8, 8,
-            12, 11,
-            16, 14,
+          'circle-opacity': [
+            'case',
+            ['boolean', ['feature-state', 'hover'], false],
+            1,    // hover时完全不透明
+            0.9,
           ],
-          'circle-color': [
-            'match',
-            ['get', 'category'],
-            'animate', '#e91e63',
-            'melonbooks', '#4caf50',
-            'mandarake', '#ff9800',
-            'surugaya', '#1565c0',
-            'gamers', '#fbc02d',
-            'lashinbang', '#7b1fa2',
-            'kbooks', '#b71c1c',
-            '#607d8b',
-          ],
-          'circle-stroke-color': '#ffffff',
-          'circle-stroke-width': 3,
-          'circle-opacity': 1,
         },
       })
 
@@ -257,7 +244,7 @@ function MarkersLayerInner({ locations }: MarkersLayerProps) {
 
     return () => {
       map.off('click', 'location-dots', handleClick)
-      map.off('mouseenter', 'location-dots', handleMouseEnter)
+      map.off('mousemove', 'location-dots', handleMouseMove)
       map.off('mouseleave', 'location-dots', handleMouseLeave)
       map.off('style.load', setupLayers)
       map.off('styledata', handleStyleData)
@@ -268,7 +255,6 @@ function MarkersLayerInner({ locations }: MarkersLayerProps) {
       // 清除图层和数据源（如果还存在）
       try {
         if (map.getLayer('location-labels')) map.removeLayer('location-labels')
-        if (map.getLayer('location-dots-hover')) map.removeLayer('location-dots-hover')
         if (map.getLayer('location-dots')) map.removeLayer('location-dots')
         if (map.getSource('locations')) map.removeSource('locations')
       } catch {
