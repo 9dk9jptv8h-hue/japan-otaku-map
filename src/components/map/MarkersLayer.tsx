@@ -101,12 +101,21 @@ function MarkersLayerInner({ locations }: MarkersLayerProps) {
       })
     }
 
-    // ─── 鼠标 hover 指针 ───
-    const handleMouseEnter = () => {
+    // ─── 鼠标 hover → 高亮层显示对应圆点 ───
+    const handleMouseEnter = (e: maplibregl.MapLayerMouseEvent) => {
       map.getCanvas().style.cursor = 'pointer'
+      if (e.features && e.features[0]) {
+        const id = e.features[0].properties?.id
+        if (id && map.getLayer('location-dots-hover')) {
+          map.setFilter('location-dots-hover', ['==', ['get', 'id'], id])
+        }
+      }
     }
     const handleMouseLeave = () => {
       map.getCanvas().style.cursor = ''
+      if (map.getLayer('location-dots-hover')) {
+        map.setFilter('location-dots-hover', ['==', ['get', 'id'], ''])
+      }
     }
 
     // 事件只在 useEffect 顶层绑定一次
@@ -168,6 +177,40 @@ function MarkersLayerInner({ locations }: MarkersLayerProps) {
         },
       })
 
+      // ─── Hover高亮层（放大效果）───
+      map.addLayer({
+        id: 'location-dots-hover',
+        type: 'circle',
+        source: 'locations',
+        filter: ['==', ['get', 'id'], ''],  // 初始不显示任何点
+        paint: {
+          'circle-radius': [
+            'interpolate',
+            ['linear'],
+            ['zoom'],
+            4, 5,
+            8, 8,
+            12, 11,
+            16, 14,
+          ],
+          'circle-color': [
+            'match',
+            ['get', 'category'],
+            'animate', '#e91e63',
+            'melonbooks', '#4caf50',
+            'mandarake', '#ff9800',
+            'surugaya', '#1565c0',
+            'gamers', '#fbc02d',
+            'lashinbang', '#7b1fa2',
+            'kbooks', '#b71c1c',
+            '#607d8b',
+          ],
+          'circle-stroke-color': '#ffffff',
+          'circle-stroke-width': 3,
+          'circle-opacity': 1,
+        },
+      })
+
       // ─── Symbol Layer（文字标签，高缩放级别可见）───
       map.addLayer({
         id: 'location-labels',
@@ -225,6 +268,7 @@ function MarkersLayerInner({ locations }: MarkersLayerProps) {
       // 清除图层和数据源（如果还存在）
       try {
         if (map.getLayer('location-labels')) map.removeLayer('location-labels')
+        if (map.getLayer('location-dots-hover')) map.removeLayer('location-dots-hover')
         if (map.getLayer('location-dots')) map.removeLayer('location-dots')
         if (map.getSource('locations')) map.removeSource('locations')
       } catch {
