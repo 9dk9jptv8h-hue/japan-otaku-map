@@ -328,6 +328,8 @@
 
 ---
 
+[2.7.0]: https://github.com/9dk9jptv8h-hue/japan-otaku-map/compare/v2.6.0...v2.7.0
+[2.6.0]: https://github.com/9dk9jptv8h-hue/japan-otaku-map/compare/v2.5.1...v2.6.0
 [2.5.1]: https://github.com/9dk9jptv8h-hue/japan-otaku-map/compare/v2.5.0...v2.5.1
 [2.5.0]: https://github.com/9dk9jptv8h-hue/japan-otaku-map/compare/v2.4.0...v2.5.0
 [2.4.0]: https://github.com/9dk9jptv8h-hue/japan-otaku-map/compare/v2.3.0...v2.4.0

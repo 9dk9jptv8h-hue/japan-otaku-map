@@ -25,20 +25,12 @@ export interface CategoryMeta {
   key: LocationCategory
   label: string
   color: string
-  icon: string
 }
 
 // 地图视口状态
 export interface ViewportState {
   center: [number, number]
   zoom: number
-}
-
-// 筛选状态
-export interface FilterState {
-  searchQuery: string
-  selectedCategories: LocationCategory[]
-  sortBy: SortOption
 }
 
 // 排序选项

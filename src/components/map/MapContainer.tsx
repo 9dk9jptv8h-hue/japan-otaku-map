@@ -17,14 +17,13 @@ export function MapView({ children }: MapViewProps) {
   const setFlyToMarker = useMapStore((s) => s.setFlyToMarker)
   const setMapReady = useMapStore((s) => s.setMapReady)
   const setMapInstance = useMapStore((s) => s.setMapInstance)
-  const tileLayer = useMapStore((s) => s.tileLayer)
   const setSelectedMarkerId = useMapStore((s) => s.setSelectedMarkerId)
 
   // 初始化地图
   useEffect(() => {
     if (!mapContainer.current || mapRef.current) return
 
-    const styleConfig = TILE_STYLES[tileLayer]
+    const styleConfig = TILE_STYLES.standard
 
     // 移动端检测 — 降低 GPU 负载
     const isMobile = window.innerWidth < 768
@@ -135,12 +134,6 @@ export function MapView({ children }: MapViewProps) {
       }
     }
   }, [])
-
-  // 图层切换
-  useEffect(() => {
-    if (!mapRef.current || !initialized.current) return
-    mapRef.current.setStyle(TILE_STYLES[tileLayer].url)
-  }, [tileLayer])
 
   return (
     <div ref={mapContainer} className="h-full w-full">

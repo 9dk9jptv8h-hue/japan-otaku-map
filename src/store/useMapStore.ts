@@ -1,6 +1,6 @@
 import type { MapInstance } from '@/types'
 import { create } from 'zustand'
-import type { ViewportState, MapBounds, TileLayerStyle } from '@/types'
+import type { ViewportState, MapBounds } from '@/types'
 import { DEFAULT_VIEWPORT } from '@/constants/mapDefaults'
 
 interface MapStore {
@@ -28,10 +28,6 @@ interface MapStore {
   // 地图就绪
   isMapReady: boolean
   setMapReady: (ready: boolean) => void
-
-  // 瓦片图层
-  tileLayer: TileLayerStyle
-  setTileLayer: (layer: TileLayerStyle) => void
 
   // 飞向标记 — MapLibre 使用 [lng, lat] 顺序
   flyToMarker: ((lng: number, lat: number, zoom?: number) => void) | null
@@ -71,9 +67,6 @@ export const useMapStore = create<MapStore>((set, get) => ({
 
   isMapReady: false,
   setMapReady: (ready) => set({ isMapReady: ready }),
-
-  tileLayer: 'standard',
-  setTileLayer: (layer) => set({ tileLayer: layer }),
 
   flyToMarker: null,
   setFlyToMarker: (fn) => set({ flyToMarker: fn }),

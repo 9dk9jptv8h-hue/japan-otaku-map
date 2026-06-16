@@ -487,28 +487,11 @@
     --shadow-glow-blue: 0 0 8px rgba(33, 150, 243, 0.18);
     --shadow-glow-gold: 0 0 8px rgba(255, 152, 0, 0.18);
   }
-
-  /* Marker dot — single-layer lightweight shadow */
-  .marker-dot {
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18) !important;
-  }
-
   /* ----------------------------------------------------------
      C. Reduce / disable non-essential transitions
      Keep functional transitions (drawer slide, button feedback)
      but shorten decorative ones to free up the compositor.
      ---------------------------------------------------------- */
-
-  /* Marker hover — shorter, simpler easing */
-  .custom-marker-el {
-    transition: transform 0.15s ease-out !important;
-  }
-
-  /* Marker dot — collapse 4-property transition into 1 */
-  .marker-dot {
-    transition: transform 0.15s ease-out !important;
-  }
-
   /* Popup close — just background, skip transform */
   .maplibregl-popup-close-button {
     transition: background 0.12s ease-out !important;
@@ -538,19 +521,9 @@
     animation: cardSlideIn 0.25s ease-out both !important;
   }
 
-  /* Marker pulse ring — slow down to reduce frame cost */
-  .marker-pulse-ring {
-    animation-duration: 2.5s !important;
-  }
-
   /* Header gradient — slow animation to halve repaint rate */
   .header-gradient {
     animation-duration: 12s !important;
-  }
-
-  /* Skeleton shimmer — slightly slower to reduce paints */
-  .skeleton-shimmer {
-    animation-duration: 2.5s !important;
   }
 
   /* Welcome page particles — reduce count effect on mobile */
