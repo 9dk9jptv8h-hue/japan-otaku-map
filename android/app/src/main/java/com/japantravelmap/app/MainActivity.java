@@ -8,8 +8,6 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.webkit.GeolocationPermissions;
-
 import androidx.activity.ComponentActivity;
 import androidx.activity.OnBackPressedCallback;
 
@@ -41,15 +39,10 @@ public class MainActivity extends ComponentActivity {
         settings.setSupportZoom(false);
 
         // 允许混合内容
-        settings.setMixedContentMode(WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE);
+        settings.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
 
         webView.setWebViewClient(new WebViewClient());
-        webView.setWebChromeClient(new WebChromeClient() {
-            @Override
-            public void onGeolocationPermissionsShowPrompt(String origin, GeolocationPermissions.Callback callback) {
-                callback.invoke(origin, true, false);
-            }
-        });
+        webView.setWebChromeClient(new WebChromeClient());
 
         // 系统UI隐藏
         WindowInsetsController insetsController = getWindow().getInsetsController();

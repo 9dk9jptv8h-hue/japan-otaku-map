@@ -17,7 +17,7 @@ export interface LocationData {
   updatedAt: string
 }
 
-// 四大分类
+// 七大分类
 export type LocationCategory = 'animate' | 'melonbooks' | 'mandarake' | 'surugaya' | 'gamers' | 'lashinbang' | 'kbooks'
 
 // 分类元信息

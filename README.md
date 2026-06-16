@@ -48,7 +48,7 @@
 | 📊 **排序** | 按评分、名称、更新时间、访问量排序 |
 | 📱 **响应式布局** | 桌面端侧边栏 + 移动端抽屉，全尺寸适配 |
 | 🤖 **AI 小助手** | DeepSeek API + Cloudflare Worker 代理，内置 176 家店铺知识的旅行顾问 |
-| 🛡️ **安全扫描** | AutoSec-QC 提示词注入检测，35+ 条规则覆盖 10 个攻击类别 |
+| 🛡️ **安全扫描** | AutoSec-QC 提示词注入检测，40+ 条规则覆盖 10 个攻击类别 |
 | 📲 **Android APK** | WebView 全屏应用，GitHub Actions 自动构建，网站更新后自动同步 |
 | ⚡ **性能优化** | 代码分割 3 chunk、CSS 变量驱动 marker、content-visibility 懒加载、Service Worker 瓦片缓存 |
 

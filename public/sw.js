@@ -1,6 +1,7 @@
 const TILE_CACHE = 'map-tiles-v3'
 const TILE_HOSTS = ['tiles.openfreemap.org']
 const MAX_CACHE_ENTRIES = 2000
+let putCount = 0
 
 self.addEventListener('install', () => self.skipWaiting())
 self.addEventListener('activate', (e) => {
@@ -36,7 +37,10 @@ self.addEventListener('fetch', (e) => {
         const fetchPromise = fetch(e.request).then(response => {
           if (response.ok) {
             cache.put(e.request, response.clone())
-            trimCache(cache)
+            putCount++
+            if (putCount % 10 === 0) {
+              trimCache(cache)
+            }
           }
           return response
         }).catch(() => new Response('', { status: 503, statusText: 'Offline' }))

@@ -271,11 +271,6 @@
    Base Styles
    ================================================================ */
 
-/* 右下角控件弹入 */
-.absolute.bottom-4.right-4 {
-  animation: popIn 0.5s 0.2s var(--ease-spring) both;
-}
-
 /* ================================================================
    Scrollbar — minimal & elegant
    ================================================================ */
@@ -513,11 +508,6 @@
 
   /* Popup: replace 4-step bounce with simple fade-up */
   .maplibregl-popup-content {
-    animation: cardSlideIn 0.25s ease-out both !important;
-  }
-
-  /* Bottom-right controls: simpler entrance */
-  .absolute.bottom-4.right-4 {
     animation: cardSlideIn 0.25s ease-out both !important;
   }
 

@@ -7,6 +7,30 @@
 
 ---
 
+## [3.1.2] - 2026-06-16
+
+### Fixed（修复）
+
+#### High
+- **BUG-10** APK版本号更新 — `versionName` 从 `2.7` 升至 `3.1`
+- **BUG-12** 移除地理位置权限自动授予 — 删除 `onGeolocationPermissionsShowPrompt` 重写，恢复系统默认弹窗确认
+- **BUG-14** Worker CORS通配符安全加固 — `Access-Control-Allow-Origin` 从 `*` 锁定为 `https://9dk9jptv8h-hue.github.io`
+
+#### Medium
+- **BUG-01** SYSTEM_PROMPT Mandarake门店数修正 — 从错误的9家更正为实际的11家
+- **BUG-04** city-photo.ts 35个日文键名改为中文简体 — 与mockData的name字段统一（秋葉原→秋叶原、渋谷→涩谷等）
+- **BUG-11** Android targetSdk/compileSdk 从34升至35
+- **BUG-13** WebView混合内容策略 — `MIXED_CONTENT_COMPATIBILITY_MODE` 改为 `MIXED_CONTENT_NEVER_ALLOW`
+
+#### Low
+- **BUG-02** 安全规则数描述从"35+"更正为"40+"
+- **BUG-05** 删除两处死CSS选择器 `.absolute.bottom-4.right-4`
+- **BUG-06** 删除无效的 `/planet` preload link
+- **BUG-07** types/index.ts 分类注释从"四大分类"更正为"七大分类"
+- **BUG-08** Service Worker trimCache优化 — 改为每10次cache.put执行一次，减少性能开销
+
+---
+
 ## [3.1.1] - 2026-06-16
 
 ### Fixed（修复）
@@ -33,7 +57,7 @@
 
 ### Added（新增）
 - AI小助手聊天功能 — 右下角浮动按钮，点击展开聊天面板，接入DeepSeek API
-- AutoSec-QC提示词注入检测 — 用户输入发送前经过35+条安全规则扫描（10个攻击类别）
+- AutoSec-QC提示词注入检测 — 用户输入发送前经过40+条安全规则扫描（10个攻击类别）
 - 支持自定义API Key — 用户自行输入DeepSeek API Key，localStorage本地存储
 - 系统提示词内置176家店铺知识 — AI了解7大连锁品牌及热门区域推荐
 - 聊天面板移动端全屏适配 — 桌面端400x500浮动面板，移动端全屏聊天
