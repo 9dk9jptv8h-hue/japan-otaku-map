@@ -63,7 +63,7 @@ export function MapView({ children }: MapViewProps) {
         compact: true,
         customAttribution: styleConfig.attribution,
       }),
-      'bottom-right'
+      'bottom-left'
     )
 
     map.on('load', () => {
