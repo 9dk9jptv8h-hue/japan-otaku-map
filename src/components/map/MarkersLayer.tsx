@@ -20,19 +20,17 @@ function MarkersLayerInner({ locations }: MarkersLayerProps) {
   const mapInstance = useMapStore((s) => s.mapInstance)
   const setSelectedMarkerId = useMapStore((s) => s.setSelectedMarkerId)
   const popupRef = useRef<maplibregl.Popup | null>(null)
-  const hoveredIdRef = useRef<number | null>(null)
 
   useEffect(() => {
     if (!mapInstance) return
 
     const map = mapInstance
 
-    // 构建 GeoJSON FeatureCollection — 每个 feature 顶层添加数字 id
+    // 构建 GeoJSON FeatureCollection
     const buildGeoJSON = () => ({
       type: 'FeatureCollection',
-      features: locations.map((loc, index) => ({
+      features: locations.map((loc) => ({
         type: 'Feature' as const,
-        id: index,  // 数字ID放在顶层，MapLibre feature-state 要求
         geometry: {
           type: 'Point' as const,
           coordinates: [loc.longitude, loc.latitude],
@@ -103,42 +101,17 @@ function MarkersLayerInner({ locations }: MarkersLayerProps) {
       })
     }
 
-    // ─── 鼠标 hover → feature-state 驱动放大效果 ───
-    const handleMouseMove = (e: maplibregl.MapLayerMouseEvent) => {
+    // ─── 鼠标 hover → 仅改变光标为手型（保守方案，不使用 feature-state）───
+    const handleMouseEnter = () => {
       map.getCanvas().style.cursor = 'pointer'
-      if (e.features && e.features.length > 0) {
-        const featureId = e.features[0].id as number
-        // 如果还是同一个feature，不重复操作
-        if (hoveredIdRef.current === featureId) return
-        // 清除上一个hover状态
-        if (hoveredIdRef.current !== null) {
-          map.setFeatureState(
-            { source: 'locations', id: hoveredIdRef.current },
-            { hover: false }
-          )
-        }
-        // 设置新的hover状态
-        hoveredIdRef.current = featureId
-        map.setFeatureState(
-          { source: 'locations', id: featureId },
-          { hover: true }
-        )
-      }
     }
     const handleMouseLeave = () => {
       map.getCanvas().style.cursor = ''
-      if (hoveredIdRef.current !== null) {
-        map.setFeatureState(
-          { source: 'locations', id: hoveredIdRef.current },
-          { hover: false }
-        )
-        hoveredIdRef.current = null
-      }
     }
 
-    // 事件只在 useEffect 顶层绑定一次
+    // 事件绑定
     map.on('click', 'location-dots', handleClick)
-    map.on('mousemove', 'location-dots', handleMouseMove)
+    map.on('mouseenter', 'location-dots', handleMouseEnter)
     map.on('mouseleave', 'location-dots', handleMouseLeave)
 
     const setupLayers = () => {
@@ -156,19 +129,18 @@ function MarkersLayerInner({ locations }: MarkersLayerProps) {
         data: geojson,
       })
 
-      // ─── Circle Layer（标记圆点）— hover 时通过 feature-state 放大 ───
+      // ─── Circle Layer（标记圆点）— 简单 interpolate，无 feature-state ───
       map.addLayer({
         id: 'location-dots',
         type: 'circle',
         source: 'locations',
         paint: {
           'circle-radius': [
-            'case',
-            ['boolean', ['feature-state', 'hover'], false],
-            // hover状态：放大约1.6倍
-            ['interpolate', ['linear'], ['zoom'], 4, 5, 8, 8, 12, 11, 16, 14],
-            // 默认状态
-            ['interpolate', ['linear'], ['zoom'], 4, 3, 8, 5, 12, 7, 16, 9],
+            'interpolate', ['linear'], ['zoom'],
+            4, 3,
+            8, 5,
+            12, 7,
+            16, 9,
           ],
           'circle-color': [
             'match',
@@ -180,21 +152,15 @@ function MarkersLayerInner({ locations }: MarkersLayerProps) {
             'gamers', '#fbc02d',
             'lashinbang', '#7b1fa2',
             'kbooks', '#b71c1c',
-            '#607d8b', // 默认灰色
+            '#607d8b',
           ],
           'circle-stroke-color': '#ffffff',
           'circle-stroke-width': [
-            'case',
-            ['boolean', ['feature-state', 'hover'], false],
-            3,  // hover时描边加粗
-            ['interpolate', ['linear'], ['zoom'], 4, 1, 12, 2],
+            'interpolate', ['linear'], ['zoom'],
+            4, 1,
+            12, 2,
           ],
-          'circle-opacity': [
-            'case',
-            ['boolean', ['feature-state', 'hover'], false],
-            1,    // hover时完全不透明
-            0.9,
-          ],
+          'circle-opacity': 0.9,
         },
       })
 
@@ -244,7 +210,7 @@ function MarkersLayerInner({ locations }: MarkersLayerProps) {
 
     return () => {
       map.off('click', 'location-dots', handleClick)
-      map.off('mousemove', 'location-dots', handleMouseMove)
+      map.off('mouseenter', 'location-dots', handleMouseEnter)
       map.off('mouseleave', 'location-dots', handleMouseLeave)
       map.off('style.load', setupLayers)
       map.off('styledata', handleStyleData)
