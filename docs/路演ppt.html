@@ -790,6 +790,68 @@ body {
 }
 
 /* ============================================
+   SLIDE 6.5: AUTOSEC-QC
+   ============================================ */
+.autosec-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  margin-top: 36px;
+}
+.autosec-card {
+  padding: 28px 24px;
+  text-align: left;
+}
+.autosec-card .autosec-icon {
+  font-size: 1.5rem;
+  margin-bottom: 12px;
+  display: block;
+}
+.autosec-card .autosec-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+.autosec-card .autosec-desc {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+.attack-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 28px;
+  justify-content: center;
+}
+.attack-badge {
+  font-size: 0.65rem;
+  padding: 4px 12px;
+  border-radius: 100px;
+  background: rgba(233, 30, 99, 0.08);
+  border: 1px solid rgba(233, 30, 99, 0.2);
+  color: var(--animate);
+  font-weight: 500;
+}
+
+/* ============================================
+   SLIDE 9: TEAM (grid layout)
+   ============================================ */
+.team-grid {
+  display: flex;
+  gap: 32px;
+  justify-content: center;
+  align-items: stretch;
+  flex-wrap: wrap;
+}
+.team-grid .team-card {
+  flex: 1;
+  min-width: 280px;
+  max-width: 480px;
+}
+
+/* ============================================
    SLIDE 10: CONTACT / END
    ============================================ */
 .end-content {
@@ -853,6 +915,8 @@ body {
   .compare-table { font-size: 0.75rem; }
   .tech-flow { grid-template-columns: 1fr 1fr; }
   .biz-grid { grid-template-columns: 1fr; }
+  .autosec-grid { grid-template-columns: 1fr; }
+  .team-grid { flex-direction: column; align-items: center; }
   .timeline-nodes { grid-template-columns: repeat(2, 1fr); gap: 28px; }
   .timeline-line { display: none; }
   .nav-dots { display: none; }
@@ -886,14 +950,15 @@ body {
   <div class="nav-dot" data-slide="3"><span class="dot-label">产品数据</span></div>
   <div class="nav-dot" data-slide="4"><span class="dot-label">竞争分析</span></div>
   <div class="nav-dot" data-slide="5"><span class="dot-label">技术架构</span></div>
-  <div class="nav-dot" data-slide="6"><span class="dot-label">商业模式</span></div>
-  <div class="nav-dot" data-slide="7"><span class="dot-label">发展路线</span></div>
-  <div class="nav-dot" data-slide="8"><span class="dot-label">团队</span></div>
-  <div class="nav-dot" data-slide="9"><span class="dot-label">联系方式</span></div>
+  <div class="nav-dot" data-slide="6"><span class="dot-label">安全防护</span></div>
+  <div class="nav-dot" data-slide="7"><span class="dot-label">商业模式</span></div>
+  <div class="nav-dot" data-slide="8"><span class="dot-label">发展路线</span></div>
+  <div class="nav-dot" data-slide="9"><span class="dot-label">团队</span></div>
+  <div class="nav-dot" data-slide="10"><span class="dot-label">联系方式</span></div>
 </nav>
 
 <!-- Page Counter -->
-<div class="page-counter" id="pageCounter">01 / 10</div>
+<div class="page-counter" id="pageCounter">01 / 11</div>
 
 <!-- ================================================
      SLIDE 1: COVER
@@ -1272,9 +1337,57 @@ body {
 </section>
 
 <!-- ================================================
-     SLIDE 7: BUSINESS MODEL
+     SLIDE 7: AUTOSEC-QC SECURITY
      ================================================ -->
 <section class="slide" id="slide-6">
+  <div class="slide-inner">
+    <div style="text-align:center;">
+      <div class="label-tag anim-item stagger-1">SECURITY</div>
+      <h2 class="title-large anim-item stagger-2">AutoSec-QC 安全防护</h2>
+      <p class="subtitle anim-item stagger-2" style="max-width:560px;margin:12px auto 0;">AI提示词注入检测系统</p>
+    </div>
+    <div class="autosec-grid">
+      <div class="glass-card autosec-card anim-item stagger-3">
+        <span class="autosec-icon">🛡️</span>
+        <div class="autosec-title">全面规则覆盖</div>
+        <div class="autosec-desc">40+条安全规则，覆盖10大攻击类别</div>
+      </div>
+      <div class="glass-card autosec-card anim-item stagger-4">
+        <span class="autosec-icon">⚡</span>
+        <div class="autosec-title">实时拦截</div>
+        <div class="autosec-desc">实时扫描用户输入，HIGH/CRITICAL级别自动拦截</div>
+      </div>
+      <div class="glass-card autosec-card anim-item stagger-5">
+        <span class="autosec-icon">📦</span>
+        <div class="autosec-title">零依赖架构</div>
+        <div class="autosec-desc">零外部依赖，纯前端TypeScript实现</div>
+      </div>
+      <div class="glass-card autosec-card anim-item stagger-6">
+        <span class="autosec-icon">🤖</span>
+        <div class="autosec-title">AI防护</div>
+        <div class="autosec-desc">保护AI小助手免受恶意提示词注入</div>
+      </div>
+    </div>
+    <div class="attack-badges anim-item stagger-7">
+      <span class="attack-badge">直接指令覆盖</span>
+      <span class="attack-badge">角色劫持</span>
+      <span class="attack-badge">上下文边界攻击</span>
+      <span class="attack-badge">编码攻击</span>
+      <span class="attack-badge">权限提升</span>
+      <span class="attack-badge">密钥提取</span>
+      <span class="attack-badge">对齐绕过</span>
+      <span class="attack-badge">输出操控</span>
+      <span class="attack-badge">信息泄露</span>
+      <span class="attack-badge">递归注入</span>
+    </div>
+    <p class="subtitle anim-item stagger-8" style="font-size:0.75rem;margin-top:24px;text-align:center;color:var(--text-dim);">基于 AutoSec-QC-light 开源项目</p>
+  </div>
+</section>
+
+<!-- ================================================
+     SLIDE 8: BUSINESS MODEL
+     ================================================ -->
+<section class="slide" id="slide-7">
   <div class="slide-inner">
     <div style="text-align:center;">
       <div class="label-tag anim-item stagger-1">BUSINESS</div>
@@ -1338,9 +1451,9 @@ body {
 </section>
 
 <!-- ================================================
-     SLIDE 8: ROADMAP
+     SLIDE 9: ROADMAP
      ================================================ -->
-<section class="slide" id="slide-7">
+<section class="slide" id="slide-8">
   <div class="slide-inner">
     <div style="text-align:center;">
       <div class="label-tag anim-item stagger-1">ROADMAP</div>
@@ -1407,41 +1520,57 @@ body {
 </section>
 
 <!-- ================================================
-     SLIDE 9: TEAM
+     SLIDE 10: TEAM
      ================================================ -->
-<section class="slide" id="slide-8">
+<section class="slide" id="slide-9">
   <div class="slide-inner">
     <div style="text-align:center;margin-bottom:36px;">
       <div class="label-tag anim-item stagger-1">TEAM</div>
       <h2 class="title-large anim-item stagger-2">创始团队</h2>
     </div>
-    <div class="glass-card team-card anim-item stagger-3">
-      <div class="team-avatar">👨‍💻</div>
-      <div class="team-name">支宇珩</div>
-      <div class="team-role">创始人 · 全栈开发者</div>
-      <p class="team-bio">
-        独立开发者，热爱日本动漫文化与地理信息技术。
-        从零构建了日本动漫店铺地图项目，从数据采集、前端开发到部署运维全栈覆盖。
-        致力于用技术连接动漫爱好者与线下体验。
-      </p>
-      <div class="team-skills">
-        <span class="team-skill-tag">React</span>
-        <span class="team-skill-tag">TypeScript</span>
-        <span class="team-skill-tag">MapLibre</span>
-        <span class="team-skill-tag">GIS</span>
-        <span class="team-skill-tag">Node.js</span>
-        <span class="team-skill-tag">UI/UX</span>
-        <span class="team-skill-tag">PWA</span>
-        <span class="team-skill-tag">Android</span>
+    <div class="team-grid">
+      <div class="glass-card team-card anim-item stagger-3">
+        <div class="team-avatar">👨‍💻</div>
+        <div class="team-name">支宇珩</div>
+        <div class="team-role">创始人 · 全栈开发者</div>
+        <p class="team-bio">
+          独立开发者，热爱日本动漫文化与地理信息技术。
+          从零构建了日本动漫店铺地图项目，从数据采集、前端开发到部署运维全栈覆盖。
+          致力于用技术连接动漫爱好者与线下体验。
+        </p>
+        <div class="team-skills">
+          <span class="team-skill-tag">React</span>
+          <span class="team-skill-tag">TypeScript</span>
+          <span class="team-skill-tag">MapLibre</span>
+          <span class="team-skill-tag">GIS</span>
+          <span class="team-skill-tag">Node.js</span>
+          <span class="team-skill-tag">UI/UX</span>
+          <span class="team-skill-tag">PWA</span>
+          <span class="team-skill-tag">Android</span>
+        </div>
+      </div>
+      <div class="glass-card team-card anim-item stagger-4">
+        <div class="team-avatar">🛡️</div>
+        <div class="team-name">王祯明</div>
+        <div class="team-role">安全架构师</div>
+        <p class="team-bio">
+          AutoSec-QC 项目设计者，提示词注入检测系统架构，AI安全防护方案
+        </p>
+        <div class="team-skills">
+          <span class="team-skill-tag">Security</span>
+          <span class="team-skill-tag">TypeScript</span>
+          <span class="team-skill-tag">Prompt Engineering</span>
+          <span class="team-skill-tag">AI Safety</span>
+        </div>
       </div>
     </div>
   </div>
 </section>
 
 <!-- ================================================
-     SLIDE 10: CONTACT / END
+     SLIDE 11: CONTACT / END
      ================================================ -->
-<section class="slide" id="slide-9">
+<section class="slide" id="slide-10">
   <div class="slide-inner end-content">
     <div class="label-tag anim-item stagger-1">THANK YOU</div>
     <div class="end-thanks anim-item stagger-2 neon-glow">感谢观看</div>
