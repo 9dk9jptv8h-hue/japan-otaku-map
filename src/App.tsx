@@ -236,7 +236,7 @@ function LoadingTransition({ isMapReady }: { isMapReady: boolean }) {
       className="fixed inset-0 z-[9998] flex items-center justify-center"
       style={{
         background: '#f7f3ee',
-        animation: exiting ? 'welcomeExit 0.5s ease-in forwards' : undefined,
+        animation: exiting ? 'welcomeExit 0.5s ease-in forwards' : 'overlayFadeIn 0.4s ease-out',
       }}
     >
       {/* 中央玻璃卡片 */}
