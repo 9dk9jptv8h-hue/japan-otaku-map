@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import {
   MessageCircle,
+  X,
   Send,
   AlertTriangle,
   Bot,
