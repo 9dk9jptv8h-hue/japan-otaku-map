@@ -73,7 +73,7 @@ const RULES: Rule[] = [
   {
     category: '角色劫持',
     description: 'Role reassignment via "you are now"',
-    pattern: /you\s+are\s+now\s+(a|an|the|my)?\s*\w+/i,
+    pattern: /you\s+are\s+now\s+(a|an|the|my)?\s*(ai|assistant|bot|system|gpt|chatgpt|claude|deepseek|llm|model)\b/i,
     risk: 'HIGH',
   },
   {
@@ -85,7 +85,7 @@ const RULES: Rule[] = [
   {
     category: '角色劫持',
     description: 'Act as or simulate being another entity',
-    pattern: /act\s+as\s+(a|an|the|if\s+you\s+were)?\s*\w+/i,
+    pattern: /act\s+as\s+(a|an|the|if\s+you\s+were)?\s*(ai|assistant|bot|system|gpt|chatgpt|claude|deepseek|llm|language\s*model)\b/i,
     risk: 'HIGH',
   },
   {
@@ -129,7 +129,7 @@ const RULES: Rule[] = [
   {
     category: '上下文注入',
     description: 'system: or assistant: role prefix injection',
-    pattern: /^(system|assistant)\s*:\s*/im,
+    pattern: /^(system|assistant)\s*:\s*/i,
     risk: 'HIGH',
   },
 
@@ -350,11 +350,11 @@ const RISK_FROM_NUMBER: ScanResult['riskLevel'][] = [
  */
 export function scanInput(text: string): ScanResult {
   if (!text || typeof text !== 'string') {
-    return { allowed: true, riskLevel: 'SAFE', matches: [] }
+    return { allowed: false, riskLevel: 'CRITICAL', matches: [] }
   }
 
   const normalizedText = text
-    .replace(/[​-‍﻿]/g, '') // strip zero-width chars
+    .replace(/[​-‍‎-‏‪-‮⁠⁦-⁩﻿]/g, '') // strip zero-width + bidi override chars
     .replace(/\s+/g, ' ')                   // collapse whitespace
     .trim()
 
@@ -373,6 +373,7 @@ export function scanInput(text: string): ScanResult {
       if (riskValue > highestRisk) {
         highestRisk = riskValue
       }
+      if (highestRisk === 4) break // CRITICAL found, stop checking remaining rules
     }
   }
 

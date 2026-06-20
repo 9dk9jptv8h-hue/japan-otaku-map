@@ -7,28 +7,13 @@
   :root {
     /* —— 活力色板 —— */
     --color-accent: #e91e63;
-    --color-accent-light: #fce4ec;
     --color-blue: #2196f3;
-    --color-blue-light: #e3f2fd;
-    --color-teal: #009688;
-    --color-teal-light: #e0f2f1;
-    --color-amber: #ff9800;
-    --color-amber-light: #fff3e0;
     --color-purple: #9c27b0;
-    --color-purple-light: #f3e5f5;
-    --color-red: #f44336;
-    --color-red-light: #ffebee;
-    --color-green: #4caf50;
-    --color-green-light: #e8f5e9;
-    --color-cyan: #00bcd4;
-    --color-cyan-light: #e0f7fa;
 
     --color-indigo: #4a5a8a;
     --color-indigo-light: #e8ecf4;
     --color-sumi: #3a3a3a;
     --color-sakura: #f2a7b4;
-    --color-koi: #d94a3a;
-    --color-gold: #c4a35a;
     --color-washi: #f7f3ed;
 
     --color-bg: #f0edf4;
@@ -45,8 +30,6 @@
 
     /* 布局 */
     --sidebar-width: 380px;
-    --sidebar-tablet-width: 280px;
-    --mobile-drawer-height: 60vh;
     --font-sans: 'Microsoft YaHei', 'PingFang SC', 'Hiragino Sans GB', system-ui, -apple-system, sans-serif;
 
     /* 统一圆角系统 */
@@ -81,10 +64,7 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-
   body {
-    font-family: var(--font-sans);
     color: var(--color-text);
     background: var(--color-bg);
     overflow: hidden;
@@ -133,12 +113,6 @@
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* 右下角控件弹入 */
-@keyframes popIn {
-  from { opacity: 0; transform: scale(0.85) translateY(12px); }
-  to   { opacity: 1; transform: scale(1) translateY(0); }
-}
-
 /* 头部渐变流动 */
 @keyframes gradientShift {
   0%   { background-position: 0% 50%; }
@@ -161,12 +135,6 @@
 /* ================================================================
    Welcome Page Keyframes — Neon • Particles • City Lights
    ================================================================ */
-
-/* 欢迎页退出 — 纯opacity+transform，零掉帧 */
-@keyframes welcomeExit {
-  0%   { opacity: 1; transform: scale(1); }
-  100% { opacity: 0; transform: scale(1.05); pointer-events: none; }
-}
 
 /* 标题逐字上滑 */
 @keyframes slideUp {
@@ -193,12 +161,6 @@
   0%   { opacity: 0; transform: scale(0); }
   50%  { opacity: 1; transform: scale(1.5); }
   100% { opacity: 0.8; transform: scale(1); }
-}
-
-/* 进度条填充 */
-@keyframes progressFill {
-  0%   { width: 0%; }
-  100% { width: 100%; }
 }
 
 /* ================================================================
@@ -290,18 +252,9 @@
   background: rgba(0, 0, 0, 0.2);
 }
 /* Firefox scrollbar */
-* {
+html, .overflow-auto, .overflow-y-auto, .overflow-x-auto {
   scrollbar-width: thin;
   scrollbar-color: rgba(0, 0, 0, 0.12) transparent;
-}
-
-/* Scrollbar hide utility */
-.scrollbar-hide {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;
 }
 
 /* 卡片悬停光条扫过（Gleam Effect） */
@@ -340,8 +293,7 @@
 
 /* 移动端按钮增大触控区域 */
 @media (max-width: 767px) {
-  button,
-  .clickable {
+  button {
     min-height: 44px;
     min-width: 44px;
   }
@@ -349,14 +301,6 @@
   /* 双指缩放友好 */
   .maplibregl-map {
     touch-action: pan-x pan-y pinch-zoom;
-  }
-
-  /* 底部安全区域 */
-  .mobile-safe-bottom {
-    padding-bottom: env(safe-area-inset-bottom, 16px);
-  }
-  .mobile-safe-top {
-    padding-top: env(safe-area-inset-top, 0px);
   }
 
   /* 弹窗在小屏幕上更紧凑 */
@@ -374,12 +318,6 @@
     background: var(--color-glass);
     backdrop-filter: var(--color-glass-blur);
     -webkit-backdrop-filter: var(--color-glass-blur);
-  }
-
-  .glass-strong {
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(30px);
-    -webkit-backdrop-filter: blur(30px);
   }
 
   .shadow-soft {
@@ -401,21 +339,6 @@
     background-size: 200% 200%;
     animation: gradientShift 6s ease infinite;
   }
-
-  .card-accent {
-    border-left: 3px solid var(--color-accent);
-  }
-
-  .text-balance {
-    text-wrap: balance;
-  }
-
-  /* 动画延迟工具 */
-  .anim-delay-1 { animation-delay: 0.05s; }
-  .anim-delay-2 { animation-delay: 0.10s; }
-  .anim-delay-3 { animation-delay: 0.15s; }
-  .anim-delay-4 { animation-delay: 0.20s; }
-  .anim-delay-5 { animation-delay: 0.25s; }
 
   /* 移动端安全区域 */
   .pb-safe {
@@ -453,12 +376,6 @@
   :root {
     --color-glass-blur: blur(12px);
     --color-glass: rgba(255, 255, 255, 0.92);
-  }
-  /* Glass-strong — reduce 30px -> 6px, near-opaque background */
-  .glass-strong {
-    backdrop-filter: blur(6px) !important;
-    -webkit-backdrop-filter: blur(6px) !important;
-    background: rgba(255, 255, 255, 0.97) !important;
   }
   /* Popup close button — remove blur entirely, use solid bg */
   .maplibregl-popup-close-button {

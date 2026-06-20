@@ -33,12 +33,12 @@ const CITY_DOTS = [
 ]
 
 function WelcomeScreen() {
-  const [count, setCount] = useState(176)
+  const [count, setCount] = useState(mockLocations.length)
 
   /* 数字递增动画 — 0 → 176 */
   useEffect(() => {
     setCount(0)
-    const target = 176
+    const target = mockLocations.length
     let current = 0
     let intervalId: ReturnType<typeof setInterval>
     const timer = setTimeout(() => {
@@ -241,7 +241,7 @@ function LoadingTransition({ isMapReady }: { isMapReady: boolean }) {
           日本动漫店铺地图
         </h2>
         <p style={{ fontSize: 13, color: '#9090b0', margin: 0 }}>
-          176 动漫店铺 · 7 大连锁 · 全日本覆盖
+          {mockLocations.length} 动漫店铺 · 7 大连锁 · 全日本覆盖
         </p>
 
         {/* 进度条 */}
@@ -291,7 +291,13 @@ export default function App() {
   const [welcomeOpacity, setWelcomeOpacity] = useState(1)
   const [loadingOpacity, setLoadingOpacity] = useState(0)
   const isMapReady = useMapStore(s => s.isMapReady)
-  const isMobile = window.innerWidth < 768
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768)
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
 
   // 阶段1→2：欢迎→加载（欢迎淡出，加载淡入交叉过渡）
   useEffect(() => {

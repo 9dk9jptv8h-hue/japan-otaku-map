@@ -1,7 +1,7 @@
 package com.japantravelmap.app;
 
+import android.os.Build;
 import android.os.Bundle;
-import android.view.Window;
 import android.view.WindowInsets;
 import android.view.WindowInsetsController;
 import android.webkit.WebChromeClient;
@@ -21,7 +21,6 @@ public class MainActivity extends ComponentActivity {
         super.onCreate(savedInstanceState);
 
         // 全屏沉浸式
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setDecorFitsSystemWindows(false);
 
         webView = new WebView(this);
@@ -31,7 +30,6 @@ public class MainActivity extends ComponentActivity {
         WebSettings settings = webView.getSettings();
         settings.setJavaScriptEnabled(true);
         settings.setDomStorageEnabled(true);
-        settings.setDatabaseEnabled(true);
         settings.setGeolocationEnabled(true);
         settings.setCacheMode(WebSettings.LOAD_DEFAULT);
         settings.setUseWideViewPort(true);
@@ -42,13 +40,22 @@ public class MainActivity extends ComponentActivity {
         settings.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
 
         webView.setWebViewClient(new WebViewClient());
-        webView.setWebChromeClient(new WebChromeClient());
+        webView.setWebChromeClient(new WebChromeClient() {
+            @Override
+            public void onGeolocationPermissionsShowPrompt(String origin, GeolocationPermissions.Callback callback) {
+                callback.invoke(origin, true, false);
+            }
+        });
 
-        // 系统UI隐藏
-        WindowInsetsController insetsController = getWindow().getInsetsController();
-        if (insetsController != null) {
-            insetsController.hide(WindowInsets.Type.statusBars() | WindowInsets.Type.navigationBars());
-            insetsController.setSystemBarsBehavior(WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_GESTURE);
+        // 系统UI隐藏（API 30+ 才支持 WindowInsets.Type）
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            WindowInsetsController insetsController = getWindow().getInsetsController();
+            if (insetsController != null) {
+                insetsController.hide(WindowInsets.Type.statusBars() | WindowInsets.Type.navigationBars());
+                insetsController.setSystemBarsBehavior(
+                    WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+                );
+            }
         }
 
         webView.loadUrl(URL);

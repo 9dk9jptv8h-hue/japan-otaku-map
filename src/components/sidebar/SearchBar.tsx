@@ -3,7 +3,8 @@ import { Input } from '@/components/ui/Input'
 import { useFilterStore } from '@/store/useFilterStore'
 
 export function SearchBar() {
-  const { searchQuery, setSearchQuery } = useFilterStore()
+  const searchQuery = useFilterStore(s => s.searchQuery)
+  const setSearchQuery = useFilterStore(s => s.setSearchQuery)
 
   return (
     <Input

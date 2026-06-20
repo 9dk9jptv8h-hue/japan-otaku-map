@@ -74,6 +74,8 @@ export function ChatAssistant() {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const panelRef = useRef<HTMLDivElement>(null)
+  const isComposingRef = useRef(false)
+  const mountedRef = useRef(true)
 
   /* ---- effects ---- */
 
@@ -85,7 +87,8 @@ export function ChatAssistant() {
   // Focus input when panel opens
   useEffect(() => {
     if (isOpen) {
-      setTimeout(() => inputRef.current?.focus(), 300)
+      const timer = setTimeout(() => inputRef.current?.focus(), 300)
+      return () => clearTimeout(timer)
     }
   }, [isOpen])
 
@@ -95,6 +98,13 @@ export function ChatAssistant() {
     const t = setTimeout(() => setError(null), 4000)
     return () => clearTimeout(t)
   }, [error])
+
+  // Cleanup mountedRef on unmount
+  useEffect(() => {
+    return () => {
+      mountedRef.current = false
+    }
+  }, [])
 
   /* ---- panel open / close ---- */
 
@@ -111,7 +121,7 @@ export function ChatAssistant() {
     if (!text || isLoading) return
 
     // 1. Prompt shield
-    const scanResult = scanInput(text)
+    const scanResult = scanInput(text.normalize('NFC'))
     if (!scanResult.allowed) {
       const safetyMsg = getSafetyMessage(scanResult)
       setMessages((prev) => [
@@ -143,7 +153,6 @@ export function ChatAssistant() {
       timestamp: new Date(),
     }
     setMessages((prev) => [...prev, userMsg])
-    setInput('')
     setIsLoading(true)
     setError(null)
 
@@ -174,13 +183,16 @@ export function ChatAssistant() {
           timestamp: new Date(),
         },
       ])
+      setInput('')
     } catch (err: unknown) {
       const message =
         err instanceof Error ? err.message : '请求失败，请稍后再试'
       setError(message)
     } finally {
       setIsLoading(false)
-      setTimeout(() => inputRef.current?.focus(), 50)
+      if (mountedRef.current) {
+        setTimeout(() => inputRef.current?.focus(), 50)
+      }
     }
   }, [input, isLoading, messages])
 
@@ -188,12 +200,14 @@ export function ChatAssistant() {
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        closePanel()
+        return
+      }
+      if (isComposingRef.current || e.nativeEvent.isComposing || e.key === 'Process') return
       if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault()
         handleSend()
-      }
-      if (e.key === 'Escape') {
-        closePanel()
       }
     },
     [handleSend, closePanel],
@@ -295,10 +309,12 @@ export function ChatAssistant() {
               )}
               style={{ color: 'var(--color-text-dim)' }}
             >
-              {msg.timestamp.toLocaleTimeString('zh-CN', {
-                hour: '2-digit',
-                minute: '2-digit',
-              })}
+              {msg.timestamp instanceof Date && !isNaN(msg.timestamp.getTime())
+                ? msg.timestamp.toLocaleTimeString('zh-CN', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })
+                : ''}
             </div>
           </div>
         </div>
@@ -440,7 +456,10 @@ export function ChatAssistant() {
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
+              onCompositionStart={() => { isComposingRef.current = true }}
+              onCompositionEnd={() => { isComposingRef.current = false }}
               onKeyDown={(e) => {
+                if (isComposingRef.current || e.nativeEvent.isComposing || e.key === 'Process') return
                 if (e.key === 'Enter' && !e.shiftKey) {
                   e.preventDefault()
                   e.stopPropagation()

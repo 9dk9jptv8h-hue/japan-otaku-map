@@ -4,7 +4,10 @@ import { useDebounce } from '@/hooks/useDebounce'
 import { mockLocations as LOCATIONS } from '@/constants/mockData'
 
 export function useFilteredLocations() {
-  const { searchQuery, selectedCategories, sortBy, selectedRegion } = useFilterStore()
+  const searchQuery = useFilterStore(s => s.searchQuery)
+  const selectedCategories = useFilterStore(s => s.selectedCategories)
+  const selectedRegion = useFilterStore(s => s.selectedRegion)
+  const sortBy = useFilterStore(s => s.sortBy)
   const debouncedSearch = useDebounce(searchQuery, 300)
 
   // 地区提取（LOCATIONS 是模块级常量，不会变化）

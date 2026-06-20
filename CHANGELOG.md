@@ -7,6 +7,25 @@
 
 ---
 
+## [3.10.1] - 2026-06-20
+
+### 🔧 修复
+- 修复 promptShield 非字符串输入绕过漏洞
+- 修复 ChatAssistant 中文输入法 Enter 键误发送
+- 修复 Zustand store 缺少 selector 导致大量不必要重渲染
+- 修复 MarkersLayer 弹窗 HTML 注入风险
+- 修复 AI Service 缺少请求超时和中断机制
+- 修复 Worker 错误静默吞没、缺少日志
+- 修复 Android API 24-29 WindowInsets 崩溃
+- 修复 Service Worker 不缓存代理后瓦片
+- 修复 CSS 死代码和冗余变量
+- 修复 viewport-fit=cover 缺失导致安全区域失效
+- 修复 App.tsx isMobile 不响应窗口大小变化
+- 修复 README 虚高版本号、CHANGELOG 缺失比较链接
+- 修复 Badge 组件死代码
+
+---
+
 ## [3.10.0] - 2026-06-20
 
 ### Changed（变更）
@@ -23,8 +42,8 @@
 ## [3.9.0] - 2026-06-20
 
 ### Changed（变更）
-- **清除地图英文标签，只保留中文
-- 回退英文标签清理至温和方案 — 保留所有文字图层，仅替换name为中文优先** — 增强矢量瓦片标签清理逻辑，删除纯英文图层（_en/-en/english/latin），名称字段优先 name:zh → name:ja → name，数组表达式中的英文字段引用也被清空
+- **清除地图英文标签，只保留中文**
+- **回退英文标签清理至温和方案 — 保留所有文字图层，仅替换name为中文优先** — 增强矢量瓦片标签清理逻辑，删除纯英文图层（_en/-en/english/latin），名称字段优先 name:zh → name:ja → name，数组表达式中的英文字段引用也被清空
 
 ---
 
@@ -535,6 +554,14 @@
 
 ---
 
+[3.10.1]: https://github.com/9dk9jptv8h-hue/japan-otaku-map/compare/v3.10.0...v3.10.1
+[3.10.0]: https://github.com/9dk9jptv8h-hue/japan-otaku-map/compare/v3.9.0...v3.10.0
+[3.9.0]: https://github.com/9dk9jptv8h-hue/japan-otaku-map/compare/v3.8.0...v3.9.0
+[3.8.0]: https://github.com/9dk9jptv8h-hue/japan-otaku-map/compare/v3.7.0...v3.8.0
+[3.7.0]: https://github.com/9dk9jptv8h-hue/japan-otaku-map/compare/v3.6.0...v3.7.0
+[3.6.0]: https://github.com/9dk9jptv8h-hue/japan-otaku-map/compare/v3.5.0...v3.6.0
+[3.5.0]: https://github.com/9dk9jptv8h-hue/japan-otaku-map/compare/v3.4.0...v3.5.0
+[3.4.0]: https://github.com/9dk9jptv8h-hue/japan-otaku-map/compare/v3.3.1...v3.4.0
 [3.3.1]: https://github.com/9dk9jptv8h-hue/japan-otaku-map/compare/v3.3.0...v3.3.1
 [3.3.0]: https://github.com/9dk9jptv8h-hue/japan-otaku-map/compare/v3.2.0...v3.3.0
 [3.2.0]: https://github.com/9dk9jptv8h-hue/japan-otaku-map/compare/v3.1.2...v3.2.0

@@ -1,0 +1,19 @@
+{
+  "name": "日本动漫店铺地图",
+  "short_name": "动漫地图",
+  "description": "探索日本全国176个动漫店铺 - Animate、Melonbooks、Mandarake等",
+  "start_url": "/japan-otaku-map/",
+  "scope": "/japan-otaku-map/",
+  "display": "standalone",
+  "background_color": "#0a1628",
+  "theme_color": "#0a1628",
+  "orientation": "portrait-primary",
+  "lang": "zh-CN",
+  "icons": [
+    {
+      "src": "/japan-otaku-map/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

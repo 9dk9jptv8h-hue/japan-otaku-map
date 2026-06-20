@@ -4,12 +4,12 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![React](https://img.shields.io/badge/React-19-61DAFB?logo=react)](https://react.dev)
-[![TypeScript](https://img.shields.io/badge/TypeScript-6.0-3178C6?logo=typescript)](https://www.typescriptlang.org)
-[![Vite](https://img.shields.io/badge/Vite-8-646CFF?logo=vite)](https://vite.dev)
+[![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript)](https://www.typescriptlang.org)
+[![Vite](https://img.shields.io/badge/Vite-646CFF?logo=vite)](https://vite.dev)
 [![TailwindCSS](https://img.shields.io/badge/TailwindCSS-4-06B6D4?logo=tailwindcss)](https://tailwindcss.com)
-[![MapLibre](https://img.shields.io/badge/MapLibre_GL-5-396CB2?logo=maplibre)](https://maplibre.org)
+[![MapLibre](https://img.shields.io/badge/MapLibre_GL-396CB2?logo=maplibre)](https://maplibre.org)
 
-**收录 176 个动漫店铺的交互式地图，内置 AI 旅行小助手，基于 MapLibre 矢量瓦片渲染，支持地区筛选、分类筛选、搜索与排序。**
+**收录 176+ 个动漫店铺的交互式地图，内置 AI 旅行小助手，基于 MapLibre 矢量瓦片渲染，支持地区筛选、分类筛选、搜索与排序。**
 
 [🐛 报告 Bug](https://github.com/9dk9jptv8h-hue/japan-otaku-map/issues) &nbsp;|&nbsp; [✨ 功能建议](https://github.com/9dk9jptv8h-hue/japan-otaku-map/issues)
 
@@ -19,7 +19,7 @@
 
 ## 简介
 
-一张专为中国动漫迷打造的日本旅行地图。标注了全日本 176 个动漫店铺，内置 AI 旅行小助手（DeepSeek + Cloudflare Worker），全中文 UI 与地点描述，使用 MapLibre GL JS 矢量瓦片实现丝滑的地图交互体验。
+一张专为中国动漫迷打造的日本旅行地图。标注了全日本 176+ 个动漫店铺，内置 AI 旅行小助手（DeepSeek + Cloudflare Worker），全中文 UI 与地点描述，使用 MapLibre GL JS 矢量瓦片实现丝滑的地图交互体验。
 
 ---
 
@@ -42,12 +42,12 @@
 | 功能 | 说明 |
 |------|------|
 | 🗺️ **矢量瓦片地图** | MapLibre GL JS 渲染，OpenFreeMap 全球 CDN 瓦片源 |
-| 📍 **176 个地点** | 176 个动漫店铺，覆盖北海道到九州 |
+| 📍 **176+ 个地点** | 176+ 个动漫店铺，覆盖北海道到九州 |
 | 🏷️ **7 类分色标记** | Animate（粉色）/ Melonbooks（绿色）/ Mandarake（橙色）/ Suruga-ya（蓝色）/ GAMERS（黄色）/ Lashinbang（紫色）/ K-Books（深红） |
 | 🔍 **搜索与筛选** | 全文搜索（名称/描述/标签/地址）、地区筛选（都道府県）、分类筛选 |
 | 📊 **排序** | 按评分、名称、更新时间、访问量排序 |
 | 📱 **响应式布局** | 桌面端侧边栏 + 移动端抽屉，全尺寸适配 |
-| 🤖 **AI 小助手** | DeepSeek API + Cloudflare Worker 代理，内置 176 家店铺知识的旅行顾问 |
+| 🤖 **AI 小助手** | DeepSeek API + Cloudflare Worker 代理，内置 176+ 家店铺知识的旅行顾问 |
 | 🛡️ **安全扫描** | AutoSec-QC 提示词注入检测，40+ 条规则覆盖 10 个攻击类别 |
 | 📲 **Android APK** | WebView 全屏应用，GitHub Actions 自动构建，网站更新后自动同步 |
 | 🎬 **加载过渡页** | 动画加载过渡页，地图资源就绪后自动进入主界面 |
@@ -60,13 +60,13 @@
 | 层级 | 技术 |
 |------|------|
 | **框架** | [React 19](https://react.dev) + Hooks |
-| **语言** | [TypeScript 6](https://www.typescriptlang.org) — 严格模式 |
-| **构建** | [Vite 8](https://vite.dev) — 亚秒级 HMR |
+| **语言** | [TypeScript](https://www.typescriptlang.org) — 严格模式 |
+| **构建** | [Vite](https://vite.dev) — 亚秒级 HMR |
 | **样式** | [TailwindCSS 4](https://tailwindcss.com) — CSS 变量 |
-| **地图引擎** | [MapLibre GL JS 5](https://maplibre.org) — 矢量瓦片渲染 |
+| **地图引擎** | [MapLibre GL JS](https://maplibre.org) — 矢量瓦片渲染 |
 | **瓦片源** | [OpenFreeMap](https://openfreemap.org) — 免费、无 Key、全球 CDN |
 | **瓦片代理** | [Cloudflare Workers](https://workers.cloudflare.com) — 亚太加速 + 缓存优化 |
-| **状态管理** | [Zustand 5](https://zustand.docs.pmnd.rs) — 轻量、持久化 |
+| **状态管理** | [Zustand](https://zustand.docs.pmnd.rs) — 轻量、持久化 |
 | **图标** | [Lucide React](https://lucide.dev) |
 | **AI 模型** | [DeepSeek API](https://platform.deepseek.com) — 旅行助手对话模型 |
 | **AI 代理** | [Cloudflare Workers](https://workers.cloudflare.com) — 服务端代理转发 |
@@ -81,6 +81,8 @@
 ```bash
 # 克隆仓库
 git clone git@github.com:9dk9jptv8h-hue/japan-otaku-map.git
+# or
+git clone https://github.com/9dk9jptv8h-hue/japan-otaku-map.git
 cd japan-otaku-map
 
 # 安装依赖
@@ -112,7 +114,7 @@ src/
 │   ├── sidebar/         # Sidebar、FilterPanel、SearchBar、CardList、LocationCard、SortControl、SidebarToggle
 │   └── ui/              # Badge、EmptyState、ErrorBoundary、Input
 ├── constants/
-│   ├── mockData.ts      # 176 个地点数据
+│   ├── mockData.ts      # 176+ 个地点数据
 │   ├── mapDefaults.ts   # 视口、瓦片样式配置
 │   └── theme.ts         # 分类颜色与元数据
 ├── hooks/               # useDebounce、useFilteredLocations、useMediaQuery

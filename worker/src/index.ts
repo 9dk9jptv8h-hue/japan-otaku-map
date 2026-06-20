@@ -59,12 +59,24 @@ async function handleTileRequest(request: Request, ctx: ExecutionContext): Promi
   }
 
   // 2. 缓存未命中，从 origin 拉取
-  const originResponse = await fetch(tileUrl, {
-    headers: {
-      'User-Agent': 'CloudflareWorker/TileProxy',
-      Accept: request.headers.get('Accept') || '*/*',
-    },
-  })
+  let originResponse: Response
+  try {
+    originResponse = await fetch(tileUrl, {
+      headers: {
+        'User-Agent': 'CloudflareWorker/TileProxy',
+        Accept: request.headers.get('Accept') || '*/*',
+      },
+    })
+  } catch (e) {
+    console.error('Tile fetch failed:', e)
+    return new Response('Tile fetch failed', {
+      status: 502,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Cache-Control': 'no-cache',
+      },
+    })
+  }
 
   if (!originResponse.ok) {
     return new Response(`Tile fetch failed: ${originResponse.status}`, {
@@ -144,16 +156,17 @@ export default {
     }
 
     try {
+      // 先检查请求体大小（避免解析超大 JSON）
+      const contentLength = request.headers.get('Content-Length')
+      if (contentLength && parseInt(contentLength, 10) > 10000) {
+        return jsonResponse({ error: '消息太长' }, 400)
+      }
+
       const body = (await request.json()) as ChatRequest
 
       // 基本校验
       if (!body.messages || !Array.isArray(body.messages)) {
         return jsonResponse({ error: '无效的请求格式' }, 400)
-      }
-
-      // 限制请求体大小（防滥用）
-      if (JSON.stringify(body).length > 10000) {
-        return jsonResponse({ error: '消息太长' }, 400)
       }
 
       // 转发到 DeepSeek API
@@ -171,18 +184,26 @@ export default {
         }),
       })
 
-      const data = await response.json()
+      let data: unknown
+      try {
+        data = await response.json()
+      } catch {
+        const textBody = await response.text().catch(() => '无法读取响应')
+        console.error('DeepSeek non-JSON response:', textBody)
+        return jsonResponse({ error: 'AI 服务返回了异常的响应格式' }, 502)
+      }
 
       if (!response.ok) {
         // 透传 DeepSeek 错误但隐藏敏感信息
         const status = response.status
         if (status === 429) return jsonResponse({ error: '请求过于频繁，请稍后再试' }, 429)
-        if (status === 402) return jsonResponse({ error: '服务暂时不可用' }, 503)
+        if (status === 402) return jsonResponse({ error: 'API 配额已用尽，请联系管理员' }, 402)
         return jsonResponse({ error: '服务暂时不可用' }, 503)
       }
 
       return jsonResponse(data)
-    } catch {
+    } catch (e) {
+      console.error('AI API error:', e)
       return jsonResponse({ error: '服务暂时不可用' }, 500)
     }
   },

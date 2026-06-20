@@ -3,7 +3,9 @@ import { CATEGORIES } from '@/constants/theme'
 import { cn } from '@/utils/cn'
 
 export function FilterPanel() {
-  const { selectedCategories, toggleCategory, clearCategories } = useFilterStore()
+  const selectedCategories = useFilterStore(s => s.selectedCategories)
+  const toggleCategory = useFilterStore(s => s.toggleCategory)
+  const clearCategories = useFilterStore(s => s.clearCategories)
   const hasFilters = selectedCategories.length > 0
 
   return (

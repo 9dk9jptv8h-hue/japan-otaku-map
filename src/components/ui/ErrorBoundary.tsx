@@ -8,16 +8,21 @@ interface ErrorBoundaryProps {
 interface ErrorBoundaryState {
   hasError: boolean
   error?: Error
+  errorKey: number
 }
 
 export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   constructor(props: ErrorBoundaryProps) {
     super(props)
-    this.state = { hasError: false }
+    this.state = { hasError: false, errorKey: 0 }
   }
 
   static getDerivedStateFromError(error: Error): ErrorBoundaryState {
-    return { hasError: true, error }
+    return { hasError: true, error, errorKey: 0 }
+  }
+
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error('ErrorBoundary caught:', error, errorInfo)
   }
 
   render() {
@@ -33,7 +38,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
                 {this.state.error?.message ?? '未知错误'}
               </p>
               <button
-                onClick={() => this.setState({ hasError: false })}
+                onClick={() => this.setState({ hasError: false, errorKey: this.state.errorKey + 1 })}
                 className="rounded-xl bg-[var(--color-indigo)] px-4 py-2 text-sm text-white hover:bg-[var(--color-indigo)]/85 transition-all"
               >
                 重试
@@ -44,6 +49,6 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
       )
     }
 
-    return this.props.children
+    return <span key={this.state.errorKey}>{this.props.children}</span>
   }
 }

@@ -8,7 +8,8 @@ interface RegionSelectProps {
 }
 
 export function RegionSelect({ regionList }: RegionSelectProps) {
-  const { selectedRegion, setSelectedRegion } = useFilterStore()
+  const selectedRegion = useFilterStore(s => s.selectedRegion)
+  const setSelectedRegion = useFilterStore(s => s.setSelectedRegion)
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 

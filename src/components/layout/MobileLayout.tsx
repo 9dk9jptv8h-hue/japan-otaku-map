@@ -17,7 +17,8 @@ interface MobileLayoutProps {
 }
 
 export function MobileLayout({ locations }: MobileLayoutProps) {
-  const { sidebarOpen, setSidebarOpen } = useUIStore()
+  const sidebarOpen = useUIStore(s => s.sidebarOpen)
+  const setSidebarOpen = useUIStore(s => s.setSidebarOpen)
   const { filteredLocations, regionList } = useFilteredLocations()
 
   return (

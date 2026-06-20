@@ -12,7 +12,8 @@ const SORT_OPTIONS: { key: SortOption; label: string }[] = [
 ]
 
 export function SortPopover() {
-  const { sortBy, setSortBy } = useFilterStore()
+  const sortBy = useFilterStore(s => s.sortBy)
+  const setSortBy = useFilterStore(s => s.setSortBy)
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 

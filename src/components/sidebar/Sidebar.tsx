@@ -15,7 +15,8 @@ interface SidebarProps {
 }
 
 export function Sidebar({ locations, className }: SidebarProps) {
-  const { sidebarCollapsed, toggleSidebar } = useUIStore()
+  const sidebarCollapsed = useUIStore(s => s.sidebarCollapsed)
+  const toggleSidebar = useUIStore(s => s.toggleSidebar)
   const { filteredLocations, regionList } = useFilteredLocations()
 
   return (
