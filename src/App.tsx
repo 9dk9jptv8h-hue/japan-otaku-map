@@ -319,14 +319,14 @@ export default function App() {
     return () => clearTimeout(t)
   }, [])
 
-  // 欢迎页定时退出 → 进入loading
+  // 欢迎页退出 → 立即显示加载页（加载页在欢迎页下方，z-index低一层，淡出时自然露出）
   useEffect(() => {
-    const show = setTimeout(() => setWelcomeExiting(true), welcomeTime)
-    const hide = setTimeout(() => setPhase('loading'), welcomeTime + 800)
-    return () => {
-      clearTimeout(show)
-      clearTimeout(hide)
-    }
+    const exitTimer = setTimeout(() => {
+      setWelcomeExiting(true)
+      setPhase('loading')  // 立即切到loading，不等退出动画
+    }, welcomeTime)
+    return () => clearTimeout(exitTimer)
+  }, [welcomeTime])
   }, [welcomeTime])
 
   // loading阶段：至少2秒 + 地图必须ready
