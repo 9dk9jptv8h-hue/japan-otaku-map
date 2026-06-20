@@ -7,9 +7,9 @@
 
 ---
 
-## [3.10.1] - 2026-06-20
+## [4.0.0] - 2026-06-20
 
-### 🔧 修复
+### 🔧 大量修复（全面审查——48个问题）
 - 修复 promptShield 非字符串输入绕过漏洞
 - 修复 ChatAssistant 中文输入法 Enter 键误发送
 - 修复 Zustand store 缺少 selector 导致大量不必要重渲染
@@ -554,7 +554,7 @@
 
 ---
 
-[3.10.1]: https://github.com/9dk9jptv8h-hue/japan-otaku-map/compare/v3.10.0...v3.10.1
+[4.0.0]: https://github.com/9dk9jptv8h-hue/japan-otaku-map/compare/v3.10.0...v4.0.0
 [3.10.0]: https://github.com/9dk9jptv8h-hue/japan-otaku-map/compare/v3.9.0...v3.10.0
 [3.9.0]: https://github.com/9dk9jptv8h-hue/japan-otaku-map/compare/v3.8.0...v3.9.0
 [3.8.0]: https://github.com/9dk9jptv8h-hue/japan-otaku-map/compare/v3.7.0...v3.8.0
