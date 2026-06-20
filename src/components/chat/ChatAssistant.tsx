@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import {
   MessageCircle,
-  X,
   Send,
   AlertTriangle,
   Bot,
@@ -360,13 +359,6 @@ export function ChatAssistant() {
                 动漫店铺问答
               </div>
             </div>
-            <button
-              aria-label="关闭聊天面板"
-              className="p-1.5 rounded-lg hover:bg-white/15 transition-colors"
-              onClick={closePanel}
-            >
-              <X size={18} color="#fff" />
-            </button>
           </div>
 
           {/* ---- Messages ---- */}
