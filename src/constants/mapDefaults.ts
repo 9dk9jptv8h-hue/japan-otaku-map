@@ -20,20 +20,30 @@ export const JAPAN_BOUNDS: [[number, number], [number, number]] = [
 // 矢量瓦片缩放无模糊，支持中文标签自动检测（name:zh 优先）
 // ================================================================
 
+// Cloudflare Worker 瓦片代理（解决国内直连 OpenFreeMap 慢/被墙的问题）
+export const TILE_PROXY_BASE = 'https://japan-map-ai.9dk9jptv8h.workers.dev'
+export const USE_TILE_PROXY = true
+
+// 根据代理开关动态生成 style URL
+const styleUrl = (style: string) =>
+  USE_TILE_PROXY
+    ? `${TILE_PROXY_BASE}/tiles/styles/${style}`
+    : `https://tiles.openfreemap.org/styles/${style}`
+
 export const TILE_STYLES: Record<TileLayerStyle, {
   url: string
   attribution: string
 }> = {
   light: {
-    url: 'https://tiles.openfreemap.org/styles/positron',
+    url: styleUrl('positron'),
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> contributors',
   },
   standard: {
-    url: 'https://tiles.openfreemap.org/styles/liberty',
+    url: styleUrl('liberty'),
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> contributors',
   },
   dark: {
-    url: 'https://tiles.openfreemap.org/styles/dark',
+    url: styleUrl('dark'),
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> contributors',
   },
 }

@@ -1,8 +1,9 @@
 /**
- * Cloudflare Worker — DeepSeek API 代理
+ * Cloudflare Worker — DeepSeek API 代理 + OpenFreeMap 瓦片缓存代理
  *
- * 架构: 用户浏览器 → 本Worker（持有API Key）→ DeepSeek API
- * 用户无需输入API Key，Worker在服务端注入。
+ * 路由:
+ *   POST /         → DeepSeek AI Chat（API Key 服务端注入）
+ *   GET  /tiles/*  → OpenFreeMap 瓦片代理（Cloudflare Edge CDN 缓存）
  */
 
 export interface Env {
@@ -13,12 +14,18 @@ interface ChatRequest {
   messages: Array<{ role: string; content: string }>
 }
 
+// ---- AI Chat CORS（仅限指定 Origin）----
 const CORS_HEADERS: Record<string, string> = {
   'Access-Control-Allow-Origin': 'https://9dk9jptv8h-hue.github.io',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type',
   'Access-Control-Max-Age': '86400',
 }
+
+// ---- Tile 代理常量 ----
+const TILE_ORIGIN = 'https://tiles.openfreemap.org'
+const TILE_CACHE_SECONDS = 604800 // 7 days
+const STYLE_CACHE_SECONDS = 86400 // 1 day
 
 function jsonResponse(data: unknown, status = 200): Response {
   return new Response(JSON.stringify(data), {
@@ -30,14 +37,108 @@ function jsonResponse(data: unknown, status = 200): Response {
   })
 }
 
+/**
+ * 处理 /tiles/* 请求：代理 OpenFreeMap 并利用 Cloudflare Cache API 缓存
+ */
+async function handleTileRequest(request: Request, ctx: ExecutionContext): Promise<Response> {
+  const url = new URL(request.url)
+  const workerOrigin = url.origin
+
+  // 去掉 /tiles 前缀，拼接到 OpenFreeMap origin
+  const tilePath = url.pathname.replace(/^\/tiles/, '')
+  const tileUrl = TILE_ORIGIN + tilePath + url.search
+
+  // 使用原始请求 URL 作为缓存 key
+  const cacheKey = new Request(request.url, { method: 'GET' })
+  const cache = caches.default
+
+  // 1. 查询缓存
+  const cachedResponse = await cache.match(cacheKey)
+  if (cachedResponse) {
+    return cachedResponse
+  }
+
+  // 2. 缓存未命中，从 origin 拉取
+  const originResponse = await fetch(tileUrl, {
+    headers: {
+      'User-Agent': 'CloudflareWorker/TileProxy',
+      Accept: request.headers.get('Accept') || '*/*',
+    },
+  })
+
+  if (!originResponse.ok) {
+    return new Response(`Tile fetch failed: ${originResponse.status}`, {
+      status: originResponse.status,
+      headers: { 'Access-Control-Allow-Origin': '*' },
+    })
+  }
+
+  // 3. 判断是否为 style JSON（路径含 /styles/）
+  const isStyleJson = tilePath.includes('/styles/')
+
+  let responseBody: ArrayBuffer | string
+  let contentType = originResponse.headers.get('Content-Type') || 'application/octet-stream'
+  let cacheDuration: number
+
+  if (isStyleJson) {
+    // Style JSON: 重写 URL，将 openfreemap origin 替换为 Worker 自身 origin + /tiles
+    let text = await originResponse.text()
+    text = text.replaceAll(TILE_ORIGIN, workerOrigin + '/tiles')
+    responseBody = text
+    cacheDuration = STYLE_CACHE_SECONDS
+  } else {
+    // PBF tiles, fonts, sprites 等：直接透传 binary
+    responseBody = await originResponse.arrayBuffer()
+    cacheDuration = TILE_CACHE_SECONDS
+  }
+
+  // 4. 构建响应
+  // 注意：不复制 Content-Encoding，因为 .text()/.arrayBuffer() 已自动解压
+  const responseHeaders = new Headers({
+    'Content-Type': contentType,
+    'Cache-Control': `public, max-age=${cacheDuration}, s-maxage=${cacheDuration}`,
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET, OPTIONS',
+  })
+
+  const response = new Response(responseBody, {
+    status: 200,
+    headers: responseHeaders,
+  })
+
+  // 5. 异步写入缓存（不阻塞响应）
+  ctx.waitUntil(cache.put(cacheKey, response.clone()))
+
+  return response
+}
+
 export default {
-  async fetch(request: Request, env: Env): Promise<Response> {
+  async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+    const url = new URL(request.url)
+
     // ---- CORS preflight ----
     if (request.method === 'OPTIONS') {
+      // 瓦片路由：宽松 CORS（任何 origin 都能加载地图）
+      if (url.pathname.startsWith('/tiles')) {
+        return new Response(null, {
+          headers: {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'GET, OPTIONS',
+            'Access-Control-Allow-Headers': '*',
+            'Access-Control-Max-Age': '86400',
+          },
+        })
+      }
+      // AI Chat 路由：限制 origin
       return new Response(null, { headers: CORS_HEADERS })
     }
 
-    // ---- Only POST ----
+    // ---- Tile 代理路由: GET /tiles/* ----
+    if (request.method === 'GET' && url.pathname.startsWith('/tiles')) {
+      return handleTileRequest(request, ctx)
+    }
+
+    // ---- AI Chat 路由: POST / ----
     if (request.method !== 'POST') {
       return jsonResponse({ error: 'Method not allowed' }, 405)
     }
