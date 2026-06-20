@@ -183,19 +183,6 @@ function WelcomeScreen() {
           ))}
         </div>
 
-        {/* 进度条 */}
-        <div className="w-full max-w-[200px]" style={{ animation: 'fadeInUp 0.4s 1.6s ease-out both' }}>
-          <div className="h-[2px] bg-white/10 rounded-full overflow-hidden">
-            <div
-              className="h-full rounded-full"
-              style={{
-                background: 'linear-gradient(90deg, #e91e63, #1565c0, #7b1fa2)',
-                animation: 'progressFill 2s 0.5s ease-out both',
-              }}
-            />
-          </div>
-          <p className="text-center text-[10px] text-white/30 mt-2">正在加载地图...</p>
-        </div>
       </div>
     </div>
   )
