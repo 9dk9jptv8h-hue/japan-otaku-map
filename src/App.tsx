@@ -2,6 +2,7 @@ import { useEffect, useState, useMemo } from 'react'
 import { mockLocations } from '@/constants/mockData'
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
 import { AppShell } from '@/components/layout/AppShell'
+import { useMapStore } from '@/store/useMapStore'
 
 /* ================================================================
    Welcome Screen — 欢迎界面 — 东京霓虹 × 日式美学
@@ -202,40 +203,114 @@ function WelcomeScreen({ exiting }: { exiting: boolean }) {
 }
 
 /* ================================================================
-   App Root
+   Loading Transition — 地图加载过渡页
+   ================================================================ */
+
+function LoadingTransition() {
+  const [progress, setProgress] = useState(0)
+  const [exiting, setExiting] = useState(false)
+  const isMapReady = useMapStore(s => s.isMapReady)
+
+  // 进度动画：1.2秒内从0到85%，然后等待mapReady
+  useEffect(() => {
+    const duration = 1200
+    const start = performance.now()
+    const tick = (now: number) => {
+      const p = Math.min((now - start) / duration, 1)
+      setProgress(Math.floor(p * 85))
+      if (p < 1) requestAnimationFrame(tick)
+    }
+    const timer = setTimeout(() => requestAnimationFrame(tick), 200)
+    return () => clearTimeout(timer)
+  }, [])
+
+  // 地图就绪 → 冲刺到100% → 退出
+  useEffect(() => {
+    if (isMapReady) {
+      setProgress(100)
+      const timer = setTimeout(() => setExiting(true), 400)
+      return () => clearTimeout(timer)
+    }
+  }, [isMapReady])
+
+  return (
+    <div
+      className="fixed inset-0 z-[9998] flex items-center justify-center"
+      style={{
+        background: '#0a0a12',
+        animation: exiting ? 'welcomeExit 0.5s ease-in forwards' : undefined,
+      }}
+    >
+      <div className="flex flex-col items-center gap-6">
+        <div className="text-4xl">🗾</div>
+        <h2 className="text-2xl font-bold text-white">地图加载中</h2>
+
+        {/* 进度条 */}
+        <div className="w-48 h-1 bg-white/10 rounded-full overflow-hidden">
+          <div
+            className="h-full rounded-full transition-all duration-300"
+            style={{
+              width: `${progress}%`,
+              background: 'linear-gradient(90deg, #e91e63, #1565c0, #7b1fa2)',
+            }}
+          />
+        </div>
+
+        <p className="text-xs text-white/30">
+          {progress >= 100 ? '加载完成' : '正在加载瓦片数据...'}
+        </p>
+      </div>
+    </div>
+  )
+}
+
+/* ================================================================
+   App Root — 三阶段过渡：welcome → loading → map
    ================================================================ */
 
 export default function App() {
-  const [loading, setLoading] = useState(true)
-  const [exiting, setExiting] = useState(false)
-  const [mapReady, setMapReady] = useState(false)
+  const [phase, setPhase] = useState<'welcome' | 'loading' | 'map'>('welcome')
+  const [welcomeExiting, setWelcomeExiting] = useState(false)
   const [isMobile] = useState(() => window.innerWidth < 768)
+  const isMapReady = useMapStore(s => s.isMapReady)
 
-  const loadingTime = isMobile ? 2200 : 2500
-  const exitTime = isMobile ? 3000 : 3300
+  const welcomeTime = isMobile ? 2200 : 2500
+  const welcomeExitDuration = isMobile ? 800 : 800
 
+  // 欢迎页定时退出
   useEffect(() => {
-    // 延迟500ms再加载地图，让欢迎动画先跑顺
-    const mapTimer = setTimeout(() => setMapReady(true), 500)
-    const show = setTimeout(() => setExiting(true), loadingTime)
+    const show = setTimeout(() => setWelcomeExiting(true), welcomeTime)
     const hide = setTimeout(() => {
-      setLoading(false)
-      document.body.style.background = ''  // 清除inline暗色背景，恢复CSS控制
-    }, exitTime)
+      setPhase('loading')
+    }, welcomeTime + welcomeExitDuration)
     return () => {
-      clearTimeout(mapTimer)
       clearTimeout(show)
       clearTimeout(hide)
     }
-  }, [loadingTime, exitTime])
+  }, [welcomeTime, welcomeExitDuration])
+
+  // loading阶段 + 地图就绪 → 过渡到map
+  useEffect(() => {
+    if (isMapReady && phase === 'loading') {
+      // 等LoadingTransition退出动画播完(500ms) + 缓冲
+      const timer = setTimeout(() => {
+        setPhase('map')
+        document.body.style.background = ''
+      }, 900)
+      return () => clearTimeout(timer)
+    }
+  }, [isMapReady, phase])
 
   return (
     <ErrorBoundary>
-      {/* 地图在底层 — 延迟500ms加载，避免和欢迎动画抢CPU */}
-      {mapReady && <AppShell locations={mockLocations} />}
+      {/* 地图从一开始就在后台渲染（被加载页覆盖） */}
+      <AppShell locations={mockLocations} />
 
-      {/* 欢迎页覆盖在上方 — 动画结束后移除 */}
-      {loading && <WelcomeScreen exiting={exiting} />}
+      {/* 欢迎页 — 最上层 */}
+      {phase === 'welcome' && <WelcomeScreen exiting={welcomeExiting} />}
+
+      {/* 加载过渡页 — 欢迎页退出后显示 */}
+      {phase === 'loading' && <LoadingTransition />}
     </ErrorBoundary>
   )
 }

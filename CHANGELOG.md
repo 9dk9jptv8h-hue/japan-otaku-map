@@ -21,6 +21,7 @@
 ### Added（新增）
 - `RegionSelect` 组件 — 地区下拉选择器，带click-outside关闭
 - `SortPopover` 组件 — 排序弹出菜单，带勾选标记
+- 地图加载过渡页 — 欢迎页退出后显示渐变进度条加载动画，地图就绪后平滑过渡
 
 ### Removed（移除）
 - `SortControl` 组件 — 功能已合并至SortPopover
