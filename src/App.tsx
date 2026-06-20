@@ -9,7 +9,7 @@ import { useMapStore } from '@/store/useMapStore'
    Neon • Particles • City Lights • CountUp
    ================================================================ */
 
-const TITLE_CHARS = '日本旅游地图'.split('')
+const TITLE_CHARS = '日本动漫店铺地图'.split('')
 
 const BRANDS = [
   { name: 'Animate', color: '#e91e63' },
@@ -238,7 +238,7 @@ function LoadingTransition({ isMapReady }: { isMapReady: boolean }) {
       }}>
         <div style={{ fontSize: 60 }}>🗾</div>
         <h2 style={{ fontSize: 22, fontWeight: 800, color: '#1a1a2e', margin: 0 }}>
-          日本旅游地图
+          日本动漫店铺地图
         </h2>
         <p style={{ fontSize: 13, color: '#9090b0', margin: 0 }}>
           176 动漫店铺 · 7 大连锁 · 全日本覆盖

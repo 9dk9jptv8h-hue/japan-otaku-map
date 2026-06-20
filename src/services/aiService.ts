@@ -3,7 +3,7 @@ export interface ChatMessage {
   content: string
 }
 
-export const SYSTEM_PROMPT = `你是「日本旅游地图」网站的AI助手。你帮助用户了解日本的动漫店铺和旅游信息。
+export const SYSTEM_PROMPT = `你是「日本动漫店铺地图」网站的AI助手。你帮助用户了解日本的动漫店铺和旅游信息。
 
 回答规则：
 1. 使用中文回答，语句通顺，必须使用正确的标点符号（逗号、句号、问号等）。

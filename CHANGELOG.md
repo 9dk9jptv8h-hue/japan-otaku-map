@@ -9,6 +9,13 @@
 - AI聊天面板去除右上角关闭按钮 — 底部浮动按钮已可开关，避免重复
 ---
 
+## [3.10.0] - 2026-06-20
+
+### Changed（变更）
+- **网站改名：日本旅游地图 → 日本动漫店铺地图** — 更新 index.html（title/meta/OG/JSON-LD）、App.tsx（TITLE_CHARS）、MobileLayout.tsx（移动端标题）、aiService.ts（AI系统提示）、README.md 标题
+
+---
+
 ## [3.9.0] - 2026-06-20
 
 ### Changed（变更）

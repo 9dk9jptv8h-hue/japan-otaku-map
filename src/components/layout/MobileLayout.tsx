@@ -75,7 +75,7 @@ export function MobileLayout({ locations }: MobileLayoutProps) {
         {/* Header — compact single line */}
         <div className="header-gradient shrink-0 px-4 py-3 text-white flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <h1 className="text-lg font-bold">🗾 日本旅游地图</h1>
+            <h1 className="text-lg font-bold">🗾 日本动漫店铺地图</h1>
             <span className="inline-flex items-center rounded-full bg-white/20 px-2 py-0.5 text-xs">
               📍 {locations.length}
             </span>
