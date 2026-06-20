@@ -73,21 +73,46 @@ export function MapView({ children }: MapViewProps) {
       initialized.current = true
     })
 
-    // 矢量瓦片中文标签替换 + 移除3D建筑层
+    // 矢量瓦片：清除英文标签，只保留中文/日文汉字 + 移除3D建筑层
     map.on('style.load', () => {
       const style = map.getStyle()
       if (!style?.layers) return
+
       for (const layer of style.layers) {
-        // 中文标签替换
+        // 1. 删除纯英文标签层（_en/-en/english/latin后缀的图层）
+        if (layer.id.includes('_en') || layer.id.includes('-en') ||
+            layer.id.includes('english') || layer.id.includes('latin')) {
+          map.removeLayer(layer.id)
+          continue
+        }
+
+        // 2. 对于symbol类型图层，修改文字标签为中文优先
         if (layer.type === 'symbol' && layer.layout?.['text-field']) {
           const textField = layer.layout['text-field']
-          if (typeof textField === 'string' && /\{name\b/.test(textField)) {
-            map.setLayoutProperty(layer.id, 'text-field',
-              ['coalesce', ['get', 'name:zh'], ['get', 'name']]
-            )
+
+          if (typeof textField === 'string') {
+            // 如果标签使用的是{name}模式 → 优先中文，回退日文汉字，最后本地名
+            if (/\{name\b/.test(textField)) {
+              map.setLayoutProperty(layer.id, 'text-field',
+                ['coalesce', ['get', 'name:zh'], ['get', 'name:ja'], ['get', 'name']]
+              )
+            }
+            // 如果标签使用的是{name_en}或{name:en}，直接清空
+            else if (/name.*en/.test(textField)) {
+              map.setLayoutProperty(layer.id, 'text-field', '')
+            }
+          }
+          // 如果是表达式数组，检测英文字段引用并清空
+          else if (Array.isArray(textField)) {
+            const textFieldStr = JSON.stringify(textField)
+            if (textFieldStr.includes('name_en') || textFieldStr.includes('name:en') ||
+                textFieldStr.includes('name:latin') || textFieldStr.includes('int_name')) {
+              map.setLayoutProperty(layer.id, 'text-field', '')
+            }
           }
         }
-        // 移除3D建筑物层（fill-extrusion）
+
+        // 3. 移除3D建筑物层（fill-extrusion）— 不需要，降低GPU负担
         if (layer.type === 'fill-extrusion') {
           map.removeLayer(layer.id)
         }
