@@ -304,77 +304,62 @@ export default function App() {
   const [welcomeOpacity, setWelcomeOpacity] = useState(1)
   const [loadingOpacity, setLoadingOpacity] = useState(0)
   const isMapReady = useMapStore(s => s.isMapReady)
-  const [isMobile] = useState(() => window.innerWidth < 768)
+  const isMobile = window.innerWidth < 768
 
-  const welcomeTime = isMobile ? 2200 : 2500
-
-  // 地图延迟渲染——300ms后开始（确保覆盖层已paint）
-  useEffect(() => {
-    const t = setTimeout(() => setMapRender(true), 300)
-    return () => clearTimeout(t)
-  }, [])
-
-  // Phase 1→2: 欢迎淡出 + 加载淡入（交叉过渡）
+  // 阶段1→2：欢迎→加载（欢迎淡出，加载淡入交叉过渡）
   useEffect(() => {
     const t = setTimeout(() => {
-      setLoadingOpacity(1)   // 加载页淡入
-      setWelcomeOpacity(0)   // 欢迎页淡出（同时进行）
-    }, welcomeTime)
+      setWelcomeOpacity(0)     // 欢迎开始淡出
+      setLoadingOpacity(1)     // 加载开始淡入（此时地图还没渲染！）
+    }, isMobile ? 2200 : 2500)
     return () => clearTimeout(t)
-  }, [welcomeTime])
+  }, [isMobile])
 
-  // Phase 2→3: 地图ready后，加载页淡出
+  // 加载页淡入完成后（opacity达到1），才开始渲染地图
   useEffect(() => {
-    if (loadingOpacity !== 1) return
-    let cancelled = false
-    let timerId: ReturnType<typeof setTimeout>
+    if (loadingOpacity < 0.5) return  // loading还没淡入完
+    const t = setTimeout(() => {
+      setMapRender(true)  // 地图开始加载（加载页已完全覆盖）
+    }, 500)  // 等loading淡入动画(0.5s)完成
+    return () => clearTimeout(t)
+  }, [loadingOpacity])
 
-    const checkReady = () => {
-      if (cancelled) return
-      if (isMapReady) {
-        // 额外等0.8秒让进度条走到100%动画完成
-        timerId = setTimeout(() => {
-          if (!cancelled) setLoadingOpacity(0)
-        }, 800)
-      } else {
-        timerId = setTimeout(checkReady, 200)
-      }
-    }
+  // 地图就绪 → 加载页淡出
+  useEffect(() => {
+    if (!mapRender) return
+    if (!isMapReady) return  // 地图还没加载完
 
-    // 最低显示2秒后才开始检查
-    timerId = setTimeout(checkReady, 2000)
-    return () => {
-      cancelled = true
-      if (timerId) clearTimeout(timerId)
-    }
-  }, [loadingOpacity, isMapReady])
+    // 额外等1秒让进度条走完
+    const t = setTimeout(() => {
+      setLoadingOpacity(0)  // 加载页淡出，地图露出来
+    }, 1000)
+    return () => clearTimeout(t)
+  }, [mapRender, isMapReady])
 
   return (
     <ErrorBoundary>
-      {/* 地图层 — 最底层 */}
+      {/* 地图层 — 最低。加载页就绪后才开始渲染 */}
       {mapRender && <AppShell locations={mockLocations} />}
 
-      {/* 加载过渡层 — z-9998 */}
+      {/* 加载过渡层 — 中间 */}
       <div
         className="fixed inset-0 z-[9998]"
         style={{
           opacity: loadingOpacity,
           transition: 'opacity 0.5s ease-out',
           pointerEvents: loadingOpacity > 0 ? 'auto' : 'none',
-          willChange: 'opacity',
         }}
       >
         <LoadingTransition isMapReady={isMapReady} />
       </div>
 
-      {/* 欢迎层 — z-9999，最顶层 */}
+      {/* 欢迎层 — 最顶层 */}
       <div
         className="fixed inset-0 z-[9999]"
         style={{
           opacity: welcomeOpacity,
           transition: 'opacity 0.6s ease-out',
           pointerEvents: welcomeOpacity > 0 ? 'auto' : 'none',
-          willChange: 'opacity',
         }}
       >
         <WelcomeScreen />
