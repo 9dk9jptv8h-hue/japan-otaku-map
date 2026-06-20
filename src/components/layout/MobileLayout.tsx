@@ -4,10 +4,10 @@ import { MarkersLayer } from '@/components/map/MarkersLayer'
 import { MapControls } from '@/components/map/MapControls'
 import { SearchBar } from '@/components/sidebar/SearchBar'
 import { FilterPanel } from '@/components/sidebar/FilterPanel'
-import { SortControl } from '@/components/sidebar/SortControl'
+import { SortPopover } from '@/components/sidebar/SortPopover'
+import { RegionSelect } from '@/components/sidebar/RegionSelect'
 import { CardList } from '@/components/sidebar/CardList'
 import { useUIStore } from '@/store/useUIStore'
-import { useFilterStore } from '@/store/useFilterStore'
 import { useFilteredLocations } from '@/hooks/useFilteredLocations'
 import { Menu, X } from 'lucide-react'
 import { cn } from '@/utils/cn'
@@ -18,7 +18,6 @@ interface MobileLayoutProps {
 
 export function MobileLayout({ locations }: MobileLayoutProps) {
   const { sidebarOpen, setSidebarOpen } = useUIStore()
-  const { selectedRegion, setSelectedRegion } = useFilterStore()
   const { filteredLocations, regionList } = useFilteredLocations()
 
   return (
@@ -31,22 +30,22 @@ export function MobileLayout({ locations }: MobileLayoutProps) {
       {/* 地图控件 */}
       <MapControls className="absolute top-16 right-3 z-[999]" />
 
-      {/* 顶部搜索栏 — 侧边栏打开时完全不渲染 */}
+      {/* 顶部搜索栏 — 侧边栏打开时不渲染 */}
       {!sidebarOpen && (
-      <div className="absolute top-0 left-0 right-0 z-[1000] p-2 pt-safe pointer-events-none">
-        <div className="flex items-center gap-2 pointer-events-auto">
-          <button
-            onClick={() => setSidebarOpen(true)}
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl glass shadow-soft border border-[var(--color-border)] active:scale-95 transition-transform"
-            aria-label="打开菜单"
-          >
-            <Menu className="h-5 w-5 text-[var(--color-text-dim)]" />
-          </button>
-          <div className="flex-1 glass rounded-xl shadow-soft border border-[var(--color-border)] pointer-events-auto">
-            <SearchBar />
+        <div className="absolute top-0 left-0 right-0 z-[1000] p-2 pt-safe pointer-events-none">
+          <div className="flex items-center gap-2 pointer-events-auto">
+            <button
+              onClick={() => setSidebarOpen(true)}
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl glass shadow-soft border border-[var(--color-border)] active:scale-95 transition-transform"
+              aria-label="打开菜单"
+            >
+              <Menu className="h-5 w-5 text-[var(--color-text-dim)]" />
+            </button>
+            <div className="flex-1 glass rounded-xl shadow-soft border border-[var(--color-border)] pointer-events-auto">
+              <SearchBar />
+            </div>
           </div>
         </div>
-      </div>
       )}
 
       {/* 遮罩 — 点击关闭抽屉 */}
@@ -73,13 +72,12 @@ export function MobileLayout({ locations }: MobileLayoutProps) {
           paddingBottom: 'env(safe-area-inset-bottom, 0px)',
         }}
       >
-        {/* Header */}
-        <div className="header-gradient shrink-0 px-4 pt-4 pb-3 text-white flex items-center justify-between">
-          <div>
+        {/* Header — compact single line */}
+        <div className="header-gradient shrink-0 px-4 py-3 text-white flex items-center justify-between">
+          <div className="flex items-center gap-2">
             <h1 className="text-lg font-bold">🗾 日本旅游地图</h1>
-            <p className="text-xs text-white/70 mt-0.5">7大连锁 — 全国地点一览</p>
-            <span className="inline-flex items-center gap-1 rounded-full bg-white/20 px-2 py-0.5 text-xs mt-2">
-              📍 {locations.length} 地点
+            <span className="inline-flex items-center rounded-full bg-white/20 px-2 py-0.5 text-xs">
+              📍 {locations.length}
             </span>
           </div>
           <button
@@ -91,51 +89,22 @@ export function MobileLayout({ locations }: MobileLayoutProps) {
           </button>
         </div>
 
-        {/* 搜索 + 筛选 */}
+        {/* 搜索 + 筛选 + 地区 */}
         <div className="shrink-0 space-y-3 px-3 py-3 glass border-b border-[var(--color-border)]">
-          <SearchBar />
-          <FilterPanel />
-          <SortControl />
-        </div>
-
-        {/* 地区筛选 — 横向滚动 chips */}
-        {regionList.length > 1 && (
-          <div className="shrink-0 px-3 py-3 border-b border-[var(--color-border)]">
-            <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-0.5">
-              <button
-                onClick={() => setSelectedRegion(null)}
-                className={cn(
-                  'shrink-0 rounded-full px-3 py-1.5 text-xs font-medium transition-all',
-                  'border border-[var(--color-border)]',
-                  'hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]',
-                  'active:scale-95',
-                  selectedRegion === null
-                    ? 'bg-[var(--color-accent)] text-white border-[var(--color-accent)]'
-                    : 'bg-white/10 text-[var(--color-text-dim)]'
-                )}
-              >
-                全部
-              </button>
-              {regionList.map(region => (
-                <button
-                  key={region}
-                  onClick={() => setSelectedRegion(region === selectedRegion ? null : region)}
-                  className={cn(
-                    'shrink-0 rounded-full px-3 py-1.5 text-xs font-medium transition-all',
-                    'border border-[var(--color-border)]',
-                    'hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]',
-                    'active:scale-95',
-                    selectedRegion === region
-                      ? 'bg-[var(--color-accent)] text-white border-[var(--color-accent)]'
-                      : 'bg-white/10 text-[var(--color-text-dim)]'
-                  )}
-                >
-                  {region}
-                </button>
-              ))}
+          {/* SearchBar + SortPopover 同行 */}
+          <div className="flex items-center gap-2">
+            <div className="flex-1">
+              <SearchBar />
             </div>
+            <SortPopover />
           </div>
-        )}
+
+          {/* FilterPanel — compact dots */}
+          <FilterPanel />
+
+          {/* RegionSelect — 地区下拉 */}
+          <RegionSelect regionList={regionList} />
+        </div>
 
         {/* 列表 */}
         <div className="flex-1 overflow-y-auto px-3 pt-2 pb-safe">
