@@ -5,6 +5,7 @@
 格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，
 版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+- 删除欢迎页底部进度条 — 避免与加载过渡页进度条重复
 ---
 
 ## [3.9.0] - 2026-06-20
