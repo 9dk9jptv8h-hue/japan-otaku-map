@@ -7,6 +7,25 @@
 
 ---
 
+## [3.6.0] - 2026-06-20
+
+### Fixed（修复）
+- **彻底修复地图闪现** — 重写启动过渡为零React卸载方案：所有覆盖层始终在DOM中，纯CSS `opacity` + `transition` 控制可见性，消除了条件渲染导致的帧间隙闪烁
+- **欢迎→加载→地图全流程平滑过渡** — 欢迎页淡出(`opacity 0.6s`)与加载页淡入(`opacity 0.5s`)同时进行，实现真正的交叉溶解(cross-dissolve)
+
+### Changed（变更）
+- App三层架构重写：地图层(底)、加载层(z-9998)、欢迎层(z-9999)始终存在DOM
+- WelcomeScreen移除`exiting`参数和`welcomeExit`动画（外部opacity已处理）
+- LoadingTransition移除内部`exiting`状态和退出动画（外部opacity已处理）
+- 各覆盖层添加`willChange: 'opacity'`提升至GPU合成层，确保60fps过渡
+- `pointerEvents`随opacity联动：透明层不阻挡交互
+
+### Removed（移除）
+- 移除所有基于React条件渲染的phase切换逻辑
+- 移除WelcomeScreen/LoadingTransition内部的exiting动画状态
+
+---
+
 ## [3.5.0] - 2026-06-20
 
 ### Fixed（修复）

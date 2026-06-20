@@ -32,10 +32,10 @@ const CITY_DOTS = [
   { name: '广岛', top: '65%', left: '40%', delay: 1.3, size: 6 },
 ]
 
-function WelcomeScreen({ exiting }: { exiting: boolean }) {
+function WelcomeScreen() {
   const [count, setCount] = useState(176)
 
-  /* 数字递增动画 — 0 → 175 */
+  /* 数字递增动画 — 0 → 176 */
   useEffect(() => {
     setCount(0)
     const target = 176
@@ -73,10 +73,9 @@ function WelcomeScreen({ exiting }: { exiting: boolean }) {
 
   return (
     <div
-      className="fixed inset-0 z-[9999] flex items-center justify-center overflow-hidden"
+      className="fixed inset-0 flex items-center justify-center overflow-hidden"
       style={{
         background: 'linear-gradient(135deg, #0a1628 0%, #1a0a2e 50%, #2e0a1a 100%)',
-        animation: exiting ? 'welcomeExit 0.8s ease-out forwards' : undefined,
       }}
     >
       {/* —— 粒子层 —— */}
@@ -204,11 +203,11 @@ function WelcomeScreen({ exiting }: { exiting: boolean }) {
 
 /* ================================================================
    Loading Transition — 地图加载过渡页
+   外部用 opacity transition 控制淡入淡出，内部只管进度条动画
    ================================================================ */
 
 function LoadingTransition({ isMapReady }: { isMapReady: boolean }) {
   const [progress, setProgress] = useState(0)
-  const [exiting, setExiting] = useState(false)
 
   // 进度动画：慢速走到90%，2.5秒
   useEffect(() => {
@@ -222,22 +221,17 @@ function LoadingTransition({ isMapReady }: { isMapReady: boolean }) {
     requestAnimationFrame(tick)
   }, [])
 
-  // 地图就绪 → 冲刺100% → 退出
+  // 地图就绪 → 冲刺100%
   useEffect(() => {
-    if (isMapReady && progress >= 50) {
+    if (isMapReady) {
       setProgress(100)
-      const t = setTimeout(() => setExiting(true), 600)
-      return () => clearTimeout(t)
     }
-  }, [isMapReady, progress])
+  }, [isMapReady])
 
   return (
     <div
-      className="fixed inset-0 z-[9998] flex items-center justify-center"
-      style={{
-        background: '#f7f3ee',
-        animation: exiting ? 'welcomeExit 0.5s ease-in forwards' : 'overlayFadeIn 0.4s ease-out',
-      }}
+      className="fixed inset-0 flex items-center justify-center"
+      style={{ background: '#f7f3ee' }}
     >
       {/* 中央玻璃卡片 */}
       <div style={{
@@ -301,63 +295,90 @@ function LoadingTransition({ isMapReady }: { isMapReady: boolean }) {
 }
 
 /* ================================================================
-   App Root — 三阶段过渡：welcome → loading → map
+   App Root — 零条件渲染三层方案
+   所有层始终在DOM中，纯CSS opacity transition控制可见性
    ================================================================ */
 
 export default function App() {
-  const [phase, setPhase] = useState<'welcome' | 'loading' | 'map'>('welcome')
-  const [welcomeExiting, setWelcomeExiting] = useState(false)
   const [mapRender, setMapRender] = useState(false)
-  const [isMobile] = useState(() => window.innerWidth < 768)
+  const [welcomeOpacity, setWelcomeOpacity] = useState(1)
+  const [loadingOpacity, setLoadingOpacity] = useState(0)
   const isMapReady = useMapStore(s => s.isMapReady)
+  const [isMobile] = useState(() => window.innerWidth < 768)
 
   const welcomeTime = isMobile ? 2200 : 2500
 
-  // 地图延迟渲染——300ms后开始（确保overlay已经paint）
+  // 地图延迟渲染——300ms后开始（确保覆盖层已paint）
   useEffect(() => {
     const t = setTimeout(() => setMapRender(true), 300)
     return () => clearTimeout(t)
   }, [])
 
-  // 欢迎页退出 → 先渲染加载页（在欢迎页z-9999下方），50ms后再退出欢迎页，确保加载页完全就位
+  // Phase 1→2: 欢迎淡出 + 加载淡入（交叉过渡）
   useEffect(() => {
-    const exitTimer = setTimeout(() => {
-      setPhase('loading')  // 第一步：渲染加载页（欢迎页还在上面盖着）
-      setTimeout(() => setWelcomeExiting(true), 60) // 第二步：60ms后欢迎页开始淡出
+    const t = setTimeout(() => {
+      setLoadingOpacity(1)   // 加载页淡入
+      setWelcomeOpacity(0)   // 欢迎页淡出（同时进行）
     }, welcomeTime)
-    return () => clearTimeout(exitTimer)
+    return () => clearTimeout(t)
   }, [welcomeTime])
 
-  // loading阶段：至少2秒 + 地图必须ready
+  // Phase 2→3: 地图ready后，加载页淡出
   useEffect(() => {
-    if (phase !== 'loading') return
+    if (loadingOpacity !== 1) return
     let cancelled = false
+    let timerId: ReturnType<typeof setTimeout>
 
-    const checkIfReady = () => {
+    const checkReady = () => {
       if (cancelled) return
       if (isMapReady) {
-        // 地图真正加载完毕 → 额外等0.8秒让进度条走完 → 进入地图
-        setTimeout(() => {
-          if (!cancelled) setPhase('map')
+        // 额外等0.8秒让进度条走到100%动画完成
+        timerId = setTimeout(() => {
+          if (!cancelled) setLoadingOpacity(0)
         }, 800)
       } else {
-        // 还没ready → 每隔200ms检查一次
-        setTimeout(checkIfReady, 200)
+        timerId = setTimeout(checkReady, 200)
       }
     }
-    // 最低2秒后才开始检查
-    const minimumTimer = setTimeout(checkIfReady, 2000)
+
+    // 最低显示2秒后才开始检查
+    timerId = setTimeout(checkReady, 2000)
     return () => {
       cancelled = true
-      clearTimeout(minimumTimer)
+      if (timerId) clearTimeout(timerId)
     }
-  }, [phase, isMapReady])
+  }, [loadingOpacity, isMapReady])
 
   return (
     <ErrorBoundary>
+      {/* 地图层 — 最底层 */}
       {mapRender && <AppShell locations={mockLocations} />}
-      {phase === 'welcome' && <WelcomeScreen exiting={welcomeExiting} />}
-      {phase === 'loading' && <LoadingTransition isMapReady={isMapReady} />}
+
+      {/* 加载过渡层 — z-9998 */}
+      <div
+        className="fixed inset-0 z-[9998]"
+        style={{
+          opacity: loadingOpacity,
+          transition: 'opacity 0.5s ease-out',
+          pointerEvents: loadingOpacity > 0 ? 'auto' : 'none',
+          willChange: 'opacity',
+        }}
+      >
+        <LoadingTransition isMapReady={isMapReady} />
+      </div>
+
+      {/* 欢迎层 — z-9999，最顶层 */}
+      <div
+        className="fixed inset-0 z-[9999]"
+        style={{
+          opacity: welcomeOpacity,
+          transition: 'opacity 0.6s ease-out',
+          pointerEvents: welcomeOpacity > 0 ? 'auto' : 'none',
+          willChange: 'opacity',
+        }}
+      >
+        <WelcomeScreen />
+      </div>
     </ErrorBoundary>
   )
 }
