@@ -327,7 +327,6 @@ export default function App() {
     }, welcomeTime)
     return () => clearTimeout(exitTimer)
   }, [welcomeTime])
-  }, [welcomeTime])
 
   // loading阶段：至少2秒 + 地图必须ready
   useEffect(() => {
