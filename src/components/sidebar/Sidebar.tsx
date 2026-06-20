@@ -43,7 +43,7 @@ export function Sidebar({ locations, className }: SidebarProps) {
         <div className="header-gradient shrink-0 px-4 py-3 text-white">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <h1 className="text-base font-bold tracking-tight">🗾 日本宅地图</h1>
+              <h1 className="text-base font-bold tracking-tight">🗾 日本动漫店铺地图</h1>
               <span className="rounded-full bg-white/20 px-2 py-0.5 text-[11px] backdrop-blur-sm">
                 {locations.length}
               </span>
