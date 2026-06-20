@@ -9,7 +9,7 @@
 
 ## [4.0.0] - 2026-06-20
 
-### 🔧 大量修复（全面审查——48个问题）
+### Fixed（修复）
 - 修复 promptShield 非字符串输入绕过漏洞
 - 修复 ChatAssistant 中文输入法 Enter 键误发送
 - 修复 Zustand store 缺少 selector 导致大量不必要重渲染
