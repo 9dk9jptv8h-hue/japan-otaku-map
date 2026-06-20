@@ -319,11 +319,11 @@ export default function App() {
     return () => clearTimeout(t)
   }, [])
 
-  // 欢迎页退出 → 立即显示加载页（加载页在欢迎页下方，z-index低一层，淡出时自然露出）
+  // 欢迎页退出 → 先渲染加载页（在欢迎页z-9999下方），50ms后再退出欢迎页，确保加载页完全就位
   useEffect(() => {
     const exitTimer = setTimeout(() => {
-      setWelcomeExiting(true)
-      setPhase('loading')  // 立即切到loading，不等退出动画
+      setPhase('loading')  // 第一步：渲染加载页（欢迎页还在上面盖着）
+      setTimeout(() => setWelcomeExiting(true), 60) // 第二步：60ms后欢迎页开始淡出
     }, welcomeTime)
     return () => clearTimeout(exitTimer)
   }, [welcomeTime])
