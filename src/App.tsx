@@ -131,7 +131,7 @@ function WelcomeScreen() {
       <div className="relative z-10 flex flex-col items-center px-6 w-full max-w-[480px]">
 
         {/* 标题 — 逐字滑入 */}
-        <h1 className="flex flex-wrap justify-center gap-[0.05em] mb-6 text-[clamp(28px,7vw,52px)] font-black leading-tight">
+        <h1 className="flex justify-center gap-[0.03em] mb-6 text-[clamp(22px,5.5vw,48px)] font-black leading-tight whitespace-nowrap">
           {TITLE_CHARS.map((char, i) => (
             <span
               key={i}
