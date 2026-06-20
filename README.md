@@ -28,10 +28,10 @@
 <div align="center">
 
 ### 欢迎屏
-<img src="https://raw.githubusercontent.com/9dk9jptv8h-hue/japan-otaku-map/master/public/screenshots/welcome-screen.png?v=1781960247" alt="欢迎屏" width="640">
+<img src="https://raw.githubusercontent.com/9dk9jptv8h-hue/japan-otaku-map/5addbcb3d4f9d244005ded22167efb85eb50dccb/public/screenshots/welcome-screen.png?v=1781960247" alt="欢迎屏" width="640">
 
 ### 地图界面
-<img src="https://raw.githubusercontent.com/9dk9jptv8h-hue/japan-otaku-map/master/public/screenshots/map-interface.png?v=1781960247" alt="地图界面" width="640">
+<img src="https://raw.githubusercontent.com/9dk9jptv8h-hue/japan-otaku-map/5addbcb3d4f9d244005ded22167efb85eb50dccb/public/screenshots/map-interface.png?v=1781960247" alt="地图界面" width="640">
 
 </div>
 
