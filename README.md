@@ -50,7 +50,8 @@
 | 🤖 **AI 小助手** | DeepSeek API + Cloudflare Worker 代理，内置 176 家店铺知识的旅行顾问 |
 | 🛡️ **安全扫描** | AutoSec-QC 提示词注入检测，40+ 条规则覆盖 10 个攻击类别 |
 | 📲 **Android APK** | WebView 全屏应用，GitHub Actions 自动构建，网站更新后自动同步 |
-| ⚡ **性能优化** | 代码分割 3 chunk、CSS 变量驱动 marker、content-visibility 懒加载、Service Worker 瓦片缓存 |
+| 🎬 **加载过渡页** | 动画加载过渡页，地图资源就绪后自动进入主界面 |
+| ⚡ **性能优化** | Cloudflare Workers 瓦片代理加速、代码分割 3 chunk、CSS 变量驱动 marker、content-visibility 懒加载、Service Worker 瓦片缓存 |
 
 ---
 
@@ -64,6 +65,7 @@
 | **样式** | [TailwindCSS 4](https://tailwindcss.com) — CSS 变量 |
 | **地图引擎** | [MapLibre GL JS 5](https://maplibre.org) — 矢量瓦片渲染 |
 | **瓦片源** | [OpenFreeMap](https://openfreemap.org) — 免费、无 Key、全球 CDN |
+| **瓦片代理** | [Cloudflare Workers](https://workers.cloudflare.com) — 亚太加速 + 缓存优化 |
 | **状态管理** | [Zustand 5](https://zustand.docs.pmnd.rs) — 轻量、持久化 |
 | **图标** | [Lucide React](https://lucide.dev) |
 | **AI 模型** | [DeepSeek API](https://platform.deepseek.com) — 旅行助手对话模型 |
