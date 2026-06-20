@@ -5,6 +5,7 @@
 格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，
 版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+- 侧边栏标题统一为"日本动漫店铺地图"
 - 欢迎页标题8字不换行 — 字号适配（clamp(22px,5.5vw,48px) + whitespace-nowrap）
 - 删除欢迎页底部进度条 — 避免与加载过渡页进度条重复
 - AI聊天面板去除右上角关闭按钮 — 底部浮动按钮已可开关，避免重复
