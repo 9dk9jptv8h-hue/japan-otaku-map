@@ -206,59 +206,95 @@ function WelcomeScreen({ exiting }: { exiting: boolean }) {
    Loading Transition — 地图加载过渡页
    ================================================================ */
 
-function LoadingTransition() {
+function LoadingTransition({ isMapReady }: { isMapReady: boolean }) {
   const [progress, setProgress] = useState(0)
   const [exiting, setExiting] = useState(false)
-  const isMapReady = useMapStore(s => s.isMapReady)
 
-  // 进度动画：1.2秒内从0到85%，然后等待mapReady
+  // 进度动画：慢速走到90%，2.5秒
   useEffect(() => {
-    const duration = 1200
+    const duration = 2500
     const start = performance.now()
     const tick = (now: number) => {
       const p = Math.min((now - start) / duration, 1)
-      setProgress(Math.floor(p * 85))
+      setProgress(Math.floor(p * 90))
       if (p < 1) requestAnimationFrame(tick)
     }
-    const timer = setTimeout(() => requestAnimationFrame(tick), 200)
-    return () => clearTimeout(timer)
+    requestAnimationFrame(tick)
   }, [])
 
-  // 地图就绪 → 冲刺到100% → 退出
+  // 地图就绪 → 冲刺100% → 退出
   useEffect(() => {
-    if (isMapReady) {
+    if (isMapReady && progress >= 50) {
       setProgress(100)
-      const timer = setTimeout(() => setExiting(true), 400)
-      return () => clearTimeout(timer)
+      const t = setTimeout(() => setExiting(true), 600)
+      return () => clearTimeout(t)
     }
-  }, [isMapReady])
+  }, [isMapReady, progress])
 
   return (
     <div
       className="fixed inset-0 z-[9998] flex items-center justify-center"
       style={{
-        background: '#0a0a12',
+        background: '#f7f3ee',
         animation: exiting ? 'welcomeExit 0.5s ease-in forwards' : undefined,
       }}
     >
-      <div className="flex flex-col items-center gap-6">
-        <div className="text-4xl">🗾</div>
-        <h2 className="text-2xl font-bold text-white">地图加载中</h2>
+      {/* 中央玻璃卡片 */}
+      <div style={{
+        background: 'rgba(255,255,255,0.85)',
+        backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)',
+        borderRadius: 24,
+        padding: '48px 56px',
+        boxShadow: '0 4px 40px rgba(0,0,0,0.06), 0 1px 4px rgba(0,0,0,0.04)',
+        maxWidth: 420,
+        width: '90%',
+        textAlign: 'center' as const,
+        display: 'flex',
+        flexDirection: 'column' as const,
+        alignItems: 'center',
+        gap: 20,
+      }}>
+        <div style={{ fontSize: 60 }}>🗾</div>
+        <h2 style={{ fontSize: 22, fontWeight: 800, color: '#1a1a2e', margin: 0 }}>
+          日本旅游地图
+        </h2>
+        <p style={{ fontSize: 13, color: '#9090b0', margin: 0 }}>
+          176 动漫店铺 · 7 大连锁 · 全日本覆盖
+        </p>
 
         {/* 进度条 */}
-        <div className="w-48 h-1 bg-white/10 rounded-full overflow-hidden">
-          <div
-            className="h-full rounded-full transition-all duration-300"
-            style={{
+        <div style={{ width: '100%', marginTop: 8 }}>
+          <div style={{
+            height: 4,
+            background: '#e8e8f0',
+            borderRadius: 2,
+            overflow: 'hidden',
+          }}>
+            <div style={{
+              height: '100%',
               width: `${progress}%`,
               background: 'linear-gradient(90deg, #e91e63, #1565c0, #7b1fa2)',
-            }}
-          />
+              borderRadius: 2,
+              transition: 'width 0.3s ease',
+            }} />
+          </div>
+          <p style={{ fontSize: 11, color: '#a0a0b8', marginTop: 8 }}>
+            {progress >= 100 ? '加载完成' : '正在加载地图数据...'}
+          </p>
         </div>
 
-        <p className="text-xs text-white/30">
-          {progress >= 100 ? '加载完成' : '正在加载瓦片数据...'}
-        </p>
+        {/* 7品牌呼吸灯 */}
+        <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
+          {BRANDS.map((b, i) => (
+            <span key={b.name} style={{
+              width: 8, height: 8, borderRadius: '50%',
+              backgroundColor: b.color,
+              opacity: 0.4 + 0.6 * (progress / 100),
+              animation: `pulse 1.8s ${i * 0.2}s ease-in-out infinite`,
+            }} />
+          ))}
+        </div>
       </div>
     </div>
   )
@@ -271,46 +307,58 @@ function LoadingTransition() {
 export default function App() {
   const [phase, setPhase] = useState<'welcome' | 'loading' | 'map'>('welcome')
   const [welcomeExiting, setWelcomeExiting] = useState(false)
+  const [mapRender, setMapRender] = useState(false)
   const [isMobile] = useState(() => window.innerWidth < 768)
   const isMapReady = useMapStore(s => s.isMapReady)
 
   const welcomeTime = isMobile ? 2200 : 2500
-  const welcomeExitDuration = isMobile ? 800 : 800
 
-  // 欢迎页定时退出
+  // 地图延迟渲染——300ms后开始（确保overlay已经paint）
+  useEffect(() => {
+    const t = setTimeout(() => setMapRender(true), 300)
+    return () => clearTimeout(t)
+  }, [])
+
+  // 欢迎页定时退出 → 进入loading
   useEffect(() => {
     const show = setTimeout(() => setWelcomeExiting(true), welcomeTime)
-    const hide = setTimeout(() => {
-      setPhase('loading')
-    }, welcomeTime + welcomeExitDuration)
+    const hide = setTimeout(() => setPhase('loading'), welcomeTime + 800)
     return () => {
       clearTimeout(show)
       clearTimeout(hide)
     }
-  }, [welcomeTime, welcomeExitDuration])
+  }, [welcomeTime])
 
-  // loading阶段 + 地图就绪 → 过渡到map
+  // loading阶段：至少2秒 + 地图必须ready
   useEffect(() => {
-    if (isMapReady && phase === 'loading') {
-      // 等LoadingTransition退出动画播完(500ms) + 缓冲
-      const timer = setTimeout(() => {
-        setPhase('map')
-        document.body.style.background = ''
-      }, 900)
-      return () => clearTimeout(timer)
+    if (phase !== 'loading') return
+    let cancelled = false
+
+    const checkIfReady = () => {
+      if (cancelled) return
+      if (isMapReady) {
+        // 地图真正加载完毕 → 额外等0.8秒让进度条走完 → 进入地图
+        setTimeout(() => {
+          if (!cancelled) setPhase('map')
+        }, 800)
+      } else {
+        // 还没ready → 每隔200ms检查一次
+        setTimeout(checkIfReady, 200)
+      }
     }
-  }, [isMapReady, phase])
+    // 最低2秒后才开始检查
+    const minimumTimer = setTimeout(checkIfReady, 2000)
+    return () => {
+      cancelled = true
+      clearTimeout(minimumTimer)
+    }
+  }, [phase, isMapReady])
 
   return (
     <ErrorBoundary>
-      {/* 地图从一开始就在后台渲染（被加载页覆盖） */}
-      <AppShell locations={mockLocations} />
-
-      {/* 欢迎页 — 最上层 */}
+      {mapRender && <AppShell locations={mockLocations} />}
       {phase === 'welcome' && <WelcomeScreen exiting={welcomeExiting} />}
-
-      {/* 加载过渡页 — 欢迎页退出后显示 */}
-      {phase === 'loading' && <LoadingTransition />}
+      {phase === 'loading' && <LoadingTransition isMapReady={isMapReady} />}
     </ErrorBoundary>
   )
 }
