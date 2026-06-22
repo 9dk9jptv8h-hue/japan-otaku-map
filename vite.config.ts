@@ -4,7 +4,8 @@ import tailwindcss from '@tailwindcss/vite'
 import path from 'node:path'
 
 export default defineConfig({
-  base: '/japan-otaku-map/',
+  // Vercel 自动注入 VERCEL=1，此时用根路径；GitHub Pages 仍用子路径
+  base: process.env.VERCEL ? '/' : '/japan-otaku-map/',
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {

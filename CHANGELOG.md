@@ -7,6 +7,21 @@
 
 ---
 
+## [4.1.0] - 2026-06-22
+
+### Added（新增）
+- 支持 Vercel 部署，国内无需 VPN 可直连访问（vercel.app 域名）
+- 新增 vercel.json（Vite 框架检测 + SPA 路由 rewrites）
+
+### Changed（变更）
+- vite.config base 改用 VERCEL 环境变量区分：Vercel 构建用根路径 `/`，GitHub Pages 保持 `/japan-otaku-map/`
+- manifest.json 改用相对路径（start_url / scope / icon），同时兼容两个部署平台的 PWA 安装
+
+### 说明
+- GitHub Pages 部署不受影响，两平台并行运行
+
+---
+
 ## [4.0.0] - 2026-06-20
 
 ### Fixed（修复）
