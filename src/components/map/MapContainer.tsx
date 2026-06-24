@@ -2,7 +2,7 @@ import { useEffect, useRef, type ReactNode } from 'react'
 import maplibregl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { useMapStore } from '@/store/useMapStore'
-import { DEFAULT_VIEWPORT, MIN_ZOOM, MAX_ZOOM, JAPAN_BOUNDS, TILE_STYLES } from '@/constants/mapDefaults'
+import { DEFAULT_VIEWPORT, MIN_ZOOM, MAX_ZOOM, JAPAN_BOUNDS, TILE_STYLES, tileProxyBase } from '@/constants/mapDefaults'
 
 interface MapViewProps {
   children?: ReactNode
@@ -55,17 +55,16 @@ export function MapView({ children }: MapViewProps) {
       dragRotate: false,
       pitchWithRotate: false,
       touchPitch: false,
-      // Vercel 环境：所有瓦片/字体/精灵图请求走 Edge Rewrites 代理
+      // 瓦片/精灵图/字体全部走 Vercel Edge Rewrites 代理
+      // Vercel 部署：同源相对路径；GitHub Pages：跨域请求 Vercel
       transformRequest: (url, _resourceType) => {
-        const isVercel = window.location.hostname.includes('vercel.app')
-        if (!isVercel) return { url }
-        // 所有 OpenFreeMap 请求统一走 Vercel /tiles/ 代理
+        // OpenFreeMap 直连 → Vercel 代理
         if (url.includes('tiles.openfreemap.org')) {
-          return { url: url.replace('https://tiles.openfreemap.org', '/tiles') }
+          return { url: url.replace('https://tiles.openfreemap.org', tileProxyBase + '/tiles') }
         }
-        // Cloudflare Worker 请求也走代理
+        // Cloudflare Worker → Vercel 代理
         if (url.includes('workers.dev') && url.includes('/tiles')) {
-          return { url: url.replace(/https:\/\/[^/]+\/tiles/, '/tiles') }
+          return { url: url.replace(/https:\/\/[^/]+\/tiles/, tileProxyBase + '/tiles') }
         }
         return { url }
       },

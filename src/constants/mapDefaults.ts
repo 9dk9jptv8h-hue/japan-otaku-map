@@ -15,32 +15,29 @@ export const JAPAN_BOUNDS: [[number, number], [number, number]] = [
 ]
 
 // ================================================================
-// 瓦片代理策略（按部署环境自适应）
+// 瓦片代理策略
 //
-// Vercel 部署 → 走 Vercel Edge Rewrites 代理（国内直连可用）
-//              vercel.json: /tiles/* → https://tiles.openfreemap.org/*
+// 问题：workers.dev 在国内被墙，直连 openfreemap.org 也被墙
+// 方案：统一走 Vercel Edge Rewrites 代理（vercel.app 国内可直连）
 //
-// GitHub Pages / 其他 → 走 Cloudflare Worker 代理或直连 OpenFreeMap
+//   Vercel 部署 → 同源相对路径 /tiles/ → vercel.json rewrites → OpenFreeMap
+//   GitHub Pages → 跨域请求 Vercel /tiles/ → vercel.json rewrites → OpenFreeMap
+//
+// vercel.json: /tiles/:path* → https://tiles.openfreemap.org/:path*
 // ================================================================
 
-// Cloudflare Worker 瓦片代理（GitHub Pages 等非 Vercel 环境使用）
-export const TILE_PROXY_BASE = 'https://japan-map-ai.9dk9jptv8h.workers.dev'
-export const USE_TILE_PROXY = true
+const VERCEL_URL = 'https://japan-otaku-map.vercel.app'
 
-// 运行时检测部署环境
+// 运行时检测：是否已在 Vercel 部署上
 const isVercel = typeof window !== 'undefined' && window.location.hostname.includes('vercel.app')
 
-// 根据部署环境自动选择代理策略
-const resolveStyleUrl = (style: string): string => {
-  // Vercel: 用相对路径走 Vercel Edge Rewrites 代理
-  if (isVercel) {
-    return `/tiles/styles/${style}`
-  }
-  // GitHub Pages / 其他: 走 Cloudflare Worker 或直连
-  return USE_TILE_PROXY
-    ? `${TILE_PROXY_BASE}/tiles/styles/${style}`
-    : `https://tiles.openfreemap.org/styles/${style}`
-}
+// tileProxyBase：瓦片代理的根 URL
+//   Vercel → 空（用相对路径 /tiles/...）
+//   其他   → Vercel 部署 URL（跨域代理）
+export const tileProxyBase = isVercel ? '' : VERCEL_URL
+
+const resolveStyleUrl = (style: string): string =>
+  `${tileProxyBase}/tiles/styles/${style}`
 
 export const TILE_STYLES: Record<TileLayerStyle, {
   url: string

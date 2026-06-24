@@ -2,6 +2,15 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "framework": "vite",
+  "headers": [
+    {
+      "source": "/tiles/(.*)",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Cache-Control", "value": "public, max-age=604800, immutable" }
+      ]
+    }
+  ],
   "rewrites": [
     { "source": "/tiles/:path*", "destination": "https://tiles.openfreemap.org/:path*" },
     { "source": "/(.*)", "destination": "/index.html" }
