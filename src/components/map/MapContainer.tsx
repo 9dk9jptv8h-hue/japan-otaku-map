@@ -55,6 +55,21 @@ export function MapView({ children }: MapViewProps) {
       dragRotate: false,
       pitchWithRotate: false,
       touchPitch: false,
+      // Vercel 环境：瓦片请求走 Vercel Edge Rewrites 代理（绕开 workers.dev 被墙问题）
+      transformRequest: (url, resourceType) => {
+        const isVercel = window.location.hostname.includes('vercel.app')
+        if (isVercel && (resourceType === 'Tile' || resourceType === 'Source')) {
+          // OpenFreeMap 直连 → Vercel 代理 /tiles/
+          if (url.includes('tiles.openfreemap.org')) {
+            return { url: url.replace('https://tiles.openfreemap.org', '/tiles') }
+          }
+          // Cloudflare Worker → Vercel 代理 /tiles/
+          if (url.includes('workers.dev')) {
+            return { url: url.replace(/https:\/\/[^/]+\/tiles/, '/tiles') }
+          }
+        }
+        return { url }
+      },
     })
 
     // 添加地图归因（精简版）

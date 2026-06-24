@@ -15,35 +15,47 @@ export const JAPAN_BOUNDS: [[number, number], [number, number]] = [
 ]
 
 // ================================================================
-// 瓦片源：OpenFreeMap 矢量瓦片
+// 瓦片代理策略（按部署环境自适应）
 //
-// 矢量瓦片缩放无模糊，支持中文标签自动检测（name:zh 优先）
+// Vercel 部署 → 走 Vercel Edge Rewrites 代理（国内直连可用）
+//              vercel.json: /tiles/* → https://tiles.openfreemap.org/*
+//
+// GitHub Pages / 其他 → 走 Cloudflare Worker 代理或直连 OpenFreeMap
 // ================================================================
 
-// Cloudflare Worker 瓦片代理（解决国内直连 OpenFreeMap 慢/被墙的问题）
+// Cloudflare Worker 瓦片代理（GitHub Pages 等非 Vercel 环境使用）
 export const TILE_PROXY_BASE = 'https://japan-map-ai.9dk9jptv8h.workers.dev'
 export const USE_TILE_PROXY = true
 
-// 根据代理开关动态生成 style URL
-const styleUrl = (style: string) =>
-  USE_TILE_PROXY
+// 运行时检测部署环境
+const isVercel = typeof window !== 'undefined' && window.location.hostname.includes('vercel.app')
+
+// 根据部署环境自动选择代理策略
+const resolveStyleUrl = (style: string): string => {
+  // Vercel: 用相对路径走 Vercel Edge Rewrites 代理
+  if (isVercel) {
+    return `/tiles/styles/${style}`
+  }
+  // GitHub Pages / 其他: 走 Cloudflare Worker 或直连
+  return USE_TILE_PROXY
     ? `${TILE_PROXY_BASE}/tiles/styles/${style}`
     : `https://tiles.openfreemap.org/styles/${style}`
+}
 
 export const TILE_STYLES: Record<TileLayerStyle, {
   url: string
   attribution: string
 }> = {
   light: {
-    url: styleUrl('positron'),
+    url: resolveStyleUrl('positron'),
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> contributors',
   },
   standard: {
-    url: styleUrl('liberty'),
+    url: resolveStyleUrl('liberty'),
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> contributors',
   },
   dark: {
-    url: styleUrl('dark'),
+    url: resolveStyleUrl('dark'),
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> contributors',
   },
 }
