@@ -7,6 +7,14 @@
 
 ---
 
+## [4.1.1] - 2026-06-24
+
+### Fixed（修复）
+- 修复不开 VPN 时地图永久卡在加载页的问题：MapContainer 新增 15 秒超时 + error 事件监听 + styledata 双重兜底机制
+- 修复 index.html preconnect/preload 直连被墙的 openfreemap.org，改为指向 Worker 代理地址
+
+---
+
 ## [4.1.0] - 2026-06-22
 
 ### Added（新增）
