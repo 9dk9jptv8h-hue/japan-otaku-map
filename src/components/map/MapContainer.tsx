@@ -67,10 +67,62 @@ export function MapView({ children }: MapViewProps) {
     )
 
     map.on('load', () => {
+      clearTimeout(loadTimeout)
       mapRef.current = map
       setMapInstance(map)
       setMapReady(true)
       initialized.current = true
+    })
+
+    // 超时保护：15 秒后无论如何显示地图容器
+    const LOAD_TIMEOUT = 15000
+    const loadTimeout = setTimeout(() => {
+      if (!initialized.current) {
+        console.warn('[Map] 地图加载超时（>15s），强制跳过加载页')
+        mapRef.current = map
+        setMapInstance(map)
+        setMapReady(true)
+        initialized.current = true
+      }
+    }, LOAD_TIMEOUT)
+
+    // 错误处理：关键资源加载失败时也跳过加载页
+    map.on('error', (e) => {
+      console.error('[Map] MapLibre 错误:', e.error?.status, e.error?.message)
+      // 404/502/503 说明 style 或瓦片不可达，强制跳过加载页让用户看到界面
+      if (
+        e.error?.status === 404 ||
+        e.error?.status === 502 ||
+        e.error?.status === 503 ||
+        e.error?.status === 403
+      ) {
+        if (!initialized.current) {
+          console.warn('[Map] 关键资源加载失败（' + e.error.status + '），强制跳过加载页')
+          mapRef.current = map
+          setMapInstance(map)
+          setMapReady(true)
+          initialized.current = true
+        }
+      }
+    })
+
+    // styledata 事件：style 加载完成后也作为 fallback 信号
+    // 如果 'load' 事件因为个别瓦片失败而不触发，至少 style 加载完就能看到地图框架
+    let styleLoaded = false
+    map.on('styledata', () => {
+      if (!styleLoaded) {
+        styleLoaded = true
+        // 给瓦片 8 秒时间加载，之后强制解锁
+        setTimeout(() => {
+          if (!initialized.current) {
+            console.warn('[Map] style 已加载但 load 事件超时，强制跳过加载页')
+            mapRef.current = map
+            setMapInstance(map)
+            setMapReady(true)
+            initialized.current = true
+          }
+        }, 8000)
+      }
     })
 
     // 矢量瓦片中文标签替换 + 移除3D建筑层
