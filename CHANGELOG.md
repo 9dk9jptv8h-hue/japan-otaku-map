@@ -12,7 +12,7 @@
 ### Fixed（修复）
 - 修复不开 VPN 时地图永久卡在加载页的问题：MapContainer 新增 15 秒超时 + error 事件监听 + styledata 双重兜底机制
 - 修复 index.html preconnect/preload 直连被墙的 openfreemap.org，改为指向 Worker 代理地址
-- **Vercel Edge Rewrites 瓦片代理**：利用 vercel.json 边缘重写 /tiles/* → OpenFreeMap，绕开 workers.dev 域名在国内被墙的问题；MapContainer 新增 transformRequest 统一拦截瓦片 URL
+- **Vercel Edge Rewrites 瓦片代理**：利用 vercel.json 边缘重写 /tiles/* → OpenFreeMap，绕开 workers.dev 域名在国内被墙的问题；MapContainer 新增 transformRequest 统一拦截瓦片 URL；修复移动端因 sprite/glyph 未代理导致地图空白
 
 ---
 
