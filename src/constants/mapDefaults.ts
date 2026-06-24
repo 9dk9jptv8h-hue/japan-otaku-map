@@ -15,44 +15,123 @@ export const JAPAN_BOUNDS: [[number, number], [number, number]] = [
 ]
 
 // ================================================================
-// 瓦片代理策略
+// 瓦片代理策略（自动检测）
 //
-// 问题：workers.dev 在国内被墙，直连 openfreemap.org 也被墙
-// 方案：统一走 Vercel Edge Rewrites 代理（vercel.app 国内可直连）
+// 问题：workers.dev 在国内被墙，直连 openfreemap.org 也可能被墙
+//      但某些网络（如 VPN）下 Vercel 不可达而 OpenFreeMap 直连反而能通
+// 方案：启动时自动检测，优先直连 OpenFreeMap（延迟更低），Vercel 做 fallback
 //
 //   Vercel 部署 → 同源相对路径 /tiles/ → vercel.json rewrites → OpenFreeMap
-//   GitHub Pages → 跨域请求 Vercel /tiles/ → vercel.json rewrites → OpenFreeMap
+//   其他部署   → 自动选择可用的代理
 //
 // vercel.json: /tiles/:path* → https://tiles.openfreemap.org/:path*
 // ================================================================
 
 const VERCEL_URL = 'https://japan-otaku-map.vercel.app'
+const DIRECT_TILES = 'https://tiles.openfreemap.org'
 
 // 运行时检测：是否已在 Vercel 部署上
 const isVercel = typeof window !== 'undefined' && window.location.hostname.includes('vercel.app')
 
-// tileProxyBase：瓦片代理的根 URL
-//   Vercel → 空（用相对路径 /tiles/...）
-//   其他   → Vercel 部署 URL（跨域代理）
+// 缓存自动检测结果
+let _detectedBase: string | null = null
+let _detectPromise: Promise<string> | null = null
+
+/** 创建带超时的 AbortSignal（兼容不支持 AbortSignal.timeout 的旧浏览器） */
+function createTimeoutSignal(ms: number): { signal: AbortSignal; clear: () => void } {
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(new DOMException('timeout', 'TimeoutError')), ms)
+  return { signal: controller.signal, clear: () => clearTimeout(timer) }
+}
+
+/**
+ * 探测 URL 是否可达（仅判断服务器是否有响应，不关心响应内容）
+ * 使用 mode: 'no-cors' 避免因缺少 CORS 头导致误判为不可达
+ */
+async function probeUrl(url: string, timeoutMs: number): Promise<boolean> {
+  const { signal, clear } = createTimeoutSignal(timeoutMs)
+  try {
+    await fetch(url, { method: 'HEAD', mode: 'no-cors', signal })
+    return true
+  } catch {
+    return false
+  } finally {
+    clear()
+  }
+}
+
+/** 自动检测最佳瓦片代理：优先直连 OpenFreeMap，不通则用 Vercel */
+export async function detectTileProxy(): Promise<string> {
+  if (_detectedBase !== null) return _detectedBase
+  if (_detectPromise) return _detectPromise
+
+  // Vercel 部署直接用相对路径
+  if (isVercel) {
+    _detectedBase = ''
+    return ''
+  }
+
+  _detectPromise = (async () => {
+    // 优先尝试直连 OpenFreeMap（延迟更低，少一跳代理）
+    if (await probeUrl(`${DIRECT_TILES}/styles/positron`, 5000)) {
+      _detectedBase = DIRECT_TILES
+      console.log('[瓦片代理] ✅ 直连 OpenFreeMap')
+      return _detectedBase
+    }
+
+    // Fallback: Vercel Edge 代理
+    if (await probeUrl(`${VERCEL_URL}/tiles/styles/positron`, 5000)) {
+      _detectedBase = VERCEL_URL
+      console.log('[瓦片代理] ⚠️ 使用 Vercel 代理')
+      return _detectedBase
+    }
+
+    // 全挂了就用 Vercel（让用户至少能看到报错）
+    console.warn('[瓦片代理] ❌ 所有代理不可达，默认使用 Vercel')
+    _detectedBase = VERCEL_URL
+    return _detectedBase
+  })()
+
+  return _detectPromise
+}
+
+/** 同步版 tileProxyBase（初始化前使用 Vercel 兜底） */
 export const tileProxyBase = isVercel ? '' : VERCEL_URL
 
-const resolveStyleUrl = (style: string): string =>
-  `${tileProxyBase}/tiles/styles/${style}`
+/** 用检测结果更新用于 transformRequest 的 base URL */
+export function getResolvedTileBase(): string {
+  return _detectedBase ?? tileProxyBase
+}
+
+const resolveStyleUrl = (style: string, base: string): string => {
+  if (!base) return `/tiles/styles/${style}`              // Vercel 相对路径
+  if (base === DIRECT_TILES) return `${base}/styles/${style}`  // 直连 OpenFreeMap
+  return `${base}/tiles/styles/${style}`                  // Vercel 跨域代理
+}
 
 export const TILE_STYLES: Record<TileLayerStyle, {
   url: string
   attribution: string
 }> = {
   light: {
-    url: resolveStyleUrl('positron'),
+    url: resolveStyleUrl('positron', tileProxyBase),
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> contributors',
   },
   standard: {
-    url: resolveStyleUrl('liberty'),
+    url: resolveStyleUrl('liberty', tileProxyBase),
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> contributors',
   },
   dark: {
-    url: resolveStyleUrl('dark'),
+    url: resolveStyleUrl('dark', tileProxyBase),
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> contributors',
   },
+}
+
+/** 根据检测结果重建 style URL（初始化后调用） */
+export function getResolvedStyleUrl(style: TileLayerStyle): string {
+  const base = getResolvedTileBase()
+  return resolveStyleUrl(
+    style === 'light' ? 'positron' : style === 'standard' ? 'liberty' : 'dark',
+    base
+  )
 }

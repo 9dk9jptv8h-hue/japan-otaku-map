@@ -2,7 +2,7 @@ import { useEffect, useRef, type ReactNode } from 'react'
 import maplibregl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { useMapStore } from '@/store/useMapStore'
-import { DEFAULT_VIEWPORT, MIN_ZOOM, MAX_ZOOM, JAPAN_BOUNDS, TILE_STYLES, tileProxyBase } from '@/constants/mapDefaults'
+import { DEFAULT_VIEWPORT, MIN_ZOOM, MAX_ZOOM, JAPAN_BOUNDS, detectTileProxy, getResolvedTileBase, getResolvedStyleUrl } from '@/constants/mapDefaults'
 
 interface MapViewProps {
   children?: ReactNode
@@ -19,177 +19,170 @@ export function MapView({ children }: MapViewProps) {
   const setMapInstance = useMapStore((s) => s.setMapInstance)
   const setSelectedMarkerId = useMapStore((s) => s.setSelectedMarkerId)
 
-  // 初始化地图
   useEffect(() => {
     if (!mapContainer.current || mapRef.current) return
 
-    const styleConfig = TILE_STYLES.standard
+    let cancelled = false
 
-    // 移动端检测 — 降低 GPU 负载
-    const isMobile = window.innerWidth < 768
+    const initMap = async () => {
+      // 🔍 自动检测最佳瓦片代理（直连 vs Vercel 代理）
+      await detectTileProxy()
+      if (cancelled) return
 
-    const map = new maplibregl.Map({
-      container: mapContainer.current,
-      style: styleConfig.url,
-      center: [DEFAULT_VIEWPORT.center[1], DEFAULT_VIEWPORT.center[0]],
-      zoom: DEFAULT_VIEWPORT.zoom,
-      minZoom: MIN_ZOOM,
-      maxZoom: isMobile ? 18 : MAX_ZOOM,
-      maxBounds: JAPAN_BOUNDS,
-      attributionControl: false,
-      // 性能优化
-      pixelRatio: isMobile ? 1 : window.devicePixelRatio,
-      fadeDuration: 0,                    // 瓦片切换无淡入，直接显示
-      refreshExpiredTiles: false,         // 不刷新过期瓦片，缓存优先
-      // CJK 文字本地渲染 — MarkersLayer 的 symbol 图层标签需要此配置
-      localIdeographFontFamily: "'Noto Sans SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif",
-      canvasContextAttributes: { antialias: false },
-      trackResize: true,
-      collectResourceTiming: false,
-      crossSourceCollisions: false,
-      maxTileCacheSize: isMobile ? 50 : 200,
-      // 2D平面模式 — 禁止倾斜和旋转，降低GPU负担
-      pitch: 0,
-      maxPitch: 0,
-      bearing: 0,
-      dragRotate: false,
-      pitchWithRotate: false,
-      touchPitch: false,
-      // 瓦片/精灵图/字体全部走 Vercel Edge Rewrites 代理
-      // Vercel 部署：同源相对路径；GitHub Pages：跨域请求 Vercel
-      transformRequest: (url, _resourceType) => {
-        // OpenFreeMap 直连 → Vercel 代理
-        if (url.includes('tiles.openfreemap.org')) {
-          return { url: url.replace('https://tiles.openfreemap.org', tileProxyBase + '/tiles') }
-        }
-        // Cloudflare Worker → Vercel 代理
-        if (url.includes('workers.dev') && url.includes('/tiles')) {
-          return { url: url.replace(/https:\/\/[^/]+\/tiles/, tileProxyBase + '/tiles') }
-        }
-        return { url }
-      },
-    })
+      const styleUrl = getResolvedStyleUrl('standard')
+      const resolvedBase = getResolvedTileBase()
+      const isDirect = resolvedBase === 'https://tiles.openfreemap.org'
+      const isMobile = window.innerWidth < 768
 
-    // 添加地图归因（精简版）
-    map.addControl(
-      new maplibregl.AttributionControl({
-        compact: true,
-        customAttribution: styleConfig.attribution,
-      }),
-      'bottom-right'
-    )
+      const map = new maplibregl.Map({
+        container: mapContainer.current!,
+        style: styleUrl,
+        center: [DEFAULT_VIEWPORT.center[1], DEFAULT_VIEWPORT.center[0]],
+        zoom: DEFAULT_VIEWPORT.zoom,
+        minZoom: MIN_ZOOM,
+        maxZoom: isMobile ? 18 : MAX_ZOOM,
+        maxBounds: JAPAN_BOUNDS,
+        attributionControl: false,
+        pixelRatio: isMobile ? 1 : window.devicePixelRatio,
+        fadeDuration: 0,
+        refreshExpiredTiles: false,
+        localIdeographFontFamily: "'Noto Sans SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif",
+        canvasContextAttributes: { antialias: false },
+        trackResize: true,
+        collectResourceTiming: false,
+        crossSourceCollisions: false,
+        maxTileCacheSize: isMobile ? 50 : 200,
+        pitch: 0,
+        maxPitch: 0,
+        bearing: 0,
+        dragRotate: false,
+        pitchWithRotate: false,
+        touchPitch: false,
+        transformRequest: (url, _resourceType) => {
+          if (isDirect) return { url }
+          if (url.includes('tiles.openfreemap.org')) {
+            return { url: url.replace('https://tiles.openfreemap.org', resolvedBase + '/tiles') }
+          }
+          if (url.includes('workers.dev') && url.includes('/tiles')) {
+            return { url: url.replace(/https:\/\/[^/]+\/tiles/, resolvedBase + '/tiles') }
+          }
+          return { url }
+        },
+      })
 
-    map.on('load', () => {
-      clearTimeout(loadTimeout)
-      mapRef.current = map
-      setMapInstance(map)
-      setMapReady(true)
-      initialized.current = true
-    })
+      map.addControl(
+        new maplibregl.AttributionControl({
+          compact: true,
+          customAttribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> contributors',
+        }),
+        'bottom-right'
+      )
 
-    // 超时保护：15 秒后无论如何显示地图容器
-    const LOAD_TIMEOUT = 15000
-    const loadTimeout = setTimeout(() => {
-      if (!initialized.current) {
+      // 超时保护：15 秒后强制跳过加载页
+      const LOAD_TIMEOUT = 15000
+      const loadTimeout = setTimeout(() => {
+        if (cancelled || initialized.current) return
         console.warn('[Map] 地图加载超时（>15s），强制跳过加载页')
         mapRef.current = map
         setMapInstance(map)
         setMapReady(true)
         initialized.current = true
-      }
-    }, LOAD_TIMEOUT)
+      }, LOAD_TIMEOUT)
 
-    // 错误处理：关键资源加载失败时也跳过加载页
-    map.on('error', (e) => {
-      console.error('[Map] MapLibre 错误:', e.error?.status, e.error?.message)
-      // 404/502/503 说明 style 或瓦片不可达，强制跳过加载页让用户看到界面
-      if (
-        e.error?.status === 404 ||
-        e.error?.status === 502 ||
-        e.error?.status === 503 ||
-        e.error?.status === 403
-      ) {
-        if (!initialized.current) {
-          console.warn('[Map] 关键资源加载失败（' + e.error.status + '），强制跳过加载页')
-          mapRef.current = map
-          setMapInstance(map)
-          setMapReady(true)
-          initialized.current = true
-        }
-      }
-    })
+      map.on('load', () => {
+        clearTimeout(loadTimeout)
+        mapRef.current = map
+        setMapInstance(map)
+        setMapReady(true)
+        initialized.current = true
+      })
 
-    // styledata 事件：style 加载完成后也作为 fallback 信号
-    // 如果 'load' 事件因为个别瓦片失败而不触发，至少 style 加载完就能看到地图框架
-    let styleLoaded = false
-    map.on('styledata', () => {
-      if (!styleLoaded) {
-        styleLoaded = true
-        // 给瓦片 8 秒时间加载，之后强制解锁
-        setTimeout(() => {
+      map.on('error', (e) => {
+        console.error('[Map] MapLibre 错误:', e.error?.status, e.error?.message)
+        if (
+          e.error?.status === 404 ||
+          e.error?.status === 502 ||
+          e.error?.status === 503 ||
+          e.error?.status === 403
+        ) {
           if (!initialized.current) {
-            console.warn('[Map] style 已加载但 load 事件超时，强制跳过加载页')
+            console.warn('[Map] 关键资源加载失败（' + e.error.status + '），强制跳过加载页')
             mapRef.current = map
             setMapInstance(map)
             setMapReady(true)
             initialized.current = true
           }
-        }, 8000)
-      }
-    })
+        }
+      })
 
-    // 矢量瓦片中文标签替换 + 移除3D建筑层
-    map.on('style.load', () => {
-      const style = map.getStyle()
-      if (!style?.layers) return
-      for (const layer of style.layers) {
-        // 中文标签替换：name优先中文，回退本地名
-        if (layer.type === 'symbol' && layer.layout?.['text-field']) {
-          const textField = layer.layout['text-field']
-          if (typeof textField === 'string' && /\{name\b/.test(textField)) {
-            map.setLayoutProperty(layer.id, 'text-field',
-              ['coalesce', ['get', 'name:zh'], ['get', 'name']]
-            )
+      // styledata：style 加载完成后作为 fallback 信号
+      let styleLoaded = false
+      map.on('styledata', () => {
+        if (!styleLoaded) {
+          styleLoaded = true
+          setTimeout(() => {
+            if (!initialized.current) {
+              console.warn('[Map] style 已加载但 load 事件超时，强制跳过加载页')
+              mapRef.current = map
+              setMapInstance(map)
+              setMapReady(true)
+              initialized.current = true
+            }
+          }, 8000)
+        }
+      })
+
+      // 中文标签 + 移除3D建筑
+      map.on('style.load', () => {
+        const style = map.getStyle()
+        if (!style?.layers) return
+        for (const layer of style.layers) {
+          if (layer.type === 'symbol' && layer.layout?.['text-field']) {
+            const textField = layer.layout['text-field']
+            if (typeof textField === 'string' && /\{name\b/.test(textField)) {
+              map.setLayoutProperty(layer.id, 'text-field',
+                ['coalesce', ['get', 'name:zh'], ['get', 'name']]
+              )
+            }
+          }
+          if (layer.type === 'fill-extrusion') {
+            map.removeLayer(layer.id)
           }
         }
-        // 移除3D建筑物层
-        if (layer.type === 'fill-extrusion') {
-          map.removeLayer(layer.id)
+      })
+
+      map.on('moveend', () => {
+        const b = map.getBounds()
+        setBounds({
+          north: b.getNorth(),
+          south: b.getSouth(),
+          east: b.getEast(),
+          west: b.getWest(),
+        })
+      })
+
+      map.on('click', (e) => {
+        if (map.getLayer('location-dots')) {
+          const features = map.queryRenderedFeatures(e.point, { layers: ['location-dots'] })
+          if (features.length > 0) return
         }
-      }
-    })
-
-    // moveend：同步边界到 store
-    map.on('moveend', () => {
-      const b = map.getBounds()
-      setBounds({
-        north: b.getNorth(),
-        south: b.getSouth(),
-        east: b.getEast(),
-        west: b.getWest(),
+        setSelectedMarkerId(null)
       })
-    })
 
-    // 点击空白取消选中 — 检查是否点击了 WebGL 标记图层，避免误清
-    map.on('click', (e) => {
-      if (map.getLayer('location-dots')) {
-        const features = map.queryRenderedFeatures(e.point, { layers: ['location-dots'] })
-        if (features.length > 0) return // 点击了标记，不清除选中
+      const flyTo = (lng: number, lat: number, zoom?: number) => {
+        map.flyTo({
+          center: [lng, lat],
+          zoom: zoom ?? map.getZoom(),
+          duration: 1200,
+        })
       }
-      setSelectedMarkerId(null)
-    })
-
-    // flyTo 注册
-    const flyTo = (lng: number, lat: number, zoom?: number) => {
-      map.flyTo({
-        center: [lng, lat],
-        zoom: zoom ?? map.getZoom(),
-        duration: 1200,
-      })
+      setFlyToMarker(flyTo)
     }
-    setFlyToMarker(flyTo)
+
+    initMap()
 
     return () => {
+      cancelled = true
       if (mapRef.current) {
         mapRef.current.remove()
         mapRef.current = null
