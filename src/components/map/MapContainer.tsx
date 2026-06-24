@@ -55,18 +55,17 @@ export function MapView({ children }: MapViewProps) {
       dragRotate: false,
       pitchWithRotate: false,
       touchPitch: false,
-      // Vercel 环境：瓦片请求走 Vercel Edge Rewrites 代理（绕开 workers.dev 被墙问题）
-      transformRequest: (url, resourceType) => {
+      // Vercel 环境：所有瓦片/字体/精灵图请求走 Edge Rewrites 代理
+      transformRequest: (url, _resourceType) => {
         const isVercel = window.location.hostname.includes('vercel.app')
-        if (isVercel && (resourceType === 'Tile' || resourceType === 'Source')) {
-          // OpenFreeMap 直连 → Vercel 代理 /tiles/
-          if (url.includes('tiles.openfreemap.org')) {
-            return { url: url.replace('https://tiles.openfreemap.org', '/tiles') }
-          }
-          // Cloudflare Worker → Vercel 代理 /tiles/
-          if (url.includes('workers.dev')) {
-            return { url: url.replace(/https:\/\/[^/]+\/tiles/, '/tiles') }
-          }
+        if (!isVercel) return { url }
+        // 所有 OpenFreeMap 请求统一走 Vercel /tiles/ 代理
+        if (url.includes('tiles.openfreemap.org')) {
+          return { url: url.replace('https://tiles.openfreemap.org', '/tiles') }
+        }
+        // Cloudflare Worker 请求也走代理
+        if (url.includes('workers.dev') && url.includes('/tiles')) {
+          return { url: url.replace(/https:\/\/[^/]+\/tiles/, '/tiles') }
         }
         return { url }
       },
