@@ -12,6 +12,8 @@
 ### Added（新增）
 - **站内独立步行导航系统**：点击店铺即可获取步行路线，无需跳转外部地图 App
   - OSRM 步行路线 API 集成（`router.project-osrm.org`），免费无需 Key
+  - **详细中文指令**：提取路名 + 转向方向 + 距离，格式「沿{路名}直行{距离}」「转入{路名}，右转步行{距离}」
+  - 机动方向完整中译：uturn/sharp right/slight left/straight/merge/fork 等 9 种方向
   - 中文指令翻译：英文 maneuver 自动转为中文转向提示
   - WebGL 路线渲染（RouteLayer）：靛蓝主线 + 白色描边 + 起终点标记，与地图瓦片同步渲染
   - 导航面板（NavigationPanel）：桌面端浮动右侧面板 / 移动端底部 Sheet，玻璃拟态风格
