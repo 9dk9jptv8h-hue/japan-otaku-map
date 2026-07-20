@@ -308,7 +308,28 @@ export const useNavigationStore = create<NavigationStore>()((set, get) => ({
     set({ finalDestination: { ...currentDest }, hasArrivedAtWaypoint: false })
 
     // Use existing userPosition, fetch route directly (skip GPS re-acquire)
-    set({ waypointTarget: { lat: station.lat, lng: station.lng }, origin: userPosition, transportMode: 'walking', isRouting: true, error: null, isPanelOpen: true })
+    const stationAsDest = {
+      id: `station-${station.id}`,
+      name: station.name,
+      description: '',
+      category: 'animate' as const,
+      latitude: station.lat,
+      longitude: station.lng,
+      imageUrl: '',
+      address: station.name,
+      tags: [] as string[],
+      updatedAt: new Date().toISOString(),
+    }
+    set({
+      destination: stationAsDest,
+      finalDestination: { ...currentDest },
+      waypointTarget: { lat: station.lat, lng: station.lng },
+      origin: userPosition,
+      transportMode: 'walking',
+      isRouting: true,
+      error: null,
+      isPanelOpen: true,
+    })
     try {
       const route = await fetchWalkingRoute(userPosition, {
         lat: station.lat,
