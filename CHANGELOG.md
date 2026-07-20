@@ -7,6 +7,26 @@
 
 ---
 
+## [4.2.0] - 2026-07-20
+
+### Added（新增）
+- **站内独立步行导航系统**：点击店铺即可获取步行路线，无需跳转外部地图 App
+  - OSRM 步行路线 API 集成（`router.project-osrm.org`），免费无需 Key
+  - 中文指令翻译：英文 maneuver 自动转为中文转向提示
+  - WebGL 路线渲染（RouteLayer）：靛蓝主线 + 白色描边 + 起终点标记，与地图瓦片同步渲染
+  - 导航面板（NavigationPanel）：桌面端浮动右侧面板 / 移动端底部 Sheet，玻璃拟态风格
+  - 步行步骤列表：时间线样式展示分步指引，点击步骤地图自动飞到对应位置
+  - GPS 自动定位：浏览器 Geolocation API 获取用户当前位置作为起点
+  - 公交模式兜底：一键跳转 Google Maps 查看公交方案
+  - 四状态处理：加载中 / 错误重试 / 完整面板 / 折叠迷你条
+- 店铺卡片和 Popup 新增「🧭 导航到这里」按钮
+
+### Changed（变更）
+- DesktopLayout / MobileLayout 集成 RouteLayer + NavigationPanel
+- useMapStore 的 selectedMarkerIds 最多支持 2 个（为路线起终点预留）
+
+---
+
 ## [4.1.1] - 2026-06-24
 
 ### Fixed（修复）
