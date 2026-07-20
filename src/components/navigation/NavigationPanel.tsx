@@ -468,24 +468,9 @@ export function NavigationPanel() {
         </div>
       </div>
 
-      {/* ── Stats row ── */}
+      {/* ── Stats row (步行模式) + 居中按钮 ── */}
       <div className="flex items-center gap-4 border-b border-gray-100 px-4 py-2">
-        {transportMode === 'transit' ? (
-          <>
-            <div className="flex items-center gap-1.5 text-xs text-[var(--color-text-dim)]">
-              <Footprints className="h-4 w-4 text-blue-400" />
-              <span>步行到站约 {originStations[0] ? Math.ceil(originStations[0].distance / 80) : '?'} 分钟</span>
-            </div>
-            <div className="flex items-center gap-1.5 text-xs text-[var(--color-text-dim)]">
-              <Bus className="h-4 w-4 text-indigo-500" />
-              <span>乘车</span>
-            </div>
-            <div className="flex items-center gap-1.5 text-xs text-[var(--color-text-dim)]">
-              <Footprints className="h-4 w-4 text-red-400" />
-              <span>步行到店约 {nearbyStations[0] ? Math.ceil(nearbyStations[0].distance / 80) : '?'} 分钟</span>
-            </div>
-          </>
-        ) : (
+        {transportMode === 'walking' ? (
           <>
             <div className="flex items-center gap-1.5 text-sm text-[var(--color-text-dim)]">
               <Clock className="h-4 w-4 text-indigo-500" />
@@ -496,6 +481,8 @@ export function NavigationPanel() {
               <span>{formatDistance(route.distance)}</span>
             </div>
           </>
+        ) : (
+          <span className="text-xs text-[var(--color-text-dim)]">公交方案</span>
         )}
         {isTracking && userPosition && (
           <button
