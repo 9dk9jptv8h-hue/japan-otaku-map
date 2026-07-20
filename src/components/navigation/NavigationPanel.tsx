@@ -399,7 +399,16 @@ export function NavigationPanel() {
       {/* ── Header ── */}
       <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3">
         <button
-          onClick={handleClose}
+          onClick={() => {
+            setExiting(true)
+            setPanelOpen(false)
+            closingRef.current = true
+            setTimeout(() => {
+              if (!closingRef.current) return
+              closingRef.current = false
+              setExiting(false)
+            }, 400)
+          }}
           className="flex h-8 w-8 items-center justify-center rounded-lg transition-colors hover:bg-gray-100"
           aria-label="关闭导航"
         >
