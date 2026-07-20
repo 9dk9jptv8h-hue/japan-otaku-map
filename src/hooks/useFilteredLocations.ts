@@ -14,7 +14,8 @@ export function useFilteredLocations() {
   const regionList = useMemo(() => {
     const set = new Set<string>()
     LOCATIONS.forEach(loc => {
-      const match = loc.address?.match(/^(京都府|大阪府|北海道|.{1,3}?[都道府県])/)
+      const cleanAddr = loc.address?.replace(/^〒\d{3}-\d{4}\s*/, '')
+      const match = cleanAddr?.match(/^(京都府|大阪府|北海道|.{1,3}?[都道府県])/)
       if (match) set.add(match[1])
     })
     return Array.from(set).sort()
@@ -43,7 +44,7 @@ export function useFilteredLocations() {
 
     // 地区过滤
     if (selectedRegion) {
-      result = result.filter(loc => loc.address?.startsWith(selectedRegion))
+      result = result.filter(loc => loc.address?.includes(selectedRegion))
     }
 
     // 排序

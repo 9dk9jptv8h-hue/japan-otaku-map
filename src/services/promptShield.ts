@@ -349,8 +349,8 @@ const RISK_FROM_NUMBER: ScanResult['riskLevel'][] = [
  * @returns ScanResult with risk assessment and matched patterns
  */
 export function scanInput(text: string): ScanResult {
-  if (!text || typeof text !== 'string') {
-    return { allowed: false, riskLevel: 'CRITICAL', matches: [] }
+  if (!text || typeof text !== 'string' || text.trim().length === 0) {
+    return { allowed: true, riskLevel: 'SAFE', matches: [] }
   }
 
   const normalizedText = text

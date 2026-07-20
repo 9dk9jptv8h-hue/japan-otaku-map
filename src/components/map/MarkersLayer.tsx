@@ -415,7 +415,7 @@ function renderPopupHTML(props: Record<string, unknown>): string {
           ${visitHtml}
         </div>
 
-<button onclick="window.__navigateToStore && window.__navigateToStore('${escapeHTML(props.id as string)}')"
+<button onclick="window.__navigateToStore && window.__navigateToStore('${(props.id as string).replace(/\\/g,'\\\\').replace(/'/g,"\\'")}')"
   style="
     display:flex;align-items:center;justify-content:center;gap:6px;
     width:100%;margin-top:12px;padding:8px 0;

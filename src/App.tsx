@@ -198,14 +198,16 @@ function LoadingTransition({ isMapReady }: { isMapReady: boolean }) {
 
   // 进度动画：慢速走到90%，2.5秒
   useEffect(() => {
+    let rafId: number
     const duration = 2500
     const start = performance.now()
     const tick = (now: number) => {
       const p = Math.min((now - start) / duration, 1)
       setProgress(Math.floor(p * 90))
-      if (p < 1) requestAnimationFrame(tick)
+      if (p < 1) rafId = requestAnimationFrame(tick)
     }
-    requestAnimationFrame(tick)
+    rafId = requestAnimationFrame(tick)
+    return () => { if (rafId) cancelAnimationFrame(rafId) }
   }, [])
 
   // 地图就绪 → 冲刺100%
@@ -320,13 +322,22 @@ export default function App() {
   // 地图就绪 → 加载页淡出
   useEffect(() => {
     if (!mapRender) return
-    if (!isMapReady) return  // 地图还没加载完
+
+    const safetyTimer = setTimeout(() => {
+      // Force exit loading after 20s even if map not ready
+      if (!isMapReady) {
+        console.warn('[App] Map loading timeout, forcing exit')
+        setMapRender(true)
+      }
+    }, 20000)
+
+    if (!isMapReady) return () => clearTimeout(safetyTimer)
 
     // 额外等1秒让进度条走完
     const t = setTimeout(() => {
       setLoadingOpacity(0)  // 加载页淡出，地图露出来
     }, 1000)
-    return () => clearTimeout(t)
+    return () => { clearTimeout(t); clearTimeout(safetyTimer) }
   }, [mapRender, isMapReady])
 
   return (

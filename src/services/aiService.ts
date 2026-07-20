@@ -30,10 +30,10 @@ export const SYSTEM_PROMPT = `你是「日本动漫店铺地图」网站的AI助
 如果用户问的不是日本旅游/动漫店铺相关的问题，礼貌地引导回来。`
 
 // Worker 部署后替换，或通过 .env 文件设置 VITE_AI_WORKER_URL
-const WORKER_URL =
-  import.meta.env.VITE_AI_WORKER_URL || 'https://japan-map-ai.9dk9jptv8h.workers.dev'
+const WORKER_URL = import.meta.env.VITE_AI_WORKER_URL
+if (!WORKER_URL) throw new Error('VITE_AI_WORKER_URL is required')
 
-export async function chat(messages: ChatMessage[]): Promise<string> {
+export async function chat(messages: ChatMessage[], signal?: AbortSignal): Promise<string> {
   // 输入校验
   if (!messages || !Array.isArray(messages) || messages.length === 0) {
     throw new Error('消息不能为空')
@@ -43,6 +43,11 @@ export async function chat(messages: ChatMessage[]): Promise<string> {
   const controller = new AbortController()
   const timeoutId = setTimeout(() => controller.abort(), 30000)
 
+  // 合并外部 signal 和内部超时 signal
+  const combinedSignal = signal
+    ? AbortSignal.any([controller.signal, signal])
+    : controller.signal
+
   let response: Response
 
   try {
@@ -50,7 +55,7 @@ export async function chat(messages: ChatMessage[]): Promise<string> {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ messages }),
-      signal: controller.signal,
+      signal: combinedSignal,
     })
   } catch (err) {
     if (err instanceof DOMException && err.name === 'AbortError') {
@@ -84,10 +89,11 @@ export async function chat(messages: ChatMessage[]): Promise<string> {
   }
 
   let data: unknown
+  const text = await response.text()
   try {
-    data = await response.json()
+    data = JSON.parse(text)
   } catch {
-    throw new Error('无法解析响应，请稍后重试')
+    throw new Error(text ? `无法解析响应: ${text.slice(0, 100)}` : '无法解析响应，请稍后重试')
   }
 
   const content = (data as Record<string, unknown[]>)?.choices?.[0] as

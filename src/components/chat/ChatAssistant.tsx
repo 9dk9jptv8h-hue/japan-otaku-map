@@ -76,6 +76,7 @@ export function ChatAssistant() {
   const panelRef = useRef<HTMLDivElement>(null)
   const isComposingRef = useRef(false)
   const mountedRef = useRef(true)
+  const abortRef = useRef<AbortController | null>(null)
 
   /* ---- effects ---- */
 
@@ -103,6 +104,7 @@ export function ChatAssistant() {
   useEffect(() => {
     return () => {
       mountedRef.current = false
+      abortRef.current?.abort()
     }
   }, [])
 
@@ -170,8 +172,11 @@ export function ChatAssistant() {
         })),
       ]
 
-      // 4. Call AI (no API key needed — Worker handles it)
-      const response = await chat(chatMessages)
+      // 4. Call AI with AbortController for cleanup on unmount
+      abortRef.current?.abort()
+      const controller = new AbortController()
+      abortRef.current = controller
+      const response = await chat(chatMessages, controller.signal)
 
       // 5. Add assistant message
       setMessages((prev) => [

@@ -7,6 +7,22 @@
 
 ---
 
+## [4.5.0] - 2026-07-20
+
+### Security（安全）
+- **XSS 修复**：Marker 弹窗 onclick 改用 JS 转义，防止 ID 注入
+- **Worker URL 隐藏**：移除前端 bundle 硬编码，仅从环境变量读取
+- **promptShield 空输入误报**：空字符串不再标记为 CRITICAL 注入攻击
+
+### Fixed（修复）
+- **邮编破坏区域筛选**：跳过 `〒XXX-XXXX` 前缀 + `startsWith` 改 `includes`
+- **AI 错误 body 双重消费**：`text()`→`JSON.parse` 替代 `json()`，保留真实错误信息
+- **rAF 内存泄漏**：LoadingTransition 卸载时 `cancelAnimationFrame`
+- **地图加载超时**：20s 安全超时强制退出，不再永久卡加载页
+- **Chat 请求不取消**：`AbortController` + unmount 清理，避免死组件更新
+- **touch-action 破坏移动地图**：移除容器触摸拦截
+- **clearCategories 清空为全选**：重置为 7 品牌完整列表
+
 ---
 
 ## [4.4.3] - 2026-07-20

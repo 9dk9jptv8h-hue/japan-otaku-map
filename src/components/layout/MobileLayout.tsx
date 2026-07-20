@@ -24,7 +24,7 @@ export function MobileLayout({ locations }: MobileLayoutProps) {
   const { filteredLocations, regionList } = useFilteredLocations()
 
   return (
-    <div className="relative h-full w-full" style={{ touchAction: 'pan-x pan-y pinch-zoom' }}>
+    <div className="relative h-full w-full">
       {/* 地图全屏 */}
       <MapView>
         <MarkersLayer locations={filteredLocations} />

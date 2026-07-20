@@ -27,7 +27,7 @@ export const useFilterStore = create<FilterStore>((set) => ({
         ? s.selectedCategories.filter((c) => c !== cat)
         : [...s.selectedCategories, cat],
     })),
-  clearCategories: () => set({ selectedCategories: [] }),
+  clearCategories: () => set({ selectedCategories: ['animate', 'melonbooks', 'mandarake', 'surugaya', 'gamers', 'lashinbang', 'kbooks'] }),
 
   sortBy: 'rating',
   setSortBy: (sort) => set({ sortBy: sort }),
