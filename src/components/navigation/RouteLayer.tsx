@@ -15,7 +15,15 @@ function RouteLayerInner() {
   const route = useNavigationStore((s) => s.route)
   const origin = useNavigationStore((s) => s.origin)
   const destination = useNavigationStore((s) => s.destination)
+  const userPosition = useNavigationStore((s) => s.userPosition)
+  const userBearing = useNavigationStore((s) => s.userBearing)
+  const isTracking = useNavigationStore((s) => s.isTracking)
   const settingUpRef = useRef(false)
+  const liveMarkerSettingUpRef = useRef(false)
+  const positionRef = useRef(userPosition)
+  positionRef.current = userPosition
+  const bearingRef = useRef(userBearing)
+  bearingRef.current = userBearing
 
   useEffect(() => {
     if (!mapInstance) return
@@ -200,6 +208,175 @@ function RouteLayerInner() {
       }
     }
   }, [mapInstance, route, origin, destination])
+
+  // ─── Live GPS position marker: setup / teardown (gated on isTracking) ───
+  useEffect(() => {
+    if (!mapInstance) return
+    const map = mapInstance
+
+    if (!isTracking) {
+      try {
+        if (map.getLayer('nav-user-arrow')) map.removeLayer('nav-user-arrow')
+        if (map.getLayer('nav-user-accuracy')) map.removeLayer('nav-user-accuracy')
+        if (map.getLayer('nav-user-dot')) map.removeLayer('nav-user-dot')
+        if (map.getSource('nav-user-position')) map.removeSource('nav-user-position')
+      } catch (_) {
+        /* source / layer already gone */
+      }
+      return
+    }
+
+    const buildPositionGeoJSON = (pos: typeof userPosition, bearing: typeof userBearing) => {
+      if (!pos) return { type: 'FeatureCollection' as const, features: [] as any[] }
+      const props: Record<string, unknown> = { type: 'user-position' }
+      if (bearing != null && bearing >= 0) props.bearing = bearing
+      return {
+        type: 'FeatureCollection' as const,
+        features: [
+          {
+            type: 'Feature' as const,
+            geometry: { type: 'Point' as const, coordinates: [pos.lng, pos.lat] },
+            properties: props,
+          },
+        ],
+      }
+    }
+
+    const createLiveLayers = () => {
+      const currentPos = positionRef.current
+      const geojson = buildPositionGeoJSON(currentPos, bearingRef.current)
+
+      // Source already exists → just update data
+      if (map.getSource('nav-user-position')) {
+        ;(map.getSource('nav-user-position') as maplibregl.GeoJSONSource).setData(geojson as any)
+        return
+      }
+
+      map.addSource('nav-user-position', { type: 'geojson', data: geojson as any })
+
+      // Accuracy circle (renders first → bottom)
+      map.addLayer({
+        id: 'nav-user-accuracy',
+        type: 'circle',
+        source: 'nav-user-position',
+        paint: {
+          'circle-radius': ['interpolate', ['linear'], ['zoom'], 10, 18, 16, 28],
+          'circle-color': '#3b82f6',
+          'circle-opacity': 0.12,
+          'circle-stroke-color': '#3b82f6',
+          'circle-stroke-width': 1,
+          'circle-stroke-opacity': 0.2,
+        },
+      })
+
+      // User dot
+      map.addLayer({
+        id: 'nav-user-dot',
+        type: 'circle',
+        source: 'nav-user-position',
+        paint: {
+          'circle-radius': ['interpolate', ['linear'], ['zoom'], 10, 7, 16, 12],
+          'circle-color': '#3b82f6',
+          'circle-stroke-color': '#ffffff',
+          'circle-stroke-width': 3,
+          'circle-opacity': 0.95,
+        },
+      })
+
+      // Bearing arrow — only when bearing data is meaningful
+      if (bearingRef.current != null && bearingRef.current >= 0) {
+        map.addLayer({
+          id: 'nav-user-arrow',
+          type: 'symbol',
+          source: 'nav-user-position',
+          layout: {
+            'icon-image': 'arrow',
+            'icon-size': ['interpolate', ['linear'], ['zoom'], 10, 0.35, 16, 0.55],
+            'icon-rotate': ['get', 'bearing'],
+            'icon-rotation-alignment': 'map',
+            'icon-allow-overlap': true,
+            'icon-ignore-placement': true,
+          },
+        })
+      }
+    }
+
+    if (map.isStyleLoaded()) {
+      createLiveLayers()
+    } else {
+      map.on('style.load', createLiveLayers)
+    }
+
+    // Rebuild layers when tile style swaps out custom source / layers
+    const handleStyleDataForLive = () => {
+      if (liveMarkerSettingUpRef.current) return
+      if (useNavigationStore.getState().isTracking && !map.getSource('nav-user-position')) {
+        liveMarkerSettingUpRef.current = true
+        try {
+          createLiveLayers()
+        } finally {
+          liveMarkerSettingUpRef.current = false
+        }
+      }
+    }
+    map.on('styledata', handleStyleDataForLive)
+
+    return () => {
+      map.off('style.load', createLiveLayers)
+      map.off('styledata', handleStyleDataForLive)
+      try {
+        if (map.getLayer('nav-user-arrow')) map.removeLayer('nav-user-arrow')
+        if (map.getLayer('nav-user-accuracy')) map.removeLayer('nav-user-accuracy')
+        if (map.getLayer('nav-user-dot')) map.removeLayer('nav-user-dot')
+        if (map.getSource('nav-user-position')) map.removeSource('nav-user-position')
+      } catch (_) {
+        /* source / layer already gone */
+      }
+    }
+  }, [mapInstance, isTracking])
+
+  // ─── Live GPS position marker: data-only updates when position changes ───
+  useEffect(() => {
+    if (!mapInstance || !isTracking) return
+    const map = mapInstance
+    const source = map.getSource('nav-user-position')
+    if (!source || !userPosition) return
+
+    const props: Record<string, unknown> = { type: 'user-position' }
+    if (userBearing != null && userBearing >= 0) props.bearing = userBearing
+
+    ;(source as maplibregl.GeoJSONSource).setData({
+      type: 'FeatureCollection',
+      features: [
+        {
+          type: 'Feature',
+          geometry: { type: 'Point', coordinates: [userPosition.lng, userPosition.lat] },
+          properties: props,
+        },
+      ],
+    })
+
+    // Toggle bearing arrow layer on/off as bearing comes and goes
+    const hasBearing = userBearing != null && userBearing >= 0
+    const arrowExists = !!map.getLayer('nav-user-arrow')
+    if (hasBearing && !arrowExists) {
+      map.addLayer({
+        id: 'nav-user-arrow',
+        type: 'symbol',
+        source: 'nav-user-position',
+        layout: {
+          'icon-image': 'arrow',
+          'icon-size': ['interpolate', ['linear'], ['zoom'], 10, 0.35, 16, 0.55],
+          'icon-rotate': ['get', 'bearing'],
+          'icon-rotation-alignment': 'map',
+          'icon-allow-overlap': true,
+          'icon-ignore-placement': true,
+        },
+      })
+    } else if (!hasBearing && arrowExists) {
+      map.removeLayer('nav-user-arrow')
+    }
+  }, [mapInstance, userPosition, userBearing, isTracking])
 
   // 纯 WebGL 渲染 — 无 DOM 输出
   return null

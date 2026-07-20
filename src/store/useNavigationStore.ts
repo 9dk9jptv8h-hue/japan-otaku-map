@@ -3,8 +3,12 @@ import type { GeoPoint, RouteData, TransportMode } from '@/types/navigation'
 import type { LocationData } from '@/types'
 import { fetchWalkingRoute } from '@/services/routingService'
 
+// ─── Module-level non-serializable handles ───
+let watchId: number | null = null
+let deviationTimer: ReturnType<typeof setTimeout> | null = null
+
 interface NavigationStore {
-  // State
+  // ─── Existing state ───
   origin: GeoPoint | null
   destination: LocationData | null
   route: RouteData | null
@@ -13,7 +17,21 @@ interface NavigationStore {
   error: string | null
   isPanelOpen: boolean
 
-  // Actions
+  // ─── New: real-time GPS tracking state ───
+  /** Current live GPS position */
+  userPosition: GeoPoint | null
+  /** Compass heading in degrees */
+  userBearing: number | null
+  /** Which step the user is currently on (-1 = not started) */
+  activeStepIndex: number
+  /** Whether navigator.geolocation.watchPosition is active */
+  isTracking: boolean
+  /** Whether user has deviated from route (>30m) */
+  isDeviated: boolean
+  /** GPS tracking error message */
+  trackingError: string | null
+
+  // ─── Existing actions ───
   setOrigin: (p: GeoPoint | null) => void
   setDestination: (loc: LocationData | null) => void
   setRoute: (r: RouteData | null) => void
@@ -22,12 +40,23 @@ interface NavigationStore {
   setError: (e: string | null) => void
   setPanelOpen: (v: boolean) => void
   clearNavigation: () => void
-
-  // Core flow: destination → route
   startNavigation: (dest: LocationData) => Promise<void>
+
+  // ─── New: GPS tracking actions ───
+  /** Start navigator.geolocation.watchPosition */
+  startTracking: () => void
+  /** Stop watchPosition and clean up */
+  stopTracking: () => void
+  /** Called by watchPosition callback — updates position, checks step advance & deviation */
+  updateUserPosition: (pos: GeolocationPosition) => void
+  /** Manually jump to a specific step */
+  advanceToStep: (index: number) => void
+  /** Re-calculate route from current position to destination */
+  reRoute: () => Promise<void>
 }
 
-export const useNavigationStore = create<NavigationStore>()((set) => ({
+export const useNavigationStore = create<NavigationStore>()((set, get) => ({
+  // ─── Initial state ───
   origin: null,
   destination: null,
   route: null,
@@ -36,6 +65,14 @@ export const useNavigationStore = create<NavigationStore>()((set) => ({
   error: null,
   isPanelOpen: false,
 
+  userPosition: null,
+  userBearing: null,
+  activeStepIndex: -1,
+  isTracking: false,
+  isDeviated: false,
+  trackingError: null,
+
+  // ─── Existing simple setters ───
   setOrigin: (p) => set({ origin: p }),
   setDestination: (loc) => set({ destination: loc }),
   setRoute: (r) => set({ route: r }),
@@ -44,7 +81,9 @@ export const useNavigationStore = create<NavigationStore>()((set) => ({
   setError: (e) => set({ error: e }),
   setPanelOpen: (v) => set({ isPanelOpen: v }),
 
-  clearNavigation: () =>
+  // ─── clearNavigation (updated: also stops tracking) ───
+  clearNavigation: () => {
+    get().stopTracking()
     set({
       origin: null,
       destination: null,
@@ -52,12 +91,20 @@ export const useNavigationStore = create<NavigationStore>()((set) => ({
       isRouting: false,
       error: null,
       isPanelOpen: false,
-    }),
+      userPosition: null,
+      userBearing: null,
+      activeStepIndex: -1,
+      isTracking: false,
+      isDeviated: false,
+      trackingError: null,
+    })
+  },
 
+  // ─── startNavigation (updated: starts tracking after route) ───
   startNavigation: async (dest) => {
     set({ destination: dest, isRouting: true, error: null, isPanelOpen: true })
 
-    // Step 1: 获取 GPS 位置
+    // Step 1: get GPS position
     let origin: GeoPoint
     try {
       const pos = await new Promise<GeolocationPosition>((resolve, reject) => {
@@ -89,13 +136,15 @@ export const useNavigationStore = create<NavigationStore>()((set) => ({
       return
     }
 
-    // Step 2: 获取路线
+    // Step 2: fetch route
     try {
       const route = await fetchWalkingRoute(origin, {
         lat: dest.latitude,
         lng: dest.longitude,
       })
-      set({ route, isRouting: false, error: null })
+      set({ route, isRouting: false, error: null, activeStepIndex: 0 })
+      // Start real-time GPS tracking after successful route fetch
+      get().startTracking()
     } catch (err) {
       set({
         isRouting: false,
@@ -103,4 +152,151 @@ export const useNavigationStore = create<NavigationStore>()((set) => ({
       })
     }
   },
+
+  // ─── startTracking ───
+  startTracking: () => {
+    if (watchId != null) return // already tracking
+
+    if (!navigator.geolocation) {
+      set({ trackingError: '浏览器不支持持续定位' })
+      return
+    }
+
+    const id = navigator.geolocation.watchPosition(
+      (pos) => get().updateUserPosition(pos),
+      (err) => {
+        set({
+          trackingError:
+            (err as GeolocationPositionError).code ===
+            (err as GeolocationPositionError).PERMISSION_DENIED
+              ? '位置权限被拒绝'
+              : '定位失败',
+        })
+      },
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 2000 },
+    )
+
+    watchId = id
+    set({ isTracking: true, trackingError: null })
+  },
+
+  // ─── stopTracking ───
+  stopTracking: () => {
+    if (watchId != null) {
+      navigator.geolocation.clearWatch(watchId)
+      watchId = null
+    }
+    if (deviationTimer != null) {
+      clearTimeout(deviationTimer)
+      deviationTimer = null
+    }
+    set({ isTracking: false })
+  },
+
+  // ─── updateUserPosition (core GPS tracking logic) ───
+  updateUserPosition: (pos) => {
+    const newPos: GeoPoint = {
+      lat: pos.coords.latitude,
+      lng: pos.coords.longitude,
+    }
+    set({
+      userPosition: newPos,
+      userBearing: pos.coords.heading ?? null,
+    })
+
+    // 1. Step advancement — check if user is close to the start of the NEXT step
+    const { route, activeStepIndex } = get()
+    if (route && activeStepIndex < route.steps.length - 1) {
+      const nextStep = route.steps[activeStepIndex + 1]
+      if (nextStep.coordinates) {
+        const dist = haversineDistance(newPos, {
+          lat: nextStep.coordinates[1],
+          lng: nextStep.coordinates[0],
+        })
+        if (dist < 15) {
+          set({ activeStepIndex: activeStepIndex + 1 })
+        }
+      }
+    }
+
+    // 2. Route deviation — check distance to nearest point on route
+    if (route) {
+      const minDist = findMinDistanceToRoute(newPos, route.geometry.coordinates)
+      const deviated = minDist > 30
+      const prevDeviated = get().isDeviated
+      if (deviated !== prevDeviated) {
+        set({ isDeviated: deviated })
+        if (deviated) {
+          // Clear any existing deviation timer
+          if (deviationTimer != null) clearTimeout(deviationTimer)
+          // Auto re-route after 8 seconds of deviation
+          deviationTimer = setTimeout(() => {
+            if (get().isDeviated) get().reRoute()
+          }, 8000)
+        } else {
+          // User is back on route — cancel the pending re-route
+          if (deviationTimer != null) {
+            clearTimeout(deviationTimer)
+            deviationTimer = null
+          }
+        }
+      }
+    }
+  },
+
+  // ─── advanceToStep ───
+  advanceToStep: (index) => set({ activeStepIndex: index }),
+
+  // ─── reRoute ───
+  reRoute: async () => {
+    const { userPosition, destination } = get()
+    if (!userPosition || !destination) return
+    set({ isRouting: true, error: null, isDeviated: false })
+    try {
+      const route = await fetchWalkingRoute(userPosition, {
+        lat: destination.latitude,
+        lng: destination.longitude,
+      })
+      set({
+        route,
+        origin: userPosition,
+        activeStepIndex: 0,
+        isRouting: false,
+      })
+    } catch (err) {
+      set({
+        isRouting: false,
+        error: err instanceof Error ? err.message : '重新规划路线失败',
+      })
+    }
+  },
 }))
+
+// ─── Haversine distance helpers ───
+
+function haversineDistance(
+  a: { lat: number; lng: number },
+  b: { lat: number; lng: number },
+): number {
+  const R = 6371000
+  const dLat = ((b.lat - a.lat) * Math.PI) / 180
+  const dLon = ((b.lng - a.lng) * Math.PI) / 180
+  const la1 = (a.lat * Math.PI) / 180
+  const la2 = (b.lat * Math.PI) / 180
+  const h =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(la1) * Math.cos(la2) * Math.sin(dLon / 2) ** 2
+  return R * 2 * Math.atan2(Math.sqrt(h), Math.sqrt(1 - h))
+}
+
+function findMinDistanceToRoute(
+  pos: { lat: number; lng: number },
+  coords: [number, number][],
+): number {
+  let minDist = Infinity
+  for (const [lng, lat] of coords) {
+    const d = haversineDistance(pos, { lat, lng })
+    if (d < minDist) minDist = d
+  }
+  return minDist
+}

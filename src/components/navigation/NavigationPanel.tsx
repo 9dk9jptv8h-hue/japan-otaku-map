@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import {
   Navigation,
   Footprints,
@@ -11,6 +11,7 @@ import {
   Route,
   ExternalLink,
   Loader2,
+  LocateFixed,
   AlertCircle,
 } from 'lucide-react'
 import { useNavigationStore } from '@/store/useNavigationStore'
@@ -54,6 +55,19 @@ export function NavigationPanel() {
     setPanelOpen,
     clearNavigation,
   } = useNavigationStore()
+
+  const activeStepIndex = useNavigationStore(s => s.activeStepIndex)
+  const isTracking = useNavigationStore(s => s.isTracking)
+  const isDeviated = useNavigationStore(s => s.isDeviated)
+  const userPosition = useNavigationStore(s => s.userPosition)
+
+  const stepRefs = useRef<(HTMLDivElement | null)[]>([])
+
+  useEffect(() => {
+    if (activeStepIndex >= 0 && stepRefs.current[activeStepIndex]) {
+      stepRefs.current[activeStepIndex]?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }
+  }, [activeStepIndex])
 
   // ─── 辅助函数 ───
 
@@ -261,6 +275,27 @@ export function NavigationPanel() {
         </div>
       </div>
 
+      {/* ── Tracking status indicator ── */}
+      {isTracking && (
+        <div className="flex items-center gap-2 px-4 py-1.5 bg-blue-50 border-b border-blue-100">
+          <span className="relative flex h-2 w-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75" />
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500" />
+          </span>
+          <span className="text-xs font-medium text-blue-600">
+            正在追踪 · 第 {activeStepIndex + 1}/{route.steps.length} 步
+          </span>
+        </div>
+      )}
+
+      {/* ── Deviation warning ── */}
+      {isDeviated && (
+        <div className="flex items-center gap-2 px-4 py-2 bg-amber-50 border-b border-amber-100">
+          <AlertCircle className="h-4 w-4 text-amber-500" />
+          <span className="text-xs font-medium text-amber-700">已偏离路线，正在重新规划...</span>
+        </div>
+      )}
+
       {/* ── Mode indicator ── */}
       <div className="flex items-center gap-2 px-4 py-2.5 text-sm">
         {transportMode === 'walking' ? (
@@ -320,6 +355,17 @@ export function NavigationPanel() {
           <Route className="h-4 w-4 text-indigo-500" />
           <span>{formatDistance(route.distance)}</span>
         </div>
+        {isTracking && userPosition && (
+          <button
+            onClick={() => {
+              const pos = useNavigationStore.getState().userPosition
+              if (pos) useMapStore.getState().flyToMarker?.(pos.lng, pos.lat, 17)
+            }}
+            className="ml-auto flex items-center gap-1 rounded-lg bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-600 active:scale-95 transition-transform"
+          >
+            <LocateFixed className="h-3 w-3" /> 居中
+          </button>
+        )}
       </div>
 
       {/* ── Steps / Transit fallback ── */}
@@ -371,26 +417,40 @@ export function NavigationPanel() {
                     return (
                       <div
                         key={index}
+                        ref={el => { stepRefs.current[index] = el }}
                         className={cn(
                           'flex gap-3 py-1.5',
-                          hasCoords &&
-                            'cursor-pointer rounded-lg px-1 transition-colors hover:bg-indigo-50/50',
+                          index === activeStepIndex && 'bg-indigo-50 rounded-lg px-1',
+                          hasCoords && 'cursor-pointer transition-colors hover:bg-indigo-50/50',
                         )}
-                        style={hasCoords ? undefined : undefined}
                         onClick={() => {
                           if (hasCoords) handleStepClick(step)
                         }}
                       >
                         {/* Timeline connector */}
                         <div className="flex w-6 flex-shrink-0 flex-col items-center">
-                          {isLast ? (
+                          {index < activeStepIndex ? (
+                            // Completed step
+                            <div className="flex h-4 w-4 items-center justify-center rounded-full bg-green-500">
+                              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3">
+                                <polyline points="20 6 9 17 4 12"/>
+                              </svg>
+                            </div>
+                          ) : index === activeStepIndex ? (
+                            // Current step - indigo highlighted
+                            <div className="flex h-4 w-4 items-center justify-center rounded-full bg-indigo-500 ring-2 ring-indigo-200">
+                              <div className="h-1.5 w-1.5 rounded-full bg-white" />
+                            </div>
+                          ) : isLast ? (
+                            // Last step (destination) - future
                             <div className="flex h-4 w-4 items-center justify-center text-[10px] font-bold text-indigo-500">
                               &#9670;
                             </div>
                           ) : (
+                            // Future step - default
                             <div
                               className={cn(
-                                'h-2.5 w-2.5 flex-shrink-0 rounded-full border-2',
+                                'h-3 w-3 flex-shrink-0 rounded-full border-2',
                                 isFirst
                                   ? 'border-indigo-400 bg-white'
                                   : 'border-gray-300 bg-gray-200',
@@ -408,9 +468,10 @@ export function NavigationPanel() {
                             <p
                               className={cn(
                                 'min-w-0 flex-1 text-sm',
-                                isFirst
-                                  ? 'font-medium text-indigo-600'
-                                  : 'text-[var(--color-text)]',
+                                index < activeStepIndex ? 'text-gray-400' :
+                                index === activeStepIndex ? 'font-semibold text-indigo-700' :
+                                isFirst ? 'font-medium text-indigo-600' :
+                                'text-[var(--color-text)]',
                               )}
                             >
                               {isFirst
