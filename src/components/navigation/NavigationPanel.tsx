@@ -35,6 +35,71 @@ function formatDuration(s: number): string {
   return `约 ${Math.ceil(s / 60)} 分钟`
 }
 
+// ─── 站点行组件 ───
+function StationRow({
+  station, isSelected, onClick, color,
+}: {
+  station: TransitStation
+  isSelected: boolean
+  onClick: () => void
+  color: 'blue' | 'red'
+}) {
+  const dotColor = color === 'blue' ? 'bg-blue-500' : 'bg-red-500'
+  return (
+    <button
+      onClick={onClick}
+      className={cn(
+        'w-full flex items-center gap-2 py-2 px-2 rounded-lg text-left transition-colors',
+        isSelected ? 'bg-indigo-50' : 'hover:bg-gray-50',
+      )}
+    >
+      <span className={cn('flex h-2.5 w-2.5 shrink-0 rounded-full', dotColor)} />
+      <div className="flex-1 min-w-0">
+        <p className="text-xs font-medium text-[var(--color-text)] truncate">{station.name}</p>
+        {station.lines && station.lines.length > 0 && (
+          <p className="text-[10px] text-[var(--color-text-dim)] truncate">
+            {station.lines.slice(0, 3).join(' · ')}
+          </p>
+        )}
+      </div>
+      <span className="text-[10px] text-[var(--color-text-dim)] shrink-0">
+        {station.distance < 1000 ? `${Math.round(station.distance)}m` : `${(station.distance / 1000).toFixed(1)}km`}
+      </span>
+    </button>
+  )
+}
+
+// ─── 步行到站卡片 ───
+function StationWalkCard({
+  station, label, prefix,
+}: {
+  station: TransitStation
+  label: string
+  prefix: string
+}) {
+  return (
+    <div className="rounded-xl bg-indigo-50 p-3 mt-1.5 space-y-2">
+      <p className="text-xs font-medium text-indigo-700">
+        {prefix} · {station.name}
+      </p>
+      <p className="text-[10px] text-indigo-500">
+        距离约 {station.distance < 1000
+          ? `${Math.round(station.distance)} 米`
+          : `${(station.distance / 1000).toFixed(1)} 公里`}，步行约 {Math.ceil(station.distance / 80)} 分钟
+      </p>
+      <button
+        onClick={() => {
+          useNavigationStore.getState().setTransportMode('walking')
+          useMapStore.getState().flyToMarker?.(station.lng, station.lat, 16)
+        }}
+        className="w-full rounded-lg bg-indigo-500 py-1.5 text-[10px] font-semibold text-white active:scale-95 transition-transform"
+      >
+        {label}
+      </button>
+    </div>
+  )
+}
+
 // ─── 玻璃拟态样式 ───
 const glassPanel =
   'bg-white/90 backdrop-blur-md rounded-2xl shadow-lg border border-white/20'
@@ -47,6 +112,9 @@ export function NavigationPanel() {
   const [nearbyStations, setNearbyStations] = useState<TransitStation[]>([])
   const [loadingStations, setLoadingStations] = useState(false)
   const [selectedStation, setSelectedStation] = useState<TransitStation | null>(null)
+  const [originStations, setOriginStations] = useState<TransitStation[]>([])
+  const [loadingOriginStations, setLoadingOriginStations] = useState(false)
+  const [selectedOriginStation, setSelectedOriginStation] = useState<TransitStation | null>(null)
 
   const {
     origin,
@@ -88,6 +156,21 @@ export function NavigationPanel() {
       setSelectedStation(null)
     }
   }, [transportMode, destination])
+
+  // ─── 公交模式：获取起点附近站点 ───
+  useEffect(() => {
+    if (transportMode === 'transit' && origin) {
+      setLoadingOriginStations(true)
+      setSelectedOriginStation(null)
+      fetchNearbyStations(origin.lat, origin.lng, 2000)
+        .then(setOriginStations)
+        .catch(() => setOriginStations([]))
+        .finally(() => setLoadingOriginStations(false))
+    } else {
+      setOriginStations([])
+      setSelectedOriginStation(null)
+    }
+  }, [transportMode, origin])
 
   // ─── 辅助函数 ───
 
@@ -388,94 +471,89 @@ export function NavigationPanel() {
         )}
       </div>
 
-      {/* ── Steps / Transit fallback ── */}
+      {/* ── Transit: 出发站点 → 到达站点 ── */}
       {transportMode === 'transit' ? (
         <div className="px-4 py-3 space-y-3">
-          {/* Walking route note */}
-          <p className="text-xs text-[var(--color-text-dim)]">
-            步行路线已显示在地图上
-          </p>
-
-          {/* Nearby stations section */}
+          {/* ── 出发站点 ── */}
           <div>
-            <p className="text-xs font-semibold text-[var(--color-text)] mb-2">
-              🚉 目的地附近站点
-              {loadingStations && <Loader2 className="inline h-3 w-3 animate-spin ml-1 text-indigo-400" />}
+            <p className="text-xs font-semibold text-[var(--color-text)] mb-2 flex items-center gap-1.5">
+              <span className="flex h-4 w-4 items-center justify-center rounded-full bg-blue-100 text-[10px]">🚶</span>
+              出发站点
+              {loadingOriginStations && <Loader2 className="inline h-3 w-3 animate-spin text-indigo-400" />}
             </p>
-
-            {!loadingStations && nearbyStations.length === 0 && (
-              <p className="text-xs text-[var(--color-text-dim)]">未找到附近站点</p>
+            {!loadingOriginStations && originStations.length === 0 && (
+              <p className="text-xs text-[var(--color-text-dim)] pl-5.5">
+                {origin ? '未找到附近站点' : '请先获取定位'}
+              </p>
             )}
+            {originStations.slice(0, 4).map((station) => (
+              <StationRow
+                key={'o' + station.id}
+                station={station}
+                isSelected={selectedOriginStation?.id === station.id}
+                onClick={() => setSelectedOriginStation(
+                  selectedOriginStation?.id === station.id ? null : station
+                )}
+                color="blue"
+              />
+            ))}
+            {/* 选中出发站 → 步行到站卡片 */}
+            {selectedOriginStation && (
+              <StationWalkCard
+                station={selectedOriginStation}
+                label="步行到车站"
+                prefix="出发"
+              />
+            )}
+          </div>
 
-            {nearbyStations.slice(0, 6).map((station) => (
-              <button
-                key={station.id}
+          {/* ── 连接线 ── */}
+          <div className="flex items-center gap-2 pl-3">
+            <div className="flex-1 h-px bg-gray-200" />
+            <span className="text-[10px] text-[var(--color-text-dim)] flex items-center gap-1">
+              <Bus className="h-3 w-3" /> 乘车
+            </span>
+            <div className="flex-1 h-px bg-gray-200" />
+          </div>
+
+          {/* ── 到达站点 ── */}
+          <div>
+            <p className="text-xs font-semibold text-[var(--color-text)] mb-2 flex items-center gap-1.5">
+              <span className="flex h-4 w-4 items-center justify-center rounded-full bg-red-100 text-[10px]">📍</span>
+              到达站点
+              {loadingStations && <Loader2 className="inline h-3 w-3 animate-spin text-indigo-400" />}
+            </p>
+            {!loadingStations && nearbyStations.length === 0 && (
+              <p className="text-xs text-[var(--color-text-dim)] pl-5.5">未找到附近站点</p>
+            )}
+            {nearbyStations.slice(0, 4).map((station) => (
+              <StationRow
+                key={'d' + station.id}
+                station={station}
+                isSelected={selectedStation?.id === station.id}
                 onClick={() => setSelectedStation(
                   selectedStation?.id === station.id ? null : station
                 )}
-                className={cn(
-                  'w-full flex items-center gap-2 py-2 px-2 rounded-lg text-left transition-colors',
-                  selectedStation?.id === station.id
-                    ? 'bg-indigo-50'
-                    : 'hover:bg-gray-50'
-                )}
-              >
-                <span className="text-sm">🚉</span>
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-medium text-[var(--color-text)] truncate">
-                    {station.name}
-                  </p>
-                  {station.lines && station.lines.length > 0 && (
-                    <p className="text-[10px] text-[var(--color-text-dim)] truncate">
-                      {station.lines.slice(0, 3).join(' · ')}
-                    </p>
-                  )}
-                </div>
-                <span className="text-[10px] text-[var(--color-text-dim)] shrink-0">
-                  {station.distance < 1000
-                    ? `${Math.round(station.distance)}m`
-                    : `${(station.distance / 1000).toFixed(1)}km`}
-                </span>
-              </button>
+                color="red"
+              />
             ))}
+            {/* 选中到达站 → 步行到店卡片 */}
+            {selectedStation && (
+              <StationWalkCard
+                station={selectedStation}
+                label={`步行到 ${destName}`}
+                prefix="到达"
+              />
+            )}
           </div>
 
-          {/* Selected station — show walking route option */}
-          {selectedStation && (
-            <div className="rounded-xl bg-indigo-50 p-3 space-y-2">
-              <p className="text-xs font-medium text-indigo-700">
-                步行到 {selectedStation.name}
-              </p>
-              <p className="text-[10px] text-indigo-500">
-                距离约 {selectedStation.distance < 1000
-                  ? `${Math.round(selectedStation.distance)} 米`
-                  : `${(selectedStation.distance / 1000).toFixed(1)} 公里`}，步行约 {Math.ceil(selectedStation.distance / 80)} 分钟
-              </p>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => {
-                    useNavigationStore.getState().setTransportMode('walking')
-                    useMapStore.getState().flyToMarker?.(
-                      selectedStation.lng, selectedStation.lat, 16
-                    )
-                  }}
-                  className="flex-1 rounded-lg bg-indigo-500 py-1.5 text-[10px] font-semibold text-white active:scale-95 transition-transform"
-                >
-                  查看步行路线
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Google Maps full transit directions */}
+          {/* ── Google Maps 完整方案 ── */}
           <button
             onClick={() => {
               if (destination && origin) {
                 window.open(
-                  getGoogleMapsTransitUrl(
-                    origin.lat, origin.lng,
-                    destination.latitude, destination.longitude
-                  ), '_blank'
+                  getGoogleMapsTransitUrl(origin.lat, origin.lng, destination.latitude, destination.longitude),
+                  '_blank'
                 )
               } else if (destination) {
                 window.open(
