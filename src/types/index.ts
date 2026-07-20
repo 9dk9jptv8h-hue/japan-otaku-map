@@ -49,3 +49,12 @@ export interface MapBounds {
 
 // MapLibre Map 实例类型别名
 export type MapInstance = MapLibreMap
+
+// ─── 导航类型 ───
+export type {
+  TransportMode,
+  GeoPoint,
+  RouteStep,
+  RouteData,
+  NavigationState,
+} from './navigation'

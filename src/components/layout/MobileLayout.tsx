@@ -2,6 +2,8 @@ import type { LocationData } from '@/types'
 import { MapView } from '@/components/map/MapContainer'
 import { MarkersLayer } from '@/components/map/MarkersLayer'
 import { MapControls } from '@/components/map/MapControls'
+import { RouteLayer } from '@/components/navigation/RouteLayer'
+import { NavigationPanel } from '@/components/navigation/NavigationPanel'
 import { SearchBar } from '@/components/sidebar/SearchBar'
 import { FilterPanel } from '@/components/sidebar/FilterPanel'
 import { SortPopover } from '@/components/sidebar/SortPopover'
@@ -26,6 +28,7 @@ export function MobileLayout({ locations }: MobileLayoutProps) {
       {/* 地图全屏 */}
       <MapView>
         <MarkersLayer locations={filteredLocations} />
+        <RouteLayer />
       </MapView>
 
       {/* 地图控件 */}
@@ -112,6 +115,9 @@ export function MobileLayout({ locations }: MobileLayoutProps) {
           <CardList locations={filteredLocations} total={locations.length} />
         </div>
       </div>
+
+      {/* 导航面板 — 底部 Sheet */}
+      <NavigationPanel />
     </div>
   )
 }

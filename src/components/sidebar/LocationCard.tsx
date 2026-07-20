@@ -1,7 +1,8 @@
 import { useRef, useEffect, memo } from 'react'
-import { Star, MapPin } from 'lucide-react'
+import { Star, MapPin, Navigation } from 'lucide-react'
 import type { LocationData } from '@/types'
 import { useMapStore } from '@/store/useMapStore'
+import { useNavigationStore } from '@/store/useNavigationStore'
 import { CATEGORIES } from '@/constants/theme'
 import { cn } from '@/utils/cn'
 
@@ -21,6 +22,7 @@ export const LocationCard = memo(function LocationCard({ location, index }: Loca
   const setSelected = useMapStore((s) => s.setSelectedMarkerId)
   const setHovered = useMapStore((s) => s.setHoveredMarkerId)
   const flyToMarker = useMapStore((s) => s.flyToMarker)
+  const startNavigation = useNavigationStore((s) => s.startNavigation)
 
   const catMeta = CATEGORY_MAP[location.category] || { label: location.category, color: '#607d8b' }
 
@@ -111,6 +113,26 @@ export const LocationCard = memo(function LocationCard({ location, index }: Loca
           ))}
         </div>
       )}
+
+      {/* Navigate button — only show when selected */}
+      {isSelected && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation()
+            startNavigation(location)
+          }}
+          className="mt-2.5 flex w-full items-center justify-center gap-1.5 rounded-xl py-2 text-xs font-semibold
+            transition-all duration-200 active:scale-[0.97]"
+          style={{
+            background: catMeta.color + '18',
+            color: catMeta.color,
+          }}
+        >
+          <Navigation className="h-3.5 w-3.5" />
+          导航到这里
+        </button>
+      )}
+
     </div>
   )
 })

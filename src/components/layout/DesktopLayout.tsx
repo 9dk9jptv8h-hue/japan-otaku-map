@@ -4,6 +4,8 @@ import { Sidebar } from '@/components/sidebar/Sidebar'
 import { MapView } from '@/components/map/MapContainer'
 import { MarkersLayer } from '@/components/map/MarkersLayer'
 import { MapControls } from '@/components/map/MapControls'
+import { RouteLayer } from '@/components/navigation/RouteLayer'
+import { NavigationPanel } from '@/components/navigation/NavigationPanel'
 
 interface DesktopLayoutProps {
   locations: LocationData[]
@@ -18,6 +20,7 @@ export function DesktopLayout({ locations }: DesktopLayoutProps) {
       <div className="absolute inset-0">
         <MapView>
           <MarkersLayer locations={filteredLocations} />
+          <RouteLayer />
         </MapView>
         {/* 地图控件 */}
         <div className="absolute top-4 right-4 z-[1000]">
@@ -27,6 +30,9 @@ export function DesktopLayout({ locations }: DesktopLayoutProps) {
 
       {/* 侧边栏浮在地图上方 */}
       <Sidebar locations={locations} />
+
+      {/* 导航面板 — 浮动在右侧，MapControls 下方 */}
+      <NavigationPanel />
     </div>
   )
 }

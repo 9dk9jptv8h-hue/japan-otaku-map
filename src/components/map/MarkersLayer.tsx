@@ -1,6 +1,7 @@
 import { memo, useEffect, useRef, useMemo } from 'react'
 import maplibregl from 'maplibre-gl'
 import { useMapStore } from '@/store/useMapStore'
+import { useNavigationStore } from '@/store/useNavigationStore'
 import { CATEGORIES } from '@/constants/theme'
 import { getCityPhoto } from '@/utils/city-photo'
 import type { LocationData } from '@/types'
@@ -165,6 +166,14 @@ function MarkersLayerInner({ locations }: MarkersLayerProps) {
     map.on('mousemove', 'location-dots', handleMouseMove)
     map.on('mouseleave', 'location-dots', handleMouseLeave)
 
+    // Register global navigation handler for popup buttons
+    ;(window as any).__navigateToStore = (id: string) => {
+      const loc = locations.find(l => l.id === id)
+      if (loc) {
+        useNavigationStore.getState().startNavigation(loc)
+      }
+    }
+
     const setupLayers = () => {
       const geojson = buildGeoJSON()
 
@@ -264,6 +273,7 @@ function MarkersLayerInner({ locations }: MarkersLayerProps) {
       map.off('mouseleave', 'location-dots', handleMouseLeave)
       map.off('style.load', setupLayers)
       map.off('styledata', handleStyleData)
+      delete (window as any).__navigateToStore
       if (popupRef.current) {
         popupRef.current.remove()
         popupRef.current = null
@@ -404,6 +414,26 @@ function renderPopupHTML(props: Record<string, unknown>): string {
             ${escapeHTML(address)}
           ${visitHtml}
         </div>
+
+<button onclick="window.__navigateToStore && window.__navigateToStore('${escapeHTML(props.id as string)}')"
+  style="
+    display:flex;align-items:center;justify-content:center;gap:6px;
+    width:100%;margin-top:12px;padding:8px 0;
+    border:none;border-radius:12px;
+    background:${color}18;color:${color};
+    font-size:12px;font-weight:600;font-family:inherit;
+    cursor:pointer;transition:all 0.2s;
+  "
+  onmousedown="this.style.transform='scale(0.97)'"
+  onmouseup="this.style.transform='scale(1)'"
+  onmouseleave="this.style.transform='scale(1)'"
+>
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polygon points="3 11 22 2 13 21 11 13 3 11"/>
+  </svg>
+  导航到这里
+</button>
+
       </div>
     </div>
   `
