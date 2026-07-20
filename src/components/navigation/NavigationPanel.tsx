@@ -142,6 +142,7 @@ export function NavigationPanel() {
   const [exiting, setExiting] = useState(false)
   const closingRef = useRef(false)
 
+  // ─── 首次挂载入场动画 ───
   useEffect(() => {
     const timer = setTimeout(() => setAnimating(false), 50)
     return () => clearTimeout(timer)
@@ -179,14 +180,29 @@ export function NavigationPanel() {
   const finalDestination = useNavigationStore(s => s.finalDestination)
 
   const stepRefs = useRef<(HTMLDivElement | null)[]>([])
+  const prevIsRouting = useRef(isRouting)
 
-  // ─── 面板打开时取消待执行的关闭 ───
+  // ─── 面板打开时取消待执行的关闭 + 重置入场动画 ───
   useEffect(() => {
     if (isPanelOpen) {
       closingRef.current = false
       setExiting(false)
+      setAnimating(true)
+      const timer = setTimeout(() => setAnimating(false), 50)
+      return () => clearTimeout(timer)
     }
   }, [isPanelOpen])
+
+  // ─── 加载→就绪过渡：重新播放入场动画 ───
+  useEffect(() => {
+    if (prevIsRouting.current && !isRouting && route && isPanelOpen) {
+      setAnimating(true)
+      const timer = setTimeout(() => setAnimating(false), 50)
+      prevIsRouting.current = isRouting
+      return () => clearTimeout(timer)
+    }
+    prevIsRouting.current = isRouting
+  }, [isRouting, route, isPanelOpen])
 
   useEffect(() => {
     if (activeStepIndex >= 0 && stepRefs.current[activeStepIndex]) {
@@ -289,14 +305,24 @@ export function NavigationPanel() {
 
     if (isDesktop) {
       return (
-        <div className="pointer-events-auto absolute right-4 top-[200px] z-[999] w-[340px]">
-          <div className={glassPanel}>{errorContent}</div>
+        <div className={cn(
+          'pointer-events-auto absolute right-4 top-[200px] z-[999] w-[340px]',
+          glassPanel,
+          'transition-all duration-300 ease-out',
+          exiting ? 'translate-x-4 opacity-0' : animating ? 'translate-x-4 opacity-0' : 'translate-x-0 opacity-100',
+        )}>
+          {errorContent}
         </div>
       )
     }
 
     return (
-      <div className="pointer-events-auto fixed bottom-0 left-0 right-0 z-[1000] rounded-t-2xl bg-white/90 shadow-lg backdrop-blur-md border border-white/20">
+      <div className={cn(
+        'pointer-events-auto fixed bottom-0 left-0 right-0 z-[1000] rounded-t-2xl',
+        glassSheet,
+        'transition-all duration-300 ease-out',
+        exiting ? 'translate-y-4 opacity-0' : animating ? 'translate-y-4 opacity-0' : 'translate-y-0 opacity-100',
+      )}>
         {errorContent}
       </div>
     )
@@ -317,14 +343,24 @@ export function NavigationPanel() {
 
     if (isDesktop) {
       return (
-        <div className="pointer-events-auto absolute right-4 top-[200px] z-[999] w-[340px]">
-          <div className={glassPanel}>{loadingContent}</div>
+        <div className={cn(
+          'pointer-events-auto absolute right-4 top-[200px] z-[999] w-[340px]',
+          glassPanel,
+          'transition-all duration-300 ease-out',
+          exiting ? 'translate-x-4 opacity-0' : animating ? 'translate-x-4 opacity-0' : 'translate-x-0 opacity-100',
+        )}>
+          {loadingContent}
         </div>
       )
     }
 
     return (
-      <div className="pointer-events-auto fixed bottom-0 left-0 right-0 z-[1000] rounded-t-2xl bg-white/90 shadow-lg backdrop-blur-md border border-white/20">
+      <div className={cn(
+        'pointer-events-auto fixed bottom-0 left-0 right-0 z-[1000] rounded-t-2xl',
+        glassSheet,
+        'transition-all duration-300 ease-out',
+        exiting ? 'translate-y-4 opacity-0' : animating ? 'translate-y-4 opacity-0' : 'translate-y-0 opacity-100',
+      )}>
         {loadingContent}
       </div>
     )
