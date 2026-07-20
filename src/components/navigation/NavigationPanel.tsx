@@ -114,6 +114,15 @@ const glassPanel =
 const glassSheet =
   'bg-white/90 backdrop-blur-md shadow-lg border border-white/20'
 
+// ─── Pulse keyframes (注入 <style>) ──
+const pulseStyle = `
+@keyframes nav-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.4); }
+  50% { box-shadow: 0 0 0 6px rgba(99, 102, 241, 0); }
+}
+.nav-pulse { animation: nav-pulse 2s ease-in-out infinite; }
+`
+
 export function NavigationPanel() {
   const isDesktop = useMediaQuery('(min-width: 768px)')
   const [stepsExpanded, setStepsExpanded] = useState(true)
@@ -123,6 +132,12 @@ export function NavigationPanel() {
   const [originStations, setOriginStations] = useState<TransitStation[]>([])
   const [loadingOriginStations, setLoadingOriginStations] = useState(false)
   const [selectedOriginStation, setSelectedOriginStation] = useState<TransitStation | null>(null)
+  const [animating, setAnimating] = useState(true)
+
+  useEffect(() => {
+    const timer = setTimeout(() => setAnimating(false), 50)
+    return () => clearTimeout(timer)
+  }, [])
 
   const {
     origin,
@@ -520,6 +535,23 @@ export function NavigationPanel() {
         </div>
       )}
 
+      {/* ── Progress bar ── */}
+      {isTracking && activeStepIndex >= 0 && route.steps.length > 0 && (
+        <div className="px-4 py-1.5 border-b border-gray-100">
+          <div className="flex items-center gap-2">
+            <div className="flex-1 h-1 bg-gray-200 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-indigo-500 rounded-full transition-all duration-500 ease-out"
+                style={{ width: `${Math.round(((activeStepIndex + 1) / route.steps.length) * 100)}%` }}
+              />
+            </div>
+            <span className="text-[10px] font-medium text-[var(--color-text-dim)] shrink-0">
+              {activeStepIndex + 1}/{route.steps.length}
+            </span>
+          </div>
+        </div>
+      )}
+
       {/* ── Mode indicator ── */}
       <div className="flex items-center gap-2 px-4 py-2.5 text-sm">
         {transportMode === 'walking' ? (
@@ -712,7 +744,7 @@ export function NavigationPanel() {
                         key={index}
                         ref={el => { stepRefs.current[index] = el }}
                         className={cn(
-                          'flex gap-3 py-1.5',
+                          'flex gap-3 py-2',
                           index === activeStepIndex && 'bg-indigo-50 rounded-lg px-1',
                           hasCoords && 'cursor-pointer transition-colors hover:bg-indigo-50/50',
                         )}
@@ -731,7 +763,7 @@ export function NavigationPanel() {
                             </div>
                           ) : index === activeStepIndex ? (
                             // Current step - indigo highlighted
-                            <div className="flex h-4 w-4 items-center justify-center rounded-full bg-indigo-500 ring-2 ring-indigo-200">
+                            <div className="nav-pulse flex h-4 w-4 items-center justify-center rounded-full bg-indigo-500 ring-2 ring-indigo-200">
                               <div className="h-1.5 w-1.5 rounded-full bg-white" />
                             </div>
                           ) : isLast ? (
@@ -751,7 +783,10 @@ export function NavigationPanel() {
                             />
                           )}
                           {!isLast && (
-                            <div className="min-h-[16px] w-0.5 flex-1 bg-gray-200" />
+                            <div className={cn(
+                              'min-h-[16px] w-[2px] flex-1',
+                              index < activeStepIndex ? 'bg-green-300' : 'bg-gray-200',
+                            )} />
                           )}
                         </div>
 
@@ -806,6 +841,8 @@ export function NavigationPanel() {
           外部导航
         </button>
       </div>
+
+      <style>{pulseStyle}</style>
     </>
   )
 
@@ -817,6 +854,8 @@ export function NavigationPanel() {
           'pointer-events-auto absolute right-4 top-[200px] z-[999] w-[340px]',
           'flex max-h-[calc(100vh-240px)] flex-col overflow-hidden',
           glassPanel,
+          'transition-all duration-300 ease-out',
+          animating ? 'translate-x-4 opacity-0' : 'translate-x-0 opacity-100',
         )}
       >
         <div className="flex-1 overflow-y-auto">{panelContent}</div>
@@ -832,9 +871,14 @@ export function NavigationPanel() {
         'flex max-h-[55vh] flex-col overflow-hidden',
         'rounded-t-2xl',
         glassSheet,
-        'transition-transform duration-300 ease-out',
+        'transition-all duration-300 ease-out',
+        animating ? 'translate-y-4 opacity-0' : 'translate-y-0 opacity-100',
       )}
     >
+      {/* Drag handle */}
+      <div className="flex justify-center pt-2 pb-1">
+        <div className="h-1 w-10 rounded-full bg-gray-300" />
+      </div>
       <div className="flex-1 overflow-y-auto">{panelContent}</div>
     </div>
   )
