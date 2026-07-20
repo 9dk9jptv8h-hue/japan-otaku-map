@@ -296,12 +296,25 @@ function RouteLayerInner() {
     }
 
     const createLiveLayers = async () => {
+      // ─── 确保定位标记图层存在（styledata 后可能被清掉）───
+      const ensureLiveLayers = () => {
+        if (!map.getLayer('nav-user-accuracy')) {
+          map.addLayer({ id: 'nav-user-accuracy', type: 'circle', source: 'nav-user-position',
+            paint: { 'circle-radius': ['interpolate', ['linear'], ['zoom'], 10, 18, 16, 28], 'circle-color': '#3b82f6', 'circle-opacity': 0.12, 'circle-stroke-color': '#3b82f6', 'circle-stroke-width': 1, 'circle-stroke-opacity': 0.2 } })
+        }
+        if (!map.getLayer('nav-user-dot')) {
+          map.addLayer({ id: 'nav-user-dot', type: 'circle', source: 'nav-user-position',
+            paint: { 'circle-radius': ['interpolate', ['linear'], ['zoom'], 10, 7, 16, 12], 'circle-color': '#3b82f6', 'circle-stroke-color': '#ffffff', 'circle-stroke-width': 3, 'circle-opacity': 0.95 } })
+        }
+      }
+
       const currentPos = positionRef.current
       const geojson = buildPositionGeoJSON(currentPos, bearingRef.current)
 
-      // Source already exists → just update data
+      // Source already exists → just update data + ensure layers
       if (map.getSource('nav-user-position')) {
         ;(map.getSource('nav-user-position') as maplibregl.GeoJSONSource).setData(geojson as any)
+        ensureLiveLayers()
         return
       }
 
@@ -366,12 +379,20 @@ function RouteLayerInner() {
     // Rebuild layers when tile style swaps out custom source / layers
     const handleStyleDataForLive = () => {
       if (liveMarkerSettingUpRef.current) return
-      if (useNavigationStore.getState().isTracking && !map.getSource('nav-user-position')) {
-        liveMarkerSettingUpRef.current = true
-        try {
-          createLiveLayers()
-        } finally {
-          liveMarkerSettingUpRef.current = false
+      if (useNavigationStore.getState().isTracking) {
+        if (!map.getSource('nav-user-position')) {
+          liveMarkerSettingUpRef.current = true
+          try { createLiveLayers() } finally { liveMarkerSettingUpRef.current = false }
+        } else if (!map.getLayer('nav-user-dot')) {
+          // Source exists but layers lost — just recreate layers
+          liveMarkerSettingUpRef.current = true
+          try {
+            const geojson = buildPositionGeoJSON(positionRef.current, bearingRef.current)
+            ;(map.getSource('nav-user-position') as maplibregl.GeoJSONSource).setData(geojson as any)
+            // ensureLiveLayers is called inside createLiveLayers setData path
+            if (!map.getLayer('nav-user-accuracy')) map.addLayer({ id: 'nav-user-accuracy', type: 'circle', source: 'nav-user-position', paint: { 'circle-radius': ['interpolate', ['linear'], ['zoom'], 10, 18, 16, 28], 'circle-color': '#3b82f6', 'circle-opacity': 0.12, 'circle-stroke-color': '#3b82f6', 'circle-stroke-width': 1, 'circle-stroke-opacity': 0.2 } })
+            if (!map.getLayer('nav-user-dot')) map.addLayer({ id: 'nav-user-dot', type: 'circle', source: 'nav-user-position', paint: { 'circle-radius': ['interpolate', ['linear'], ['zoom'], 10, 7, 16, 12], 'circle-color': '#3b82f6', 'circle-stroke-color': '#ffffff', 'circle-stroke-width': 3, 'circle-opacity': 0.95 } })
+          } finally { liveMarkerSettingUpRef.current = false }
         }
       }
     }
