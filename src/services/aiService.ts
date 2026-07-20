@@ -30,8 +30,9 @@ export const SYSTEM_PROMPT = `你是「日本动漫店铺地图」网站的AI助
 如果用户问的不是日本旅游/动漫店铺相关的问题，礼貌地引导回来。`
 
 // Worker 部署后替换，或通过 .env 文件设置 VITE_AI_WORKER_URL
-const WORKER_URL = import.meta.env.VITE_AI_WORKER_URL
-if (!WORKER_URL) throw new Error('VITE_AI_WORKER_URL is required')
+// Worker 部署后替换，或通过 .env 文件设置 VITE_AI_WORKER_URL
+const WORKER_URL =
+  import.meta.env.VITE_AI_WORKER_URL || 'https://japan-map-ai.9dk9jptv8h.workers.dev'
 
 export async function chat(messages: ChatMessage[], signal?: AbortSignal): Promise<string> {
   // 输入校验
