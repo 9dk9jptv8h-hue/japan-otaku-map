@@ -12,25 +12,67 @@
 ### Security（安全）
 - **XSS 修复**：Marker 弹窗 onclick 改用 JS 转义，防止 ID 注入
 - **Worker URL 隐藏**：移除前端 bundle 硬编码，仅从环境变量读取
-- **promptShield 空输入误报**：空字符串不再标记为 CRITICAL 注入攻击
+- **promptShield 空输入误报**：空字符串不再标记为 CRITICAL
+- **Worker body 校验**：`arrayBuffer` 替代可被省略的 `Content-Length`
+- **DeepSeek 超时**：Worker 添加 25s `AbortController`
+- **Worker 消息校验**：最大 20 条 + role/content 必填 + 400 拒绝
 
 ### Fixed（修复）
-- **邮编破坏区域筛选**：跳过 `〒XXX-XXXX` 前缀 + `startsWith` 改 `includes`
-- **AI 错误 body 双重消费**：`text()`→`JSON.parse` 替代 `json()`，保留真实错误信息
-- **rAF 内存泄漏**：LoadingTransition 卸载时 `cancelAnimationFrame`
-- **地图加载超时**：20s 安全超时强制退出，不再永久卡加载页
-- **Chat 请求不取消**：`AbortController` + unmount 清理，避免死组件更新
-- **touch-action 破坏移动地图**：移除容器触摸拦截
-- **Worker body 校验增强**：`arrayBuffer` 替代可被省略的 `Content-Length`
-- **DeepSeek 超时**：Worker 添加 25s `AbortController`
-- **移动抽屉锁滚动**：打开时 `document.body.style.overflow = 'hidden'`
-- **欢迎消息时间戳固化**：改为组件挂载时动态生成
-- **Chat 输入无上限**：`maxLength={500}`
-- **Esc 关闭抽屉**：键盘无障碍
-- **Input "0" 值 bug**：`value && onClear` → `value != null && value !== ''`
-- **moveend 节流**：150ms 防止 flyTo 期间高频 setBounds
-- **MarkersLayer 过度重建**：仅真正卸载时销毁图层，数据更新走 setData
-- **clearCategories 清空为全选**：重置为 7 品牌完整列表
+
+**导航系统：**
+- 邮编破坏区域筛选：跳过 `〒XXX-XXXX` + `startsWith` 改 `includes`
+- AI 错误 body 双重消费：`text()`→`JSON.parse`
+- rAF 内存泄漏：`cancelAnimationFrame`
+- 地图加载超时：20s 安全强制退出
+- Chat 请求不取消：`AbortController` + unmount
+- touch-action 破坏移动地图：移除容器触摸拦截
+- 移动抽屉锁滚动：`body overflow hidden`
+- 欢迎消息时间戳固化→动态生成
+- Chat 输入 `maxLength={500}`
+- Esc 关闭抽屉：键盘无障碍
+- Input "0" 值 bug：falsy→`!= null && !== ''`
+- moveend 节流：150ms
+- MarkersLayer 过度重建→仅卸载时销毁
+- clearCategories→全选
+- visitCount 阈值 1000→10000
+- city-photo 长键优先匹配
+- AI 空响应不加空气泡
+- ErrorBoundary 3 次重试限制 + functional setState
+- 切换店铺竞态：`navSeq` 序列号防旧请求覆盖
+- 路线/定位图层 styledata 丢失→`ensureLayers` 自动补建
+- X→折叠箭头 `>` / `v`
+
+**无障碍（7 处）：**
+- SortPopover/RegionSelect/Input/LocationCard/MobileLayout 补 `aria-label`
+- 按钮加 `type="button"` 防误提交
+- EmptyState 空标题不渲染 + `role="status"`
+- MapControls 未就绪 `disabled` 态
+
+**UX/UI：**
+- Chat 桌面加关闭按钮 + safe-area + FAB safe-area
+- Sidebar safe-area insets
+- LocationCard `flyToMarker` null 时 `cursor-default`
+- 清除按钮重聚焦
+- LocationCard 跳过首次 `scrollIntoView`
+
+**代码质量：**
+- MarkersLayer `as any`/`setFeatureState`/`photoUrl`/popupProps 注释和修复
+- mockData 坐标精度 3 位小数注释 + IMG 占位注释
+- mapDefaults `probeUrl`/`DEFAULT_VIEWPORT`/`TILE_STYLES` 注释
+- MapContainer CJK 字体/mobile maxZoom 注释
+- useFilteredLocations ISO8601 排序/useMemo 空依赖注释
+- useFilterStore `ALL_CATEGORIES` 常量
+- useMapStore 第 3 标记/`setSelectedMarkerId` 注释
+- Worker `replaceAll` 子域名注释
+- promptShield 零宽字符注释
+- AppShell SSR hydration flash 注释
+- city-photo 共享照片注释
+- index.css `scrollbar`/`color-scheme` 注释
+- SidebarToggle `z-50`
+
+**HTML/构建：**
+- `index.html`：canonical + JSON-LD priceCurrency + noscript 降级
+- main.tsx：SW 注册错误日志
 
 ---
 
