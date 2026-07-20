@@ -652,3 +652,4 @@
 [0.1.0]: https://github.com/9dk9jptv8h-hue/japan-otaku-map/releases/tag/v0.1.0
 
 
+
