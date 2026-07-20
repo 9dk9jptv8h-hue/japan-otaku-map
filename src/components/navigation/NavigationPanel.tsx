@@ -468,34 +468,30 @@ export function NavigationPanel() {
         </div>
       </div>
 
-      {/* ── Stats row (步行模式) + 居中按钮 ── */}
-      <div className="flex items-center gap-4 border-b border-gray-100 px-4 py-2">
-        {transportMode === 'walking' ? (
-          <>
-            <div className="flex items-center gap-1.5 text-sm text-[var(--color-text-dim)]">
-              <Clock className="h-4 w-4 text-indigo-500" />
-              <span>{formatDuration(route.duration)}</span>
-            </div>
-            <div className="flex items-center gap-1.5 text-sm text-[var(--color-text-dim)]">
-              <Route className="h-4 w-4 text-indigo-500" />
-              <span>{formatDistance(route.distance)}</span>
-            </div>
-          </>
-        ) : (
-          <span className="text-xs text-[var(--color-text-dim)]">公交方案</span>
-        )}
-        {isTracking && userPosition && (
-          <button
-            onClick={() => {
-              const pos = useNavigationStore.getState().userPosition
-              if (pos) useMapStore.getState().flyToMarker?.(pos.lng, pos.lat, 17)
-            }}
-            className="ml-auto flex items-center gap-1 rounded-lg bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-600 active:scale-95 transition-transform"
-          >
-            <LocateFixed className="h-3 w-3" /> 居中
-          </button>
-        )}
-      </div>
+      {/* ── Stats row (仅步行模式) ── */}
+      {transportMode === 'walking' && (
+        <div className="flex items-center gap-4 border-b border-gray-100 px-4 py-2">
+          <div className="flex items-center gap-1.5 text-sm text-[var(--color-text-dim)]">
+            <Clock className="h-4 w-4 text-indigo-500" />
+            <span>{formatDuration(route.duration)}</span>
+          </div>
+          <div className="flex items-center gap-1.5 text-sm text-[var(--color-text-dim)]">
+            <Route className="h-4 w-4 text-indigo-500" />
+            <span>{formatDistance(route.distance)}</span>
+          </div>
+          {isTracking && userPosition && (
+            <button
+              onClick={() => {
+                const pos = useNavigationStore.getState().userPosition
+                if (pos) useMapStore.getState().flyToMarker?.(pos.lng, pos.lat, 17)
+              }}
+              className="ml-auto flex items-center gap-1 rounded-lg bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-600 active:scale-95 transition-transform"
+            >
+              <LocateFixed className="h-3 w-3" /> 居中
+            </button>
+          )}
+        </div>
+      )}
 
       {/* ── Transit: 出发站点 → 到达站点 ── */}
       {transportMode === 'transit' ? (
