@@ -34,6 +34,13 @@
 - DesktopLayout / MobileLayout 集成 RouteLayer + NavigationPanel
 - useMapStore 的 selectedMarkerIds 最多支持 2 个（为路线起终点预留）
 
+### Fixed（修复）
+- navigateToStation/continueToFinalDestination 复用追踪中的 userPosition，不再重复请求 GPS 导致超时
+- 「步行到车站」点击后自动切换至步行模式
+- 到达站「步行到店」与出发站「步行到车站」行为分离：前者导航到车站，后者从当前位置直接导航到店铺
+- 公交面板移除重复的「查看完整方案」按钮，统一使用底部「外部导航」
+- 公交模式迷你条独立显示时间（步行到站约 X 分钟），不再套用步行路线的时长
+
 ---
 
 ## [4.1.1] - 2026-06-24
