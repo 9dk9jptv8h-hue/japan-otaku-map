@@ -19,6 +19,8 @@ import { useMapStore } from '@/store/useMapStore'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { getGoogleMapsUrl } from '@/services/routingService'
 import { cn } from '@/utils/cn'
+import { fetchNearbyStations, getGoogleMapsTransitUrl } from '@/services/transitService'
+import type { TransitStation } from '@/services/transitService'
 import type { RouteStep } from '@/types/navigation'
 
 // ─── 格式化工具 ───
@@ -42,6 +44,9 @@ const glassSheet =
 export function NavigationPanel() {
   const isDesktop = useMediaQuery('(min-width: 768px)')
   const [stepsExpanded, setStepsExpanded] = useState(true)
+  const [nearbyStations, setNearbyStations] = useState<TransitStation[]>([])
+  const [loadingStations, setLoadingStations] = useState(false)
+  const [selectedStation, setSelectedStation] = useState<TransitStation | null>(null)
 
   const {
     origin,
@@ -68,6 +73,21 @@ export function NavigationPanel() {
       stepRefs.current[activeStepIndex]?.scrollIntoView({ behavior: 'smooth', block: 'center' })
     }
   }, [activeStepIndex])
+
+  // ─── 公交模式：获取附近站点 ───
+  useEffect(() => {
+    if (transportMode === 'transit' && destination) {
+      setLoadingStations(true)
+      setSelectedStation(null)
+      fetchNearbyStations(destination.latitude, destination.longitude, 2000)
+        .then(setNearbyStations)
+        .catch(() => setNearbyStations([]))
+        .finally(() => setLoadingStations(false))
+    } else {
+      setNearbyStations([])
+      setSelectedStation(null)
+    }
+  }, [transportMode, destination])
 
   // ─── 辅助函数 ───
 
@@ -370,17 +390,104 @@ export function NavigationPanel() {
 
       {/* ── Steps / Transit fallback ── */}
       {transportMode === 'transit' ? (
-        <div className="flex flex-col items-center gap-3 px-4 py-6 text-center">
-          <Bus className="h-10 w-10 text-indigo-300" />
-          <p className="text-sm text-[var(--color-text-dim)]">
+        <div className="px-4 py-3 space-y-3">
+          {/* Walking route note */}
+          <p className="text-xs text-[var(--color-text-dim)]">
             步行路线已显示在地图上
           </p>
+
+          {/* Nearby stations section */}
+          <div>
+            <p className="text-xs font-semibold text-[var(--color-text)] mb-2">
+              🚉 目的地附近站点
+              {loadingStations && <Loader2 className="inline h-3 w-3 animate-spin ml-1 text-indigo-400" />}
+            </p>
+
+            {!loadingStations && nearbyStations.length === 0 && (
+              <p className="text-xs text-[var(--color-text-dim)]">未找到附近站点</p>
+            )}
+
+            {nearbyStations.slice(0, 6).map((station) => (
+              <button
+                key={station.id}
+                onClick={() => setSelectedStation(
+                  selectedStation?.id === station.id ? null : station
+                )}
+                className={cn(
+                  'w-full flex items-center gap-2 py-2 px-2 rounded-lg text-left transition-colors',
+                  selectedStation?.id === station.id
+                    ? 'bg-indigo-50'
+                    : 'hover:bg-gray-50'
+                )}
+              >
+                <span className="text-sm">🚉</span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-medium text-[var(--color-text)] truncate">
+                    {station.name}
+                  </p>
+                  {station.lines && station.lines.length > 0 && (
+                    <p className="text-[10px] text-[var(--color-text-dim)] truncate">
+                      {station.lines.slice(0, 3).join(' · ')}
+                    </p>
+                  )}
+                </div>
+                <span className="text-[10px] text-[var(--color-text-dim)] shrink-0">
+                  {station.distance < 1000
+                    ? `${Math.round(station.distance)}m`
+                    : `${(station.distance / 1000).toFixed(1)}km`}
+                </span>
+              </button>
+            ))}
+          </div>
+
+          {/* Selected station — show walking route option */}
+          {selectedStation && (
+            <div className="rounded-xl bg-indigo-50 p-3 space-y-2">
+              <p className="text-xs font-medium text-indigo-700">
+                步行到 {selectedStation.name}
+              </p>
+              <p className="text-[10px] text-indigo-500">
+                距离约 {selectedStation.distance < 1000
+                  ? `${Math.round(selectedStation.distance)} 米`
+                  : `${(selectedStation.distance / 1000).toFixed(1)} 公里`}，步行约 {Math.ceil(selectedStation.distance / 80)} 分钟
+              </p>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => {
+                    useNavigationStore.getState().setTransportMode('walking')
+                    useMapStore.getState().flyToMarker?.(
+                      selectedStation.lng, selectedStation.lat, 16
+                    )
+                  }}
+                  className="flex-1 rounded-lg bg-indigo-500 py-1.5 text-[10px] font-semibold text-white active:scale-95 transition-transform"
+                >
+                  查看步行路线
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Google Maps full transit directions */}
           <button
-            onClick={handleOpenGoogleMaps}
-            className="flex items-center gap-1.5 rounded-lg bg-indigo-500 px-4 py-2 text-xs font-medium text-white transition-colors hover:bg-indigo-600"
+            onClick={() => {
+              if (destination && origin) {
+                window.open(
+                  getGoogleMapsTransitUrl(
+                    origin.lat, origin.lng,
+                    destination.latitude, destination.longitude
+                  ), '_blank'
+                )
+              } else if (destination) {
+                window.open(
+                  `https://www.google.com/maps/dir/?api=1&destination=${destination.latitude},${destination.longitude}&travelmode=transit`,
+                  '_blank'
+                )
+              }
+            }}
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-500 py-2.5 text-sm font-semibold text-white active:scale-[0.98] transition-transform"
           >
-            查看公交方案
-            <ExternalLink className="h-3 w-3" />
+            查看完整公交方案
+            <ExternalLink className="h-4 w-4" />
           </button>
         </div>
       ) : (
