@@ -299,9 +299,19 @@ export function NavigationPanel() {
             )}
           >
             <Navigation className="h-4 w-4 text-indigo-500" />
-            <span>{formatDuration(route.duration)}</span>
-            <span className="text-[var(--color-text-dim)]">&middot;</span>
-            <span>{formatDistance(route.distance)}</span>
+            {transportMode === 'transit' ? (
+              <>
+                <span>公交方案</span>
+                <span className="text-[var(--color-text-dim)]">&middot;</span>
+                <span>步行到站约 {originStations[0] ? Math.ceil(originStations[0].distance / 80) : '?'} 分钟</span>
+              </>
+            ) : (
+              <>
+                <span>{formatDuration(route.duration)}</span>
+                <span className="text-[var(--color-text-dim)]">&middot;</span>
+                <span>{formatDistance(route.distance)}</span>
+              </>
+            )}
           </button>
         </div>
       )
@@ -320,9 +330,19 @@ export function NavigationPanel() {
         >
           <div className="flex items-center gap-2 text-sm">
             <Navigation className="h-4 w-4 text-indigo-500" />
-            <span>{formatDuration(route.duration)}</span>
-            <span className="text-[var(--color-text-dim)]">&middot;</span>
-            <span>{formatDistance(route.distance)}</span>
+            {transportMode === 'transit' ? (
+              <>
+                <span>公交方案</span>
+                <span className="text-[var(--color-text-dim)]">&middot;</span>
+                <span>步行到站约 {originStations[0] ? Math.ceil(originStations[0].distance / 80) : '?'} 分钟</span>
+              </>
+            ) : (
+              <>
+                <span>{formatDuration(route.duration)}</span>
+                <span className="text-[var(--color-text-dim)]">&middot;</span>
+                <span>{formatDistance(route.distance)}</span>
+              </>
+            )}
           </div>
           <ChevronUp className="h-5 w-5 text-[var(--color-text-dim)]" />
         </button>
@@ -450,14 +470,33 @@ export function NavigationPanel() {
 
       {/* ── Stats row ── */}
       <div className="flex items-center gap-4 border-b border-gray-100 px-4 py-2">
-        <div className="flex items-center gap-1.5 text-sm text-[var(--color-text-dim)]">
-          <Clock className="h-4 w-4 text-indigo-500" />
-          <span>{formatDuration(route.duration)}</span>
-        </div>
-        <div className="flex items-center gap-1.5 text-sm text-[var(--color-text-dim)]">
-          <Route className="h-4 w-4 text-indigo-500" />
-          <span>{formatDistance(route.distance)}</span>
-        </div>
+        {transportMode === 'transit' ? (
+          <>
+            <div className="flex items-center gap-1.5 text-xs text-[var(--color-text-dim)]">
+              <Footprints className="h-4 w-4 text-blue-400" />
+              <span>步行到站约 {originStations[0] ? Math.ceil(originStations[0].distance / 80) : '?'} 分钟</span>
+            </div>
+            <div className="flex items-center gap-1.5 text-xs text-[var(--color-text-dim)]">
+              <Bus className="h-4 w-4 text-indigo-500" />
+              <span>乘车</span>
+            </div>
+            <div className="flex items-center gap-1.5 text-xs text-[var(--color-text-dim)]">
+              <Footprints className="h-4 w-4 text-red-400" />
+              <span>步行到店约 {nearbyStations[0] ? Math.ceil(nearbyStations[0].distance / 80) : '?'} 分钟</span>
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="flex items-center gap-1.5 text-sm text-[var(--color-text-dim)]">
+              <Clock className="h-4 w-4 text-indigo-500" />
+              <span>{formatDuration(route.duration)}</span>
+            </div>
+            <div className="flex items-center gap-1.5 text-sm text-[var(--color-text-dim)]">
+              <Route className="h-4 w-4 text-indigo-500" />
+              <span>{formatDistance(route.distance)}</span>
+            </div>
+          </>
+        )}
         {isTracking && userPosition && (
           <button
             onClick={() => {
