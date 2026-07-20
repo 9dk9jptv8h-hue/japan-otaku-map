@@ -35,6 +35,16 @@ function formatDuration(s: number): string {
   return `约 ${Math.ceil(s / 60)} 分钟`
 }
 
+function haversineDistance(a: { lat: number; lng: number }, b: { lat: number; lng: number }): number {
+  const R = 6371000
+  const dLat = (b.lat - a.lat) * Math.PI / 180
+  const dLon = (b.lng - a.lng) * Math.PI / 180
+  const la1 = a.lat * Math.PI / 180
+  const la2 = b.lat * Math.PI / 180
+  const h = Math.sin(dLat/2)**2 + Math.cos(la1)*Math.cos(la2)*Math.sin(dLon/2)**2
+  return R * 2 * Math.atan2(Math.sqrt(h), Math.sqrt(1-h))
+}
+
 // ─── 站点行组件 ───
 function StationRow({
   station, isSelected, onClick, color,
@@ -286,6 +296,20 @@ export function NavigationPanel() {
   // ═══════════════════════════════════════════
   // State 3: Mini badge / Collapsed mobile
   // ═══════════════════════════════════════════
+
+  // ─── 公交时间估算 ───
+  const walkToOriginMin = originStations[0] ? Math.ceil(originStations[0].distance / 80) : 0
+  const walkFromDestMin = nearbyStations[0] ? Math.ceil(nearbyStations[0].distance / 80) : 0
+  let transitRideMin = 0
+  if (originStations[0] && nearbyStations[0]) {
+    const stationDist = haversineDistance(
+      { lat: originStations[0].lat, lng: originStations[0].lng },
+      { lat: nearbyStations[0].lat, lng: nearbyStations[0].lng }
+    )
+    transitRideMin = Math.max(2, Math.ceil(stationDist / 500))
+  }
+  const totalTransitMin = walkToOriginMin + transitRideMin + walkFromDestMin
+
   if (!isPanelOpen) {
     if (isDesktop) {
       return (
@@ -302,14 +326,29 @@ export function NavigationPanel() {
             {transportMode === 'transit' ? (
               <>
                 <span>公交方案</span>
-                <span className="text-[var(--color-text-dim)]">&middot;</span>
-                <span>步行到站约 {originStations[0] ? Math.ceil(originStations[0].distance / 80) : '?'} 分钟</span>
+                {originStations[0] && nearbyStations[0] ? (
+                  <>
+                    <span className="text-[var(--color-text-dim)]">&middot;</span>
+                    <span>公交约 {totalTransitMin} 分钟</span>
+                    <span className="text-[var(--color-text-dim)]">&middot;</span>
+                    <span>步行到站 {walkToOriginMin} 分钟</span>
+                  </>
+                ) : originStations[0] ? (
+                  <>
+                    <span className="text-[var(--color-text-dim)]">&middot;</span>
+                    <span>步行到站约 {walkToOriginMin} 分钟</span>
+                  </>
+                ) : null}
               </>
             ) : (
               <>
                 <span>{formatDuration(route.duration)}</span>
                 <span className="text-[var(--color-text-dim)]">&middot;</span>
                 <span>{formatDistance(route.distance)}</span>
+                <span className="text-[var(--color-text-dim)]">&middot;</span>
+                <span className="text-xs">
+                  预计 {new Date(Date.now() + route.duration * 1000).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}
+                </span>
               </>
             )}
           </button>
@@ -333,14 +372,29 @@ export function NavigationPanel() {
             {transportMode === 'transit' ? (
               <>
                 <span>公交方案</span>
-                <span className="text-[var(--color-text-dim)]">&middot;</span>
-                <span>步行到站约 {originStations[0] ? Math.ceil(originStations[0].distance / 80) : '?'} 分钟</span>
+                {originStations[0] && nearbyStations[0] ? (
+                  <>
+                    <span className="text-[var(--color-text-dim)]">&middot;</span>
+                    <span>公交约 {totalTransitMin} 分钟</span>
+                    <span className="text-[var(--color-text-dim)]">&middot;</span>
+                    <span>步行到站 {walkToOriginMin} 分钟</span>
+                  </>
+                ) : originStations[0] ? (
+                  <>
+                    <span className="text-[var(--color-text-dim)]">&middot;</span>
+                    <span>步行到站约 {walkToOriginMin} 分钟</span>
+                  </>
+                ) : null}
               </>
             ) : (
               <>
                 <span>{formatDuration(route.duration)}</span>
                 <span className="text-[var(--color-text-dim)]">&middot;</span>
                 <span>{formatDistance(route.distance)}</span>
+                <span className="text-[var(--color-text-dim)]">&middot;</span>
+                <span className="text-xs">
+                  预计 {new Date(Date.now() + route.duration * 1000).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}
+                </span>
               </>
             )}
           </div>
@@ -526,6 +580,9 @@ export function NavigationPanel() {
             <Route className="h-4 w-4 text-indigo-500" />
             <span>{formatDistance(route.distance)}</span>
           </div>
+          <span className="text-xs text-[var(--color-text-dim)] ml-auto">
+            预计 {new Date(Date.now() + route.duration * 1000).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}
+          </span>
           {isTracking && userPosition && (
             <button
               onClick={() => {

@@ -26,7 +26,7 @@ interface NavigationStore {
   activeStepIndex: number
   /** Whether navigator.geolocation.watchPosition is active */
   isTracking: boolean
-  /** Whether user has deviated from route (>30m) */
+  /** Whether user has deviated from route (>50m segment distance) */
   isDeviated: boolean
   /** GPS tracking error message */
   trackingError: string | null
@@ -269,8 +269,8 @@ export const useNavigationStore = create<NavigationStore>()((set, get) => ({
 
     // 2. Route deviation — check distance to nearest point on route
     if (route) {
-      const minDist = findMinDistanceToRoute(newPos, route.geometry.coordinates)
-      const deviated = minDist > 30
+      const minDist = findMinDistanceToRouteSegments(newPos, route.geometry.coordinates)
+      const deviated = minDist > 50 // raised from 30m — segment distance is more accurate
       const prevDeviated = get().isDeviated
       if (deviated !== prevDeviated) {
         set({ isDeviated: deviated })
@@ -413,6 +413,51 @@ function haversineDistance(
     Math.sin(dLat / 2) ** 2 +
     Math.cos(la1) * Math.cos(la2) * Math.sin(dLon / 2) ** 2
   return R * 2 * Math.atan2(Math.sqrt(h), Math.sqrt(1 - h))
+}
+
+function findMinDistanceToRouteSegments(
+  pos: { lat: number; lng: number },
+  coords: [number, number][],
+): number {
+  if (coords.length < 2) return findMinDistanceToRoute(pos, coords)
+
+  let minDist = Infinity
+  for (let i = 0; i < coords.length - 1; i++) {
+    const [lng1, lat1] = coords[i]
+    const [lng2, lat2] = coords[i + 1]
+    const d = pointToSegmentDistance(pos.lat, pos.lng, lat1, lng1, lat2, lng2)
+    if (d < minDist) minDist = d
+  }
+  return minDist
+}
+
+function pointToSegmentDistance(
+  px: number, py: number,
+  x1: number, y1: number,
+  x2: number, y2: number,
+): number {
+  const latToM = 111320
+  const lngToM = 111320 * Math.cos((px * Math.PI) / 180)
+
+  const dx = (x2 - x1) * latToM
+  const dy = (y2 - y1) * lngToM
+  const segLenSq = dx * dx + dy * dy
+
+  if (segLenSq === 0) {
+    return haversineDistance({ lat: px, lng: py }, { lat: x1, lng: y1 })
+  }
+
+  let t =
+    ((px - x1) * latToM * dx + (py - y1) * lngToM * dy) / segLenSq
+  t = Math.max(0, Math.min(1, t))
+
+  const projLat = x1 + t * (x2 - x1)
+  const projLng = y1 + t * (y2 - y1)
+
+  return haversineDistance(
+    { lat: px, lng: py },
+    { lat: projLat, lng: projLng },
+  )
 }
 
 function findMinDistanceToRoute(

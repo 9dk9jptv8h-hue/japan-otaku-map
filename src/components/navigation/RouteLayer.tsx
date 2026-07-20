@@ -242,7 +242,26 @@ function RouteLayerInner() {
       }
     }
 
-    const createLiveLayers = () => {
+    // Load custom arrow image if not already registered
+    const ensureArrowImage = (): Promise<void> => {
+      return new Promise((resolve) => {
+        if (map.hasImage('nav-arrow')) { resolve(); return }
+        const svg = `<svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="12,2 22,20 12,16 2,20" fill="#3b82f6" stroke="white" stroke-width="1"/>
+        </svg>`
+        const img = new Image()
+        img.onload = () => {
+          if (!map.hasImage('nav-arrow')) {
+            map.addImage('nav-arrow', img as any)
+          }
+          resolve()
+        }
+        img.onerror = () => resolve()
+        img.src = 'data:image/svg+xml;base64,' + btoa(svg)
+      })
+    }
+
+    const createLiveLayers = async () => {
       const currentPos = positionRef.current
       const geojson = buildPositionGeoJSON(currentPos, bearingRef.current)
 
@@ -285,19 +304,22 @@ function RouteLayerInner() {
 
       // Bearing arrow — only when bearing data is meaningful
       if (bearingRef.current != null && bearingRef.current >= 0) {
-        map.addLayer({
-          id: 'nav-user-arrow',
-          type: 'symbol',
-          source: 'nav-user-position',
-          layout: {
-            'icon-image': 'arrow',
-            'icon-size': ['interpolate', ['linear'], ['zoom'], 10, 0.35, 16, 0.55],
-            'icon-rotate': ['get', 'bearing'],
-            'icon-rotation-alignment': 'map',
-            'icon-allow-overlap': true,
-            'icon-ignore-placement': true,
-          },
-        })
+        await ensureArrowImage()
+        if (map.hasImage('nav-arrow')) {
+          map.addLayer({
+            id: 'nav-user-arrow',
+            type: 'symbol',
+            source: 'nav-user-position',
+            layout: {
+              'icon-image': 'nav-arrow',
+              'icon-size': ['interpolate', ['linear'], ['zoom'], 10, 0.35, 16, 0.55],
+              'icon-rotate': ['get', 'bearing'],
+              'icon-rotation-alignment': 'map',
+              'icon-allow-overlap': true,
+              'icon-ignore-placement': true,
+            },
+          })
+        }
       }
     }
 
@@ -360,19 +382,31 @@ function RouteLayerInner() {
     const hasBearing = userBearing != null && userBearing >= 0
     const arrowExists = !!map.getLayer('nav-user-arrow')
     if (hasBearing && !arrowExists) {
-      map.addLayer({
-        id: 'nav-user-arrow',
-        type: 'symbol',
-        source: 'nav-user-position',
-        layout: {
-          'icon-image': 'arrow',
-          'icon-size': ['interpolate', ['linear'], ['zoom'], 10, 0.35, 16, 0.55],
-          'icon-rotate': ['get', 'bearing'],
-          'icon-rotation-alignment': 'map',
-          'icon-allow-overlap': true,
-          'icon-ignore-placement': true,
-        },
-      })
+      if (!map.hasImage('nav-arrow')) {
+        const svg = `<svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="12,2 22,20 12,16 2,20" fill="#3b82f6" stroke="white" stroke-width="1"/>
+        </svg>`
+        const img = new Image()
+        img.onload = () => {
+          if (!map.hasImage('nav-arrow')) map.addImage('nav-arrow', img as any)
+        }
+        img.src = 'data:image/svg+xml;base64,' + btoa(svg)
+      }
+      if (map.hasImage('nav-arrow')) {
+        map.addLayer({
+          id: 'nav-user-arrow',
+          type: 'symbol',
+          source: 'nav-user-position',
+          layout: {
+            'icon-image': 'nav-arrow',
+            'icon-size': ['interpolate', ['linear'], ['zoom'], 10, 0.35, 16, 0.55],
+            'icon-rotate': ['get', 'bearing'],
+            'icon-rotation-alignment': 'map',
+            'icon-allow-overlap': true,
+            'icon-ignore-placement': true,
+          },
+        })
+      }
     } else if (!hasBearing && arrowExists) {
       map.removeLayer('nav-user-arrow')
     }
