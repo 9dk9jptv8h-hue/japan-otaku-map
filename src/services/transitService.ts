@@ -87,6 +87,14 @@ interface OverpassResponse {
 // ═══════════════════════════════════════════
 // 核心函数：获取附近站点
 // ═══════════════════════════════════════════
+
+// 多个 Overpass API 端点，自动 fallback
+const OVERPASS_ENDPOINTS = [
+  'https://overpass-api.de/api/interpreter',
+  'https://overpass.kumi.systems/api/interpreter',
+  'https://maps.mail.ru/osm/tools/overpass/api/interpreter',
+]
+
 export async function fetchNearbyStations(
   lat: number,
   lng: number,
@@ -100,51 +108,56 @@ export async function fetchNearbyStations(
   }
 
   const controller = new AbortController()
-  const timeoutId = setTimeout(() => controller.abort(), 10000) // 10s timeout
+  const timeoutId = setTimeout(() => controller.abort(), 8000) // 8s timeout
 
-  try {
-    const query = `[out:json];(node[railway=station](around:${radiusMeters},${lat},${lng});node[railway=subway_entrance](around:${radiusMeters},${lat},${lng});node[public_transport=station](around:${radiusMeters},${lat},${lng}););out center 20;`
+  // 查询：火车站 + 地铁站 + 公交站 + 电车站
+  const query = `[out:json];(node[railway=station](around:${radiusMeters},${lat},${lng});node[railway=halt](around:${radiusMeters},${lat},${lng});node[railway=tram_stop](around:${radiusMeters},${lat},${lng});node[public_transport=station](around:${radiusMeters},${lat},${lng});node[highway=bus_stop](around:${radiusMeters},${lat},${lng});node[amenity=bus_station](around:${radiusMeters},${lat},${lng}););out center 30;`
 
-    const response = await fetch(
-      `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`,
-      { signal: controller.signal },
-    )
+  let lastError: Error | null = null
 
-    if (!response.ok) {
-      throw new Error(`Overpass API returned ${response.status}`)
+  for (const endpoint of OVERPASS_ENDPOINTS) {
+    try {
+      const response = await fetch(
+        `${endpoint}?data=${encodeURIComponent(query)}`,
+        { signal: controller.signal },
+      )
+
+      if (!response.ok) {
+        throw new Error(`${endpoint} returned ${response.status}`)
+      }
+
+      const data: OverpassResponse = await response.json()
+
+      const stations: TransitStation[] = data.elements
+        .filter(el => el.tags?.name || el.tags?.['name:en'] || el.tags?.['name:ja'] || el.tags?.['name:zh'])
+        .map(el => ({
+          id: el.id,
+          name: extractName(el.tags || {}),
+          lat: el.lat,
+          lng: el.lon,
+          railway: getRailwayType(el.tags || {}),
+          distance: haversineDistance(lat, lng, el.lat, el.lon),
+          lines: extractLines(el.tags || {}),
+        }))
+        .sort((a, b) => a.distance - b.distance)
+        .slice(0, 10)
+
+      // 写入缓存
+      stationCache.set(cacheKey, { stations, timestamp: Date.now() })
+
+      return stations
+    } catch (err) {
+      lastError = err instanceof Error ? err : new Error(String(err))
+      // 如果是超时，下一个端点也不会好，直接放弃
+      if (err instanceof DOMException && err.name === 'AbortError') break
+      // 否则尝试下一个端点
     }
-
-    const data: OverpassResponse = await response.json()
-
-    const stations: TransitStation[] = data.elements
-      .filter(el => el.tags?.name || el.tags?.['name:en'] || el.tags?.['name:ja'] || el.tags?.['name:zh'])
-      .map(el => ({
-        id: el.id,
-        name: extractName(el.tags || {}),
-        lat: el.lat,
-        lng: el.lon,
-        railway: getRailwayType(el.tags || {}),
-        distance: haversineDistance(lat, lng, el.lat, el.lon),
-        lines: extractLines(el.tags || {}),
-      }))
-      .sort((a, b) => a.distance - b.distance)
-      .slice(0, 10) // Max 10 stations
-
-    // 写入缓存
-    stationCache.set(cacheKey, { stations, timestamp: Date.now() })
-
-    return stations
-  } catch (err) {
-    // 如果是 AbortError（超时），静默返回空数组
-    if (err instanceof DOMException && err.name === 'AbortError') {
-      console.warn('[transitService] Overpass API 请求超时')
-      return []
-    }
-    console.error('[transitService] 获取站点失败:', err)
-    return []
-  } finally {
-    clearTimeout(timeoutId)
   }
+
+  // 所有端点都失败
+  console.warn('[transitService] 所有 Overpass 端点不可达:', lastError?.message)
+  clearTimeout(timeoutId)
+  return []
 }
 
 // ═══════════════════════════════════════════
