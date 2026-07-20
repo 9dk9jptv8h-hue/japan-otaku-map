@@ -157,7 +157,7 @@ export function NavigationPanel() {
       if (!closingRef.current) return // 被新导航取消了
       closingRef.current = false
       useNavigationStore.getState().clearNavigation()
-    }, 250)
+    }, 400)
   }
 
   const {
