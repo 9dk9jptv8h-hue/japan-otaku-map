@@ -141,6 +141,7 @@ export function NavigationPanel() {
   const [animating, setAnimating] = useState(true)
   const [exiting, setExiting] = useState(false)
   const closingRef = useRef(false)
+  const wasRouteNull = useRef(true)
 
   // ─── 首次挂载入场动画 ───
   useEffect(() => {
@@ -193,9 +194,10 @@ export function NavigationPanel() {
     }
   }, [isPanelOpen])
 
-  // ─── 加载→就绪过渡：重新播放入场动画 ───
+  // ─── 加载→就绪过渡：仅在首次加载时播放入场动画 ───
   useEffect(() => {
-    if (prevIsRouting.current && !isRouting && route && isPanelOpen) {
+    if (prevIsRouting.current && !isRouting && route && isPanelOpen && wasRouteNull.current) {
+      wasRouteNull.current = false
       setAnimating(true)
       const timer = setTimeout(() => setAnimating(false), 50)
       prevIsRouting.current = isRouting
@@ -203,6 +205,11 @@ export function NavigationPanel() {
     }
     prevIsRouting.current = isRouting
   }, [isRouting, route, isPanelOpen])
+
+  // ─── 路线清空时重置首次加载标记 ───
+  useEffect(() => {
+    if (!route) wasRouteNull.current = true
+  }, [route])
 
   useEffect(() => {
     if (activeStepIndex >= 0 && stepRefs.current[activeStepIndex]) {
@@ -594,7 +601,7 @@ export function NavigationPanel() {
       {transportMode === 'transit' ? (
         <div className="px-4 py-3 space-y-3 nav-fade-in">
           {/* ── 出发站点 ── */}
-          <div className="nav-fade-in">
+          <div>
             <p className="text-xs font-semibold text-[var(--color-text)] mb-2 flex items-center gap-1.5">
               <span className="flex h-4 w-4 items-center justify-center rounded-full bg-blue-100 text-[10px]">🚶</span>
               出发站点
@@ -637,7 +644,7 @@ export function NavigationPanel() {
           </div>
 
           {/* ── 到达站点 ── */}
-          <div className="nav-fade-in">
+          <div>
             <p className="text-xs font-semibold text-[var(--color-text)] mb-2 flex items-center gap-1.5">
               <span className="flex h-4 w-4 items-center justify-center rounded-full bg-red-100 text-[10px]">📍</span>
               到达站点

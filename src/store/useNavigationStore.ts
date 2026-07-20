@@ -34,6 +34,8 @@ interface NavigationStore {
   finalDestination: LocationData | null
   /** Whether user has arrived at the transit station waypoint */
   hasArrivedAtWaypoint: boolean
+  /** Temporary station waypoint target for transit navigation */
+  waypointTarget: GeoPoint | null
 
   // ─── Existing actions ───
   setOrigin: (p: GeoPoint | null) => void
@@ -61,8 +63,6 @@ interface NavigationStore {
   navigateToStation: (station: { id: number; name: string; lat: number; lng: number }) => Promise<void>
   /** Continue navigation from waypoint to the final destination */
   continueToFinalDestination: () => Promise<void>
-  /** Start walking navigation from current position to the store */
-  navigateToStore: () => Promise<void>
 }
 
 export const useNavigationStore = create<NavigationStore>()((set, get) => ({
@@ -83,6 +83,7 @@ export const useNavigationStore = create<NavigationStore>()((set, get) => ({
   trackingError: null,
   finalDestination: null,
   hasArrivedAtWaypoint: false,
+  waypointTarget: null,
 
   // ─── Existing simple setters ───
   setOrigin: (p) => set({ origin: p }),
@@ -111,6 +112,7 @@ export const useNavigationStore = create<NavigationStore>()((set, get) => ({
       trackingError: null,
       finalDestination: null,
       hasArrivedAtWaypoint: false,
+      waypointTarget: null,
     })
   },
 
@@ -159,40 +161,6 @@ export const useNavigationStore = create<NavigationStore>()((set, get) => ({
       set({ route, isRouting: false, error: null, activeStepIndex: 0 })
       // Start real-time GPS tracking after successful route fetch
       get().startTracking()
-    } catch (err) {
-      set({
-        isRouting: false,
-        error: err instanceof Error ? err.message : '路线计算失败',
-      })
-    }
-  },
-
-  // ─── navigateToStore: 从当前位置直接导航到店铺（到达站用） ───
-  navigateToStore: async () => {
-    const { userPosition, finalDestination, destination } = get()
-    const target = finalDestination || destination
-    if (!target) return
-    if (!userPosition) {
-      set({ error: '无法获取当前位置' })
-      return
-    }
-
-    set({
-      destination: target,
-      origin: userPosition,
-      transportMode: 'walking',
-      finalDestination: null,
-      hasArrivedAtWaypoint: false,
-      isRouting: true,
-      error: null,
-      isPanelOpen: true,
-    })
-    try {
-      const route = await fetchWalkingRoute(userPosition, {
-        lat: target.latitude,
-        lng: target.longitude,
-      })
-      set({ route, isRouting: false, error: null, activeStepIndex: 0 })
     } catch (err) {
       set({
         isRouting: false,
@@ -268,7 +236,7 @@ export const useNavigationStore = create<NavigationStore>()((set, get) => ({
     }
 
     // 2. Route deviation — check distance to nearest point on route
-    if (route) {
+    if (route && route.geometry.coordinates.length > 0) {
       const minDist = findMinDistanceToRouteSegments(newPos, route.geometry.coordinates)
       const deviated = minDist > 50 // raised from 30m — segment distance is more accurate
       const prevDeviated = get().isDeviated
@@ -292,12 +260,9 @@ export const useNavigationStore = create<NavigationStore>()((set, get) => ({
     }
 
     // 3. Waypoint arrival detection
-    const { finalDestination, hasArrivedAtWaypoint, destination } = get()
-    if (finalDestination && !hasArrivedAtWaypoint && destination) {
-      const distToDest = haversineDistance(newPos, {
-        lat: destination.latitude,
-        lng: destination.longitude,
-      })
+    const { finalDestination, hasArrivedAtWaypoint, waypointTarget } = get()
+    if (finalDestination && !hasArrivedAtWaypoint && waypointTarget) {
+      const distToDest = haversineDistance(newPos, waypointTarget)
       if (distToDest < 30) {
         set({ hasArrivedAtWaypoint: true })
       }
@@ -311,7 +276,7 @@ export const useNavigationStore = create<NavigationStore>()((set, get) => ({
   reRoute: async () => {
     const { userPosition, destination } = get()
     if (!userPosition || !destination) return
-    set({ isRouting: true, error: null, isDeviated: false })
+    set({ origin: userPosition, isRouting: true, error: null, isDeviated: false })
     try {
       const route = await fetchWalkingRoute(userPosition, {
         lat: destination.latitude,
@@ -319,7 +284,6 @@ export const useNavigationStore = create<NavigationStore>()((set, get) => ({
       })
       set({
         route,
-        origin: userPosition,
         activeStepIndex: 0,
         isRouting: false,
       })
@@ -343,30 +307,19 @@ export const useNavigationStore = create<NavigationStore>()((set, get) => ({
     // Save the real destination as final
     set({ finalDestination: { ...currentDest }, hasArrivedAtWaypoint: false })
 
-    // Build a virtual destination for the station
-    const stationAsDest: LocationData = {
-      id: `station-${station.id}`,
-      name: station.name,
-      description: '',
-      category: 'animate',
-      latitude: station.lat,
-      longitude: station.lng,
-      imageUrl: '',
-      address: station.name,
-      tags: [],
-      updatedAt: new Date().toISOString(),
-    }
-
     // Use existing userPosition, fetch route directly (skip GPS re-acquire)
-    set({ destination: stationAsDest, origin: userPosition, transportMode: 'walking', isRouting: true, error: null, isPanelOpen: true })
+    set({ waypointTarget: { lat: station.lat, lng: station.lng }, origin: userPosition, transportMode: 'walking', isRouting: true, error: null, isPanelOpen: true })
     try {
       const route = await fetchWalkingRoute(userPosition, {
         lat: station.lat,
         lng: station.lng,
       })
       set({ route, isRouting: false, error: null, activeStepIndex: 0 })
+      get().startTracking()
     } catch (err) {
       set({
+        destination: currentDest,
+        finalDestination: null,
         isRouting: false,
         error: err instanceof Error ? err.message : '路线计算失败',
       })
@@ -381,13 +334,14 @@ export const useNavigationStore = create<NavigationStore>()((set, get) => ({
       set({ error: '无法获取当前位置' })
       return
     }
-    set({ hasArrivedAtWaypoint: false, destination: finalDestination, origin: userPosition, isRouting: true, error: null, isPanelOpen: true })
+    set({ hasArrivedAtWaypoint: false, destination: finalDestination, origin: userPosition, transportMode: 'walking', isRouting: true, error: null, isPanelOpen: true })
     try {
       const route = await fetchWalkingRoute(userPosition, {
         lat: finalDestination.latitude,
         lng: finalDestination.longitude,
       })
-      set({ route, finalDestination: null, isRouting: false, error: null, activeStepIndex: 0 })
+      set({ route, finalDestination: null, waypointTarget: null, isRouting: false, error: null, activeStepIndex: 0 })
+      get().startTracking()
     } catch (err) {
       set({
         isRouting: false,

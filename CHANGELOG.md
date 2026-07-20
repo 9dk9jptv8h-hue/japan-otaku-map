@@ -7,6 +7,19 @@
 
 ---
 
+## [4.4.2] - 2026-07-20
+
+### Fixed（修复）
+- **navigateToStation 失败不回滚**：路线获取失败时 destination 被永久改为车站坐标 → 现在恢复原值
+- **destination 被覆盖**：navigateToStation 改写 destination 导致公交面板查询偏移 → 新增独立 waypointTarget
+- **continueToFinalDestination 缺 transportMode**：公交模式下继续导航面板状态异常
+- **死代码 navigateToStore**：33 行无人调用的函数 → 已删除
+- **中转导航无 GPS 追踪**：navigateToStation/continueToFinalDestination 未启动 watchPosition
+- **空 geometry 无限重规划**：坐标数组为空时偏差永远 >50m → 加长度检查
+- **reRoute 延迟更新 origin**：失败时 origin 停留旧值
+- **公交面板双层动画**：内外层 nav-fade-in 叠加 → 去重
+- **重规划重播动画**：偏离自动重规划触发全场滑入 → 仅首次加载播放入场动画
+
 ---
 
 ## [4.4.1] - 2026-07-20
