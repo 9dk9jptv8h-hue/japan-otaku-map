@@ -71,11 +71,12 @@ function StationRow({
 
 // ─── 步行到站卡片 ───
 function StationWalkCard({
-  station, label, prefix,
+  station, label, prefix, onNavigate,
 }: {
   station: TransitStation
   label: string
   prefix: string
+  onNavigate: () => void
 }) {
   return (
     <div className="rounded-xl bg-indigo-50 p-3 mt-1.5 space-y-2">
@@ -88,9 +89,7 @@ function StationWalkCard({
           : `${(station.distance / 1000).toFixed(1)} 公里`}，步行约 {Math.ceil(station.distance / 80)} 分钟
       </p>
       <button
-        onClick={() => {
-          useNavigationStore.getState().navigateToStation(station)
-        }}
+        onClick={onNavigate}
         className="w-full rounded-lg bg-indigo-500 py-1.5 text-[10px] font-semibold text-white active:scale-95 transition-transform"
       >
         {label}
@@ -573,6 +572,7 @@ export function NavigationPanel() {
                 station={selectedOriginStation}
                 label="步行到车站"
                 prefix="出发"
+                onNavigate={() => useNavigationStore.getState().navigateToStation(selectedOriginStation)}
               />
             )}
           </div>
@@ -613,6 +613,7 @@ export function NavigationPanel() {
                 station={selectedStation}
                 label={`步行到 ${destName}`}
                 prefix="到达"
+                onNavigate={() => useNavigationStore.getState().navigateToStore()}
               />
             )}
           </div>

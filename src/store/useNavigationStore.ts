@@ -61,6 +61,8 @@ interface NavigationStore {
   navigateToStation: (station: { id: number; name: string; lat: number; lng: number }) => Promise<void>
   /** Continue navigation from waypoint to the final destination */
   continueToFinalDestination: () => Promise<void>
+  /** Start walking navigation from current position to the store */
+  navigateToStore: () => Promise<void>
 }
 
 export const useNavigationStore = create<NavigationStore>()((set, get) => ({
@@ -157,6 +159,40 @@ export const useNavigationStore = create<NavigationStore>()((set, get) => ({
       set({ route, isRouting: false, error: null, activeStepIndex: 0 })
       // Start real-time GPS tracking after successful route fetch
       get().startTracking()
+    } catch (err) {
+      set({
+        isRouting: false,
+        error: err instanceof Error ? err.message : '路线计算失败',
+      })
+    }
+  },
+
+  // ─── navigateToStore: 从当前位置直接导航到店铺（到达站用） ───
+  navigateToStore: async () => {
+    const { userPosition, finalDestination, destination } = get()
+    const target = finalDestination || destination
+    if (!target) return
+    if (!userPosition) {
+      set({ error: '无法获取当前位置' })
+      return
+    }
+
+    set({
+      destination: target,
+      origin: userPosition,
+      transportMode: 'walking',
+      finalDestination: null,
+      hasArrivedAtWaypoint: false,
+      isRouting: true,
+      error: null,
+      isPanelOpen: true,
+    })
+    try {
+      const route = await fetchWalkingRoute(userPosition, {
+        lat: target.latitude,
+        lng: target.longitude,
+      })
+      set({ route, isRouting: false, error: null, activeStepIndex: 0 })
     } catch (err) {
       set({
         isRouting: false,
