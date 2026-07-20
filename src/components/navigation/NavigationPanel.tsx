@@ -589,9 +589,6 @@ export function NavigationPanel() {
             <Route className="h-4 w-4 text-indigo-500" />
             <span>{formatDistance(route.distance)}</span>
           </div>
-          <span className="text-xs text-[var(--color-text-dim)] ml-auto">
-            预计 {new Date(Date.now() + route.duration * 1000).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}
-          </span>
           {isTracking && userPosition && (
             <button
               onClick={() => {
@@ -896,10 +893,6 @@ export function NavigationPanel() {
                 <span>{formatDuration(route.duration)}</span>
                 <span className="text-[var(--color-text-dim)]">&middot;</span>
                 <span>{formatDistance(route.distance)}</span>
-                <span className="text-[var(--color-text-dim)]">&middot;</span>
-                <span className="text-xs">
-                  预计 {new Date(Date.now() + route.duration * 1000).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}
-                </span>
               </>
             )}
           </button>
@@ -942,10 +935,6 @@ export function NavigationPanel() {
                 <span>{formatDuration(route.duration)}</span>
                 <span className="text-[var(--color-text-dim)]">&middot;</span>
                 <span>{formatDistance(route.distance)}</span>
-                <span className="text-[var(--color-text-dim)]">&middot;</span>
-                <span className="text-xs">
-                  预计 {new Date(Date.now() + route.duration * 1000).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}
-                </span>
               </>
             )}
           </div>
