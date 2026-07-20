@@ -118,7 +118,11 @@ export const useNavigationStore = create<NavigationStore>()((set, get) => ({
 
   // ─── startNavigation (updated: starts tracking after route) ───
   startNavigation: async (dest) => {
-    set({ destination: dest, isRouting: true, error: null, isPanelOpen: true })
+    // 先关闭前一个导航（停止追踪 + 清空状态）
+    get().stopTracking()
+    set({ destination: dest, isRouting: true, error: null, isPanelOpen: true,
+      route: null, origin: null, activeStepIndex: -1, isDeviated: false,
+      finalDestination: null, waypointTarget: null, hasArrivedAtWaypoint: false })
 
     // Step 1: get GPS position
     let origin: GeoPoint
