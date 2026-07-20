@@ -89,8 +89,7 @@ function StationWalkCard({
       </p>
       <button
         onClick={() => {
-          useNavigationStore.getState().setTransportMode('walking')
-          useMapStore.getState().flyToMarker?.(station.lng, station.lat, 16)
+          useNavigationStore.getState().navigateToStation(station)
         }}
         className="w-full rounded-lg bg-indigo-500 py-1.5 text-[10px] font-semibold text-white active:scale-95 transition-transform"
       >
@@ -133,6 +132,8 @@ export function NavigationPanel() {
   const isTracking = useNavigationStore(s => s.isTracking)
   const isDeviated = useNavigationStore(s => s.isDeviated)
   const userPosition = useNavigationStore(s => s.userPosition)
+  const hasArrivedAtWaypoint = useNavigationStore(s => s.hasArrivedAtWaypoint)
+  const finalDestination = useNavigationStore(s => s.finalDestination)
 
   const stepRefs = useRef<(HTMLDivElement | null)[]>([])
 
@@ -400,13 +401,29 @@ export function NavigationPanel() {
 
       {/* ── Tracking status indicator ── */}
       {isTracking && (
-        <div className="flex items-center gap-2 px-4 py-1.5 bg-blue-50 border-b border-blue-100">
+        <div className={cn(
+          'flex items-center gap-2 px-4 py-1.5 border-b',
+          hasArrivedAtWaypoint
+            ? 'bg-green-50 border-green-100'
+            : 'bg-blue-50 border-blue-100',
+        )}>
           <span className="relative flex h-2 w-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75" />
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500" />
+            {hasArrivedAtWaypoint ? (
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
+            ) : (
+              <>
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500" />
+              </>
+            )}
           </span>
-          <span className="text-xs font-medium text-blue-600">
-            正在追踪 · 第 {activeStepIndex + 1}/{route.steps.length} 步
+          <span className={cn(
+            'text-xs font-medium',
+            hasArrivedAtWaypoint ? 'text-green-700' : 'text-blue-600',
+          )}>
+            {hasArrivedAtWaypoint
+              ? '已到达车站 · 可选择继续导航'
+              : `正在追踪 · 第 ${activeStepIndex + 1}/${route.steps.length} 步`}
           </span>
         </div>
       )}
@@ -416,6 +433,37 @@ export function NavigationPanel() {
         <div className="flex items-center gap-2 px-4 py-2 bg-amber-50 border-b border-amber-100">
           <AlertCircle className="h-4 w-4 text-amber-500" />
           <span className="text-xs font-medium text-amber-700">已偏离路线，正在重新规划...</span>
+        </div>
+      )}
+
+      {/* ── Waypoint arrival prompt ── */}
+      {hasArrivedAtWaypoint && finalDestination && (
+        <div className="mx-4 mt-3 rounded-xl bg-green-50 border border-green-200 p-3 space-y-2">
+          <div className="flex items-center gap-2">
+            <div className="flex h-5 w-5 items-center justify-center rounded-full bg-green-500">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+            </div>
+            <p className="text-sm font-semibold text-green-700">已到达车站</p>
+          </div>
+          <p className="text-xs text-green-600">
+            已到达 {destination?.name}，是否继续导航至最终目的地 {finalDestination.name}？
+          </p>
+          <div className="flex gap-2">
+            <button
+              onClick={() => useNavigationStore.getState().continueToFinalDestination()}
+              className="flex-1 rounded-lg bg-green-500 py-2 text-xs font-semibold text-white active:scale-95 transition-transform"
+            >
+              继续导航
+            </button>
+            <button
+              onClick={() => useNavigationStore.getState().clearNavigation()}
+              className="flex-1 rounded-lg border border-gray-200 py-2 text-xs font-medium text-[var(--color-text-dim)] active:scale-95 transition-transform"
+            >
+              结束导航
+            </button>
+          </div>
         </div>
       )}
 

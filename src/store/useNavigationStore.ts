@@ -30,6 +30,10 @@ interface NavigationStore {
   isDeviated: boolean
   /** GPS tracking error message */
   trackingError: string | null
+  /** Original destination saved when navigating to a station waypoint */
+  finalDestination: LocationData | null
+  /** Whether user has arrived at the transit station waypoint */
+  hasArrivedAtWaypoint: boolean
 
   // ─── Existing actions ───
   setOrigin: (p: GeoPoint | null) => void
@@ -53,6 +57,10 @@ interface NavigationStore {
   advanceToStep: (index: number) => void
   /** Re-calculate route from current position to destination */
   reRoute: () => Promise<void>
+  /** Start walking navigation to a transit station, saving the real destination */
+  navigateToStation: (station: { id: number; name: string; lat: number; lng: number }) => Promise<void>
+  /** Continue navigation from waypoint to the final destination */
+  continueToFinalDestination: () => Promise<void>
 }
 
 export const useNavigationStore = create<NavigationStore>()((set, get) => ({
@@ -71,6 +79,8 @@ export const useNavigationStore = create<NavigationStore>()((set, get) => ({
   isTracking: false,
   isDeviated: false,
   trackingError: null,
+  finalDestination: null,
+  hasArrivedAtWaypoint: false,
 
   // ─── Existing simple setters ───
   setOrigin: (p) => set({ origin: p }),
@@ -97,6 +107,8 @@ export const useNavigationStore = create<NavigationStore>()((set, get) => ({
       isTracking: false,
       isDeviated: false,
       trackingError: null,
+      finalDestination: null,
+      hasArrivedAtWaypoint: false,
     })
   },
 
@@ -242,6 +254,18 @@ export const useNavigationStore = create<NavigationStore>()((set, get) => ({
         }
       }
     }
+
+    // 3. Waypoint arrival detection
+    const { finalDestination, hasArrivedAtWaypoint, destination } = get()
+    if (finalDestination && !hasArrivedAtWaypoint && destination) {
+      const distToDest = haversineDistance(newPos, {
+        lat: destination.latitude,
+        lng: destination.longitude,
+      })
+      if (distToDest < 30) {
+        set({ hasArrivedAtWaypoint: true })
+      }
+    }
   },
 
   // ─── advanceToStep ───
@@ -269,6 +293,40 @@ export const useNavigationStore = create<NavigationStore>()((set, get) => ({
         error: err instanceof Error ? err.message : '重新规划路线失败',
       })
     }
+  },
+
+  // ─── navigateToStation ───
+  navigateToStation: async (station) => {
+    const { destination: currentDest } = get()
+    if (!currentDest) return
+
+    // Save the real destination as final
+    set({ finalDestination: { ...currentDest }, hasArrivedAtWaypoint: false })
+
+    // Build a virtual destination for the station
+    const stationAsDest: LocationData = {
+      id: `station-${station.id}`,
+      name: station.name,
+      description: '',
+      category: 'animate',
+      latitude: station.lat,
+      longitude: station.lng,
+      imageUrl: '',
+      address: station.name,
+      tags: [],
+      updatedAt: new Date().toISOString(),
+    }
+
+    await get().startNavigation(stationAsDest)
+  },
+
+  // ─── continueToFinalDestination ───
+  continueToFinalDestination: async () => {
+    const { finalDestination } = get()
+    if (!finalDestination) return
+    set({ hasArrivedAtWaypoint: false })
+    await get().startNavigation(finalDestination)
+    set({ finalDestination: null })
   },
 }))
 
