@@ -7,6 +7,19 @@
 
 ---
 
+---
+
+## [4.4.3] - 2026-07-20
+
+### Fixed（修复）
+- **ETA 不准**：`toLocaleTimeString` 时区计算错误导致预计时间偏差 → 已删除
+- **Overpass 间歇无站点**：三端点共享 8s 超时 → 每端点独立 5s + 总预算 15s
+- **路线间歇不显示**：styledata 清掉 layers 但 source 还在 → `ensureRouteLayers` 自动补建
+- **切换店铺报定位错**：`startNavigation` 不清旧追踪 → 开头先 `stopTracking` + 清状态
+- **X 按钮改为折叠箭头**：桌面 `>` / 移动 `v` 替代 X，行为不变
+
+---
+
 ## [4.4.2] - 2026-07-20
 
 ### Fixed（修复）
