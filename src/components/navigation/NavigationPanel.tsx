@@ -134,6 +134,7 @@ export function NavigationPanel() {
   const [selectedOriginStation, setSelectedOriginStation] = useState<TransitStation | null>(null)
   const [animating, setAnimating] = useState(true)
   const [exiting, setExiting] = useState(false)
+  const closingRef = useRef(false)
 
   useEffect(() => {
     const timer = setTimeout(() => setAnimating(false), 50)
@@ -143,7 +144,11 @@ export function NavigationPanel() {
   // ─── 带退出动画的关闭 ───
   const handleClose = () => {
     setExiting(true)
+    setPanelOpen(false)
+    closingRef.current = true
     setTimeout(() => {
+      if (!closingRef.current) return // 被新导航取消了
+      closingRef.current = false
       useNavigationStore.getState().clearNavigation()
     }, 250)
   }
@@ -168,6 +173,14 @@ export function NavigationPanel() {
   const finalDestination = useNavigationStore(s => s.finalDestination)
 
   const stepRefs = useRef<(HTMLDivElement | null)[]>([])
+
+  // ─── 面板打开时取消待执行的关闭 ───
+  useEffect(() => {
+    if (isPanelOpen) {
+      closingRef.current = false
+      setExiting(false)
+    }
+  }, [isPanelOpen])
 
   useEffect(() => {
     if (activeStepIndex >= 0 && stepRefs.current[activeStepIndex]) {
