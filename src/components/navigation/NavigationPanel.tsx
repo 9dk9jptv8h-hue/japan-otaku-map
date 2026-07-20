@@ -121,6 +121,12 @@ const pulseStyle = `
   50% { box-shadow: 0 0 0 6px rgba(99, 102, 241, 0); }
 }
 .nav-pulse { animation: nav-pulse 2s ease-in-out infinite; }
+
+@keyframes nav-fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.nav-fade-in { animation: nav-fade-in 200ms ease-out; }
 `
 
 export function NavigationPanel() {
@@ -652,9 +658,9 @@ export function NavigationPanel() {
 
       {/* ── Transit: 出发站点 → 到达站点 ── */}
       {transportMode === 'transit' ? (
-        <div className="px-4 py-3 space-y-3">
+        <div className="px-4 py-3 space-y-3 nav-fade-in">
           {/* ── 出发站点 ── */}
-          <div>
+          <div className="nav-fade-in">
             <p className="text-xs font-semibold text-[var(--color-text)] mb-2 flex items-center gap-1.5">
               <span className="flex h-4 w-4 items-center justify-center rounded-full bg-blue-100 text-[10px]">🚶</span>
               出发站点
@@ -697,7 +703,7 @@ export function NavigationPanel() {
           </div>
 
           {/* ── 到达站点 ── */}
-          <div>
+          <div className="nav-fade-in">
             <p className="text-xs font-semibold text-[var(--color-text)] mb-2 flex items-center gap-1.5">
               <span className="flex h-4 w-4 items-center justify-center rounded-full bg-red-100 text-[10px]">📍</span>
               到达站点
@@ -730,7 +736,7 @@ export function NavigationPanel() {
 
         </div>
       ) : (
-        <>
+        <div className="nav-fade-in">
           {/* Steps section header (collapsible toggle) */}
           <button
             onClick={() => setStepsExpanded(!stepsExpanded)}
@@ -747,8 +753,10 @@ export function NavigationPanel() {
           </button>
 
           {/* Steps list */}
-          {stepsExpanded && (
-            <div className="overflow-y-auto px-4 pb-2 max-h-[240px]">
+          <div className={cn(
+            'overflow-y-auto px-4 pb-2 transition-all duration-300 ease-out',
+            stepsExpanded ? 'max-h-[240px] opacity-100' : 'max-h-0 opacity-0'
+          )}>
               {route.steps.length === 0 ? (
                 <p className="py-4 text-center text-sm text-[var(--color-text-dim)]">
                   暂无步骤信息
@@ -842,8 +850,7 @@ export function NavigationPanel() {
                 </div>
               )}
             </div>
-          )}
-        </>
+        </div>
       )}
 
       {/* ── Action buttons ── */}
