@@ -661,9 +661,9 @@ export function NavigationPanel() {
             {selectedStation && (
               <StationWalkCard
                 station={selectedStation}
-                label={`步行到 ${destName}`}
+                label="步行到车站"
                 prefix="到达"
-                onNavigate={() => useNavigationStore.getState().navigateToStore()}
+                onNavigate={() => useNavigationStore.getState().navigateToStation(selectedStation)}
               />
             )}
           </div>
