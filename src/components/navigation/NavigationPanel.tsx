@@ -346,8 +346,8 @@ export function NavigationPanel() {
   // ═══════════════════════════════════════════
   if (isRouting) {
     const loadingContent = (
-      <div className="flex flex-col items-center justify-center gap-3 py-10 px-4 min-h-[160px]">
-        <Loader2 className="h-8 w-8 flex-shrink-0 animate-spin text-indigo-500" />
+      <div className="flex flex-col items-center justify-center gap-3 py-8 px-4">
+        <Loader2 className="h-7 w-7 flex-shrink-0 animate-spin text-indigo-500" />
         <p className="text-sm text-[var(--color-text-dim)]">
           {origin ? '正在计算路线...' : '正在获取位置...'}
         </p>
@@ -358,28 +358,23 @@ export function NavigationPanel() {
       return (
         <div className={cn(
           'pointer-events-auto absolute right-4 top-[200px] z-[999] w-[340px]',
-          'flex max-h-[calc(100vh-240px)] flex-col overflow-hidden',
           glassPanel,
           'transition-all duration-400 ease-[cubic-bezier(0.4,0,0.2,1)]',
           exiting ? 'translate-x-4 opacity-0' : animating ? 'translate-x-4 opacity-0' : 'translate-x-0 opacity-100',
         )}>
-          <div className="flex-1 flex items-center">{loadingContent}</div>
+          {loadingContent}
         </div>
       )
     }
 
     return (
       <div className={cn(
-        'pointer-events-auto fixed bottom-0 left-0 right-0 z-[1000]',
-        'flex max-h-[55vh] flex-col overflow-hidden rounded-t-2xl',
+        'pointer-events-auto fixed bottom-0 left-0 right-0 z-[1000] rounded-t-2xl',
         glassSheet,
         'transition-all duration-400 ease-[cubic-bezier(0.4,0,0.2,1)]',
         exiting ? 'translate-y-4 opacity-0' : animating ? 'translate-y-4 opacity-0' : 'translate-y-0 opacity-100',
       )}>
-        <div className="flex justify-center pt-2 pb-1">
-          <div className="h-1 w-10 rounded-full bg-gray-300" />
-        </div>
-        <div className="flex-1 flex items-center">{loadingContent}</div>
+        {loadingContent}
       </div>
     )
   }
