@@ -297,8 +297,12 @@ export const useNavigationStore = create<NavigationStore>()((set, get) => ({
 
   // ─── navigateToStation ───
   navigateToStation: async (station) => {
-    const { destination: currentDest } = get()
+    const { destination: currentDest, userPosition } = get()
     if (!currentDest) return
+    if (!userPosition) {
+      set({ error: '无法获取当前位置，请确保 GPS 已开启' })
+      return
+    }
 
     // Save the real destination as final
     set({ finalDestination: { ...currentDest }, hasArrivedAtWaypoint: false })
@@ -317,16 +321,44 @@ export const useNavigationStore = create<NavigationStore>()((set, get) => ({
       updatedAt: new Date().toISOString(),
     }
 
-    await get().startNavigation(stationAsDest)
+    // Use existing userPosition, fetch route directly (skip GPS re-acquire)
+    set({ destination: stationAsDest, origin: userPosition, isRouting: true, error: null, isPanelOpen: true })
+    try {
+      const route = await fetchWalkingRoute(userPosition, {
+        lat: station.lat,
+        lng: station.lng,
+      })
+      set({ route, isRouting: false, error: null, activeStepIndex: 0 })
+    } catch (err) {
+      set({
+        isRouting: false,
+        error: err instanceof Error ? err.message : '路线计算失败',
+      })
+    }
   },
 
   // ─── continueToFinalDestination ───
   continueToFinalDestination: async () => {
-    const { finalDestination } = get()
+    const { finalDestination, userPosition } = get()
     if (!finalDestination) return
-    set({ hasArrivedAtWaypoint: false })
-    await get().startNavigation(finalDestination)
-    set({ finalDestination: null })
+    if (!userPosition) {
+      set({ error: '无法获取当前位置' })
+      return
+    }
+    set({ hasArrivedAtWaypoint: false, destination: finalDestination, origin: userPosition, isRouting: true, error: null, isPanelOpen: true })
+    try {
+      const route = await fetchWalkingRoute(userPosition, {
+        lat: finalDestination.latitude,
+        lng: finalDestination.longitude,
+      })
+      set({ route, finalDestination: null, isRouting: false, error: null, activeStepIndex: 0 })
+    } catch (err) {
+      set({
+        isRouting: false,
+        finalDestination: null,
+        error: err instanceof Error ? err.message : '路线计算失败',
+      })
+    }
   },
 }))
 
