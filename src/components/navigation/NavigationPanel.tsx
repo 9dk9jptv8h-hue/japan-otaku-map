@@ -308,7 +308,7 @@ export function NavigationPanel() {
         <div className={cn(
           'pointer-events-auto absolute right-4 top-[200px] z-[999] w-[340px]',
           glassPanel,
-          'transition-all duration-300 ease-out',
+          'transition-all duration-400 ease-[cubic-bezier(0.4,0,0.2,1)]',
           exiting ? 'translate-x-4 opacity-0' : animating ? 'translate-x-4 opacity-0' : 'translate-x-0 opacity-100',
         )}>
           {errorContent}
@@ -346,7 +346,7 @@ export function NavigationPanel() {
         <div className={cn(
           'pointer-events-auto absolute right-4 top-[200px] z-[999] w-[340px]',
           glassPanel,
-          'transition-all duration-300 ease-out',
+          'transition-all duration-400 ease-[cubic-bezier(0.4,0,0.2,1)]',
           exiting ? 'translate-x-4 opacity-0' : animating ? 'translate-x-4 opacity-0' : 'translate-x-0 opacity-100',
         )}>
           {loadingContent}
@@ -910,6 +910,39 @@ export function NavigationPanel() {
     </>
   )
 
+  // ═══════════════════════════════════════════
+  // Exiting state — 播完退出动画再清除
+  // ═══════════════════════════════════════════
+  if (exiting) {
+    if (isDesktop) {
+      return (
+        <div className={cn(
+          'pointer-events-auto absolute right-4 top-[200px] z-[999] w-[340px]',
+          'flex max-h-[calc(100vh-240px)] flex-col overflow-hidden',
+          glassPanel,
+          'transition-all duration-400 ease-[cubic-bezier(0.4,0,0.2,1)]',
+          'translate-x-4 opacity-0',
+        )}>
+          <div className="flex-1 overflow-y-auto">{panelContent}</div>
+        </div>
+      )
+    }
+    return (
+      <div className={cn(
+        'pointer-events-auto fixed bottom-0 left-0 right-0 z-[1000]',
+        'flex max-h-[55vh] flex-col overflow-hidden rounded-t-2xl',
+        glassSheet,
+        'transition-all duration-400 ease-[cubic-bezier(0.4,0,0.2,1)]',
+        'translate-y-4 opacity-0',
+      )}>
+        <div className="flex justify-center pt-2 pb-1">
+          <div className="h-1 w-10 rounded-full bg-gray-300" />
+        </div>
+        <div className="flex-1 overflow-y-auto">{panelContent}</div>
+      </div>
+    )
+  }
+
   // ── Desktop: floating right panel ──
   if (isDesktop) {
     return (
@@ -918,7 +951,7 @@ export function NavigationPanel() {
           'pointer-events-auto absolute right-4 top-[200px] z-[999] w-[340px]',
           'flex max-h-[calc(100vh-240px)] flex-col overflow-hidden',
           glassPanel,
-          'transition-all duration-300 ease-out',
+          'transition-all duration-400 ease-[cubic-bezier(0.4,0,0.2,1)]',
           exiting ? 'translate-x-4 opacity-0' : animating ? 'translate-x-4 opacity-0' : 'translate-x-0 opacity-100',
         )}
       >
