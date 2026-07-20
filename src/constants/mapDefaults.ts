@@ -116,6 +116,10 @@ const resolveStyleUrl = (style: string, base: string): string => {
   return `${base}/tiles/styles/${style}`                  // Vercel 跨域代理
 }
 
+// NOTE: TILE_STYLES 在模块初始化时计算（同步），此时 detectTileProxy() 尚未运行，
+// tileProxyBase 固定为 Vercel fallback 值。这意味着 TILE_STYLES 的 style URL 始终指向
+// Vercel 代理，而非最终检测结果。运行时通过 getResolvedStyleUrl() 获取修正后的 URL。
+// 如果未来需要静态使用 TILE_STYLES 中的 URL（如 SSR 预渲染），需先 await detectTileProxy()。
 export const TILE_STYLES: Record<TileLayerStyle, {
   url: string
   attribution: string

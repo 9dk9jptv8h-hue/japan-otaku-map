@@ -129,6 +129,10 @@ export const mockLocations: LocationData[] = [
 
   // ================================================================
   //  SURUGA-YA（駿河屋）— https://www.suruga-ya.jp/
+  //
+  // NOTE: 本节坐标仅保留 3 位小数（~100m 精度），因为多数骏河屋地址仅
+  // 精确到街区级别（非具体门牌号），实际店铺位置可能存在偏差。
+  // 后续获取精确 GPS 坐标后可提升至 4 位小数（~10m 精度）。
   // ================================================================
 
   // ── 北海道 ──
@@ -182,6 +186,8 @@ export const mockLocations: LocationData[] = [
 
   // ================================================================
   //  GAMERS（ゲーマーズ）— https://www.gamers.co.jp/
+  //
+  // NOTE: 本节坐标仅保留 3 位小数（~100m 精度），原因同骏河屋节。
   // ================================================================
   { id: 'gam-knt-1', name: 'GAMERS秋叶原总店', nameJa: 'ゲーマーズ秋葉原本店', description: 'Broccoli旗下连锁旗舰店，秋叶原标志性建筑。主营动漫CD/DVD、手办、周边商品，特色Broccoli自社作品专区', category: 'gamers', latitude: 35.699, longitude: 139.771, imageUrl: IMG, address: '東京都千代田区外神田1-14-7', tags: ['旗舰店', '手办', 'CD/DVD'], rating: 4.3, visitCount: 4800, updatedAt: '2025-01-01' },
   { id: 'gam-knt-2', name: 'GAMERS池袋店', nameJa: 'ゲーマーズ池袋店', description: 'Broccoli旗下连锁，池袋乙女路核心位置。女性向商品丰富，动漫CD/周边/手办一应俱全', category: 'gamers', latitude: 35.731, longitude: 139.714, imageUrl: IMG, address: '東京都豊島区東池袋1-28-10', tags: ['女性向', '乙女路', '周边'], rating: 4.1, visitCount: 3200, updatedAt: '2025-01-01' },
@@ -200,6 +206,8 @@ export const mockLocations: LocationData[] = [
 
   // ================================================================
   //  LASHINBANG（らしんばん）— https://www.lashinbang.com/
+  //
+  // NOTE: 本节坐标仅保留 3 位小数（~100m 精度），原因同骏河屋节。
   // ================================================================
   { id: 'las-knt-1', name: 'Lashinbang秋叶原店', nameJa: 'らしんばん秋葉原店', description: '日本最大规模二手动漫连锁，秋叶原核心店。大量二手同人志、手办、周边，价格实惠', category: 'lashinbang', latitude: 35.698, longitude: 139.772, imageUrl: IMG, address: '東京都千代田区外神田1-7-6', tags: ['二手', '同人志', '秋叶原'], rating: 4.2, visitCount: 4500, updatedAt: '2025-01-01' },
   { id: 'las-knt-2', name: 'Lashinbang池袋角色宫殿', nameJa: 'らしんばん池袋キャラクターパレス', description: '池袋角色商品专门店，大量二手手办、扭蛋、角色周边，女性向商品丰富', category: 'lashinbang', latitude: 35.731, longitude: 139.716, imageUrl: IMG, address: '東京都豊島区東池袋1-20-6', tags: ['角色周边', '女性向', '池袋'], rating: 4.1, visitCount: 3500, updatedAt: '2025-01-01' },
@@ -234,6 +242,8 @@ export const mockLocations: LocationData[] = [
 
   // ================================================================
   //  K-BOOKS（ケーブックス）— https://www.k-books.co.jp/
+  //
+  // NOTE: 本节坐标仅保留 3 位小数（~100m 精度），原因同骏河屋节。
   // ================================================================
   { id: 'kbk-knt-1', name: 'K-Books秋叶原总店', nameJa: 'ケーブックス秋葉原本店', description: '秋叶原老牌同人志/二手动漫专门店总店。同人志库存量日本最大级别，男性向/女性向齐全', category: 'kbooks', latitude: 35.699, longitude: 139.772, imageUrl: IMG, address: '東京都千代田区外神田1-8-8', tags: ['同人志', '秋叶原', '总店'], rating: 4.4, visitCount: 5000, updatedAt: '2025-01-01' },
   { id: 'kbk-knt-2', name: 'K-Books秋叶原新馆', nameJa: 'ケーブックス秋葉原新館', description: '秋叶原新馆，主营二手手办、抱枕、周边商品', category: 'kbooks', latitude: 35.700, longitude: 139.770, imageUrl: IMG, address: '東京都千代田区外神田3-2-13', tags: ['手办', '秋叶原', '抱枕'], rating: 4.2, visitCount: 3500, updatedAt: '2025-01-01' },

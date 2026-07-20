@@ -58,6 +58,8 @@ export function useFilteredLocations() {
         result.sort((a, b) => (b.visitCount ?? 0) - (a.visitCount ?? 0))
         break
       case 'recent':
+        // ISO 8601 日期字符串（如 "2025-04-24"）的字典序与时间顺序一致，
+        // 因此 localeCompare 等价于按日期从新到旧排序。
         result.sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
         break
       case 'name':

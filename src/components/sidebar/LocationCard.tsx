@@ -19,6 +19,7 @@ interface LocationCardProps {
 
 export const LocationCard = memo(function LocationCard({ location, index }: LocationCardProps) {
   const cardRef = useRef<HTMLDivElement>(null)
+  const isInitialRender = useRef(true)
   const isSelected = useMapStore((s) => s.selectedMarkerIds.includes(location.id))
   const isHovered = useMapStore((s) => s.hoveredMarkerId === location.id)
   const setSelected = useMapStore((s) => s.setSelectedMarkerId)
@@ -29,6 +30,11 @@ export const LocationCard = memo(function LocationCard({ location, index }: Loca
   const catMeta = CATEGORY_MAP[location.category] || { label: location.category, color: '#607d8b' }
 
   useEffect(() => {
+    // 跳过首次挂载时的 scrollIntoView（首次渲染不应滚动）
+    if (isInitialRender.current) {
+      isInitialRender.current = false
+      return
+    }
     if (isSelected && cardRef.current) {
       cardRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
     }

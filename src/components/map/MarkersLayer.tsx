@@ -357,6 +357,8 @@ function MarkersLayerInner({ locations }: MarkersLayerProps) {
 export const MarkersLayer = memo(MarkersLayerInner)
 
 // ─── Popup HTML 渲染（匹配 CustomMarker 原有样式）───
+// TODO: 将 props 参数从 Record<string, unknown> 改为强类型接口
+//       定义 PopupProps { id, name, nameJa, category, description, rating, address, visitCount, tags } 等字段
 function renderPopupHTML(props: Record<string, unknown>): string {
   const name = props.name as string
   const nameJa = props.nameJa as string

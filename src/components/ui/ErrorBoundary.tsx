@@ -30,12 +30,14 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
   }
 
   handleRetry = () => {
-    const nextCount = this.state.retryCount + 1
-    if (nextCount > MAX_RETRIES) return
-    this.setState({
-      hasError: false,
-      errorKey: this.state.errorKey + 1,
-      retryCount: nextCount,
+    this.setState((prev) => {
+      const nextCount = prev.retryCount + 1
+      if (nextCount > MAX_RETRIES) return null
+      return {
+        hasError: false,
+        errorKey: prev.errorKey + 1,
+        retryCount: nextCount,
+      }
     })
   }
 
@@ -71,6 +73,9 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
       )
     }
 
+    // NOTE: <span> 作为 key-wrapper 渲染 children，在 flex/grid 父容器中
+    // 可能影响布局（span 默认 display:inline，无法作为 flex/grid item）。
+    // 如果父级期望直接子元素参与 flex/grid 布局，需考虑改用 <>{children}</> 或 CSS display:contents。
     return <span key={this.state.errorKey}>{this.props.children}</span>
   }
 }

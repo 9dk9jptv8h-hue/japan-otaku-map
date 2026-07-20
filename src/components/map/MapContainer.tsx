@@ -40,7 +40,7 @@ export function MapView({ children }: MapViewProps) {
         center: [DEFAULT_VIEWPORT.center[1], DEFAULT_VIEWPORT.center[0]],
         zoom: DEFAULT_VIEWPORT.zoom,
         minZoom: MIN_ZOOM,
-        maxZoom: isMobile ? 18 : MAX_ZOOM,
+        maxZoom: isMobile ? 18 : MAX_ZOOM, // 移动端限制 maxZoom=18 以减少高缩放级别瓦片加载量，节省带宽与电量
         maxBounds: JAPAN_BOUNDS,
         attributionControl: false,
         pixelRatio: isMobile ? 1 : window.devicePixelRatio,

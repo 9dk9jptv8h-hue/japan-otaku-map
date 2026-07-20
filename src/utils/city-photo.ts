@@ -1,4 +1,7 @@
 // 城市风景图片 — 使用多个图源确保加载成功
+// NOTE: 部分城市共用同一张照片 URL（如静冈/沼津共享富士山图、蒲田/大田共享大田区图、
+// 吉祥寺/武藏野共享井之头公园图等），这是因可用照片集有限而做的有意识取舍，
+// 并非 bug。后续如有更精确的独立照片可逐个替换。
 const CITY_PHOTOS: Record<string, string> = {
   '池袋': 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Sunshine_60_and_Tokyo_Solamachi.jpg/640px-Sunshine_60_and_Tokyo_Solamachi.jpg',
   '秋叶原': 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fd/Akihabara_Night.jpg/640px-Akihabara_Night.jpg',
