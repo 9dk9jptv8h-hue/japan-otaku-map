@@ -72,6 +72,39 @@ function RouteLayerInner() {
     })
 
     const setupLayers = () => {
+      // ─── 确保路线图层存在（styledata 后可能被清掉）───
+      const ensureRouteLayers = () => {
+        if (!hasData) return
+        if (!map.getLayer('nav-route-outline')) {
+          map.addLayer({
+            id: 'nav-route-outline', type: 'line', source: 'nav-route',
+            filter: ['==', ['get', 'type'], 'route'],
+            paint: { 'line-color': '#ffffff', 'line-width': ['interpolate', ['linear'], ['zoom'], 10, 5, 16, 8], 'line-opacity': 0.7 },
+          })
+        }
+        if (!map.getLayer('nav-route-line')) {
+          map.addLayer({
+            id: 'nav-route-line', type: 'line', source: 'nav-route',
+            filter: ['==', ['get', 'type'], 'route'],
+            paint: { 'line-color': '#6366f1', 'line-width': ['interpolate', ['linear'], ['zoom'], 10, 3, 16, 5], 'line-opacity': 0.9 },
+          })
+        }
+        if (!map.getLayer('nav-route-end')) {
+          map.addLayer({
+            id: 'nav-route-end', type: 'circle', source: 'nav-route',
+            filter: ['==', ['get', 'type'], 'end'],
+            paint: { 'circle-radius': ['interpolate', ['linear'], ['zoom'], 10, 8, 16, 14], 'circle-color': '#ef4444', 'circle-stroke-color': '#ffffff', 'circle-stroke-width': 3, 'circle-opacity': 0.95 },
+          })
+        }
+        if (!map.getLayer('nav-route-start')) {
+          map.addLayer({
+            id: 'nav-route-start', type: 'circle', source: 'nav-route',
+            filter: ['==', ['get', 'type'], 'start'],
+            paint: { 'circle-radius': ['interpolate', ['linear'], ['zoom'], 10, 7, 16, 12], 'circle-color': '#3b82f6', 'circle-stroke-color': '#ffffff', 'circle-stroke-width': 3, 'circle-opacity': 0.95 },
+          })
+        }
+      }
+
       if (!hasData) {
         // 导航已清除 → 清理所有图层和 source
         try {
@@ -88,9 +121,10 @@ function RouteLayerInner() {
 
       const geojson = buildRouteGeoJSON()
 
-      // 数据源已存在 → 仅更新数据
+      // 数据源已存在 → 更新数据 + 重建可能丢失的图层
       if (map.getSource('nav-route')) {
         ;(map.getSource('nav-route') as maplibregl.GeoJSONSource).setData(geojson as any)
+        ensureRouteLayers()
         return
       }
 
