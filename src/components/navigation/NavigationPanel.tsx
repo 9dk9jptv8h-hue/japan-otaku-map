@@ -346,9 +346,9 @@ export function NavigationPanel() {
   // ═══════════════════════════════════════════
   if (isRouting) {
     const loadingContent = (
-      <div className="flex flex-col items-center justify-center gap-3 py-8 px-4">
-        <Loader2 className="h-7 w-7 flex-shrink-0 animate-spin text-indigo-500" />
-        <p className="text-sm text-[var(--color-text-dim)]">
+      <div className="flex items-center gap-2.5 px-4 py-3.5">
+        <Loader2 className="h-4 w-4 flex-shrink-0 animate-spin text-indigo-500" />
+        <p className="text-xs text-[var(--color-text-dim)]">
           {origin ? '正在计算路线...' : '正在获取位置...'}
         </p>
       </div>
