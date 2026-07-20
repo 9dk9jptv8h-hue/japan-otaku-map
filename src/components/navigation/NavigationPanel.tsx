@@ -240,6 +240,19 @@ export function NavigationPanel() {
     }
   }, [transportMode, origin])
 
+  // ─── 公交时间估算 ───
+  const walkToOriginMin = originStations[0] ? Math.ceil(originStations[0].distance / 80) : 0
+  const walkFromDestMin = nearbyStations[0] ? Math.ceil(nearbyStations[0].distance / 80) : 0
+  let transitRideMin = 0
+  if (originStations[0] && nearbyStations[0]) {
+    const stationDist = haversineDistance(
+      { lat: originStations[0].lat, lng: originStations[0].lng },
+      { lat: nearbyStations[0].lat, lng: nearbyStations[0].lng }
+    )
+    transitRideMin = Math.max(2, Math.ceil(stationDist / 500))
+  }
+  const totalTransitMin = walkToOriginMin + transitRideMin + walkFromDestMin
+
   // ─── 辅助函数 ───
 
   const handleStepClick = (step: RouteStep) => {
@@ -370,121 +383,6 @@ export function NavigationPanel() {
   // State 3/4: No route → render nothing
   // ═══════════════════════════════════════════
   if (!route) return null
-
-  // ═══════════════════════════════════════════
-  // State 3: Mini badge / Collapsed mobile
-  // ═══════════════════════════════════════════
-
-  // ─── 公交时间估算 ───
-  const walkToOriginMin = originStations[0] ? Math.ceil(originStations[0].distance / 80) : 0
-  const walkFromDestMin = nearbyStations[0] ? Math.ceil(nearbyStations[0].distance / 80) : 0
-  let transitRideMin = 0
-  if (originStations[0] && nearbyStations[0]) {
-    const stationDist = haversineDistance(
-      { lat: originStations[0].lat, lng: originStations[0].lng },
-      { lat: nearbyStations[0].lat, lng: nearbyStations[0].lng }
-    )
-    transitRideMin = Math.max(2, Math.ceil(stationDist / 500))
-  }
-  const totalTransitMin = walkToOriginMin + transitRideMin + walkFromDestMin
-
-  if (!isPanelOpen) {
-    if (isDesktop) {
-      return (
-        <div className="pointer-events-auto absolute right-4 top-[200px] z-[999]">
-          <button
-            onClick={() => setPanelOpen(true)}
-            className={cn(
-              'flex cursor-pointer items-center gap-2 px-4 py-2.5 text-sm',
-              glassPanel,
-              'text-[var(--color-text)] transition-all duration-300 ease-out hover:scale-105 active:scale-95',
-            )}
-          >
-            <Navigation className="h-4 w-4 text-indigo-500" />
-            {transportMode === 'transit' ? (
-              <>
-                <span>公交方案</span>
-                {originStations[0] && nearbyStations[0] ? (
-                  <>
-                    <span className="text-[var(--color-text-dim)]">&middot;</span>
-                    <span>公交约 {totalTransitMin} 分钟</span>
-                    <span className="text-[var(--color-text-dim)]">&middot;</span>
-                    <span>步行到站 {walkToOriginMin} 分钟</span>
-                  </>
-                ) : originStations[0] ? (
-                  <>
-                    <span className="text-[var(--color-text-dim)]">&middot;</span>
-                    <span>步行到站约 {walkToOriginMin} 分钟</span>
-                  </>
-                ) : null}
-              </>
-            ) : (
-              <>
-                <span>{formatDuration(route.duration)}</span>
-                <span className="text-[var(--color-text-dim)]">&middot;</span>
-                <span>{formatDistance(route.distance)}</span>
-                <span className="text-[var(--color-text-dim)]">&middot;</span>
-                <span className="text-xs">
-                  预计 {new Date(Date.now() + route.duration * 1000).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}
-                </span>
-              </>
-            )}
-          </button>
-        </div>
-      )
-    }
-
-    // Mobile collapsed: thin bottom bar
-    return (
-      <div className="pointer-events-auto fixed bottom-0 left-0 right-0 z-[1000]">
-        <button
-          onClick={() => setPanelOpen(true)}
-          className={cn(
-            'flex h-14 w-full items-center justify-between px-4',
-            'border-t border-white/20 bg-white/90 shadow-lg backdrop-blur-md',
-            'text-[var(--color-text)] transition-all duration-300 ease-out',
-          )}
-        >
-          <div className="flex items-center gap-2 text-sm">
-            <Navigation className="h-4 w-4 text-indigo-500" />
-            {transportMode === 'transit' ? (
-              <>
-                <span>公交方案</span>
-                {originStations[0] && nearbyStations[0] ? (
-                  <>
-                    <span className="text-[var(--color-text-dim)]">&middot;</span>
-                    <span>公交约 {totalTransitMin} 分钟</span>
-                    <span className="text-[var(--color-text-dim)]">&middot;</span>
-                    <span>步行到站 {walkToOriginMin} 分钟</span>
-                  </>
-                ) : originStations[0] ? (
-                  <>
-                    <span className="text-[var(--color-text-dim)]">&middot;</span>
-                    <span>步行到站约 {walkToOriginMin} 分钟</span>
-                  </>
-                ) : null}
-              </>
-            ) : (
-              <>
-                <span>{formatDuration(route.duration)}</span>
-                <span className="text-[var(--color-text-dim)]">&middot;</span>
-                <span>{formatDistance(route.distance)}</span>
-                <span className="text-[var(--color-text-dim)]">&middot;</span>
-                <span className="text-xs">
-                  预计 {new Date(Date.now() + route.duration * 1000).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}
-                </span>
-              </>
-            )}
-          </div>
-          <ChevronUp className="h-5 w-5 text-[var(--color-text-dim)]" />
-        </button>
-      </div>
-    )
-  }
-
-  // ═══════════════════════════════════════════
-  // State 4: Full panel content
-  // ═══════════════════════════════════════════
 
   const isLastStep = (index: number) => index === route.steps.length - 1
   const destName = destination?.name ?? '目的地'
@@ -942,6 +840,105 @@ export function NavigationPanel() {
       </div>
     )
   }
+
+  // ═══════════════════════════════════════════
+  // State 3: Mini badge / Collapsed mobile
+  // ═══════════════════════════════════════════
+
+  if (!isPanelOpen) {
+    if (isDesktop) {
+      return (
+        <div className="pointer-events-auto absolute right-4 top-[200px] z-[999]">
+          <button
+            onClick={() => setPanelOpen(true)}
+            className={cn(
+              'flex cursor-pointer items-center gap-2 px-4 py-2.5 text-sm',
+              glassPanel,
+              'text-[var(--color-text)] transition-all duration-300 ease-out hover:scale-105 active:scale-95',
+            )}
+          >
+            <Navigation className="h-4 w-4 text-indigo-500" />
+            {transportMode === 'transit' ? (
+              <>
+                <span>公交方案</span>
+                {originStations[0] && nearbyStations[0] ? (
+                  <>
+                    <span className="text-[var(--color-text-dim)]">&middot;</span>
+                    <span>公交约 {totalTransitMin} 分钟</span>
+                    <span className="text-[var(--color-text-dim)]">&middot;</span>
+                    <span>步行到站 {walkToOriginMin} 分钟</span>
+                  </>
+                ) : originStations[0] ? (
+                  <>
+                    <span className="text-[var(--color-text-dim)]">&middot;</span>
+                    <span>步行到站约 {walkToOriginMin} 分钟</span>
+                  </>
+                ) : null}
+              </>
+            ) : (
+              <>
+                <span>{formatDuration(route.duration)}</span>
+                <span className="text-[var(--color-text-dim)]">&middot;</span>
+                <span>{formatDistance(route.distance)}</span>
+                <span className="text-[var(--color-text-dim)]">&middot;</span>
+                <span className="text-xs">
+                  预计 {new Date(Date.now() + route.duration * 1000).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}
+                </span>
+              </>
+            )}
+          </button>
+        </div>
+      )
+    }
+
+    // Mobile collapsed: thin bottom bar
+    return (
+      <div className="pointer-events-auto fixed bottom-0 left-0 right-0 z-[1000]">
+        <button
+          onClick={() => setPanelOpen(true)}
+          className={cn(
+            'flex h-14 w-full items-center justify-between px-4',
+            'border-t border-white/20 bg-white/90 shadow-lg backdrop-blur-md',
+            'text-[var(--color-text)] transition-all duration-300 ease-out',
+          )}
+        >
+          <div className="flex items-center gap-2 text-sm">
+            <Navigation className="h-4 w-4 text-indigo-500" />
+            {transportMode === 'transit' ? (
+              <>
+                <span>公交方案</span>
+                {originStations[0] && nearbyStations[0] ? (
+                  <>
+                    <span className="text-[var(--color-text-dim)]">&middot;</span>
+                    <span>公交约 {totalTransitMin} 分钟</span>
+                    <span className="text-[var(--color-text-dim)]">&middot;</span>
+                    <span>步行到站 {walkToOriginMin} 分钟</span>
+                  </>
+                ) : originStations[0] ? (
+                  <>
+                    <span className="text-[var(--color-text-dim)]">&middot;</span>
+                    <span>步行到站约 {walkToOriginMin} 分钟</span>
+                  </>
+                ) : null}
+              </>
+            ) : (
+              <>
+                <span>{formatDuration(route.duration)}</span>
+                <span className="text-[var(--color-text-dim)]">&middot;</span>
+                <span>{formatDistance(route.distance)}</span>
+                <span className="text-[var(--color-text-dim)]">&middot;</span>
+                <span className="text-xs">
+                  预计 {new Date(Date.now() + route.duration * 1000).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}
+                </span>
+              </>
+            )}
+          </div>
+          <ChevronUp className="h-5 w-5 text-[var(--color-text-dim)]" />
+        </button>
+      </div>
+    )
+  }
+
 
   // ── Desktop: floating right panel ──
   if (isDesktop) {
