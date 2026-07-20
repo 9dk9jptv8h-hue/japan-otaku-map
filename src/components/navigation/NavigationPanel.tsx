@@ -19,7 +19,7 @@ import { useMapStore } from '@/store/useMapStore'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { getGoogleMapsUrl } from '@/services/routingService'
 import { cn } from '@/utils/cn'
-import { fetchNearbyStations, getGoogleMapsTransitUrl } from '@/services/transitService'
+import { fetchNearbyStations } from '@/services/transitService'
 import type { TransitStation } from '@/services/transitService'
 import type { RouteStep } from '@/types/navigation'
 
@@ -618,26 +618,6 @@ export function NavigationPanel() {
             )}
           </div>
 
-          {/* ── Google Maps 完整方案 ── */}
-          <button
-            onClick={() => {
-              if (destination && origin) {
-                window.open(
-                  getGoogleMapsTransitUrl(origin.lat, origin.lng, destination.latitude, destination.longitude),
-                  '_blank'
-                )
-              } else if (destination) {
-                window.open(
-                  `https://www.google.com/maps/dir/?api=1&destination=${destination.latitude},${destination.longitude}&travelmode=transit`,
-                  '_blank'
-                )
-              }
-            }}
-            className="flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-500 py-2.5 text-sm font-semibold text-white active:scale-[0.98] transition-transform"
-          >
-            查看完整公交方案
-            <ExternalLink className="h-4 w-4" />
-          </button>
         </div>
       ) : (
         <>
