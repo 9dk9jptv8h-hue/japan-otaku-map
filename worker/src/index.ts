@@ -156,33 +156,40 @@ export default {
     }
 
     try {
-      // 先检查请求体大小（避免解析超大 JSON）
-      const contentLength = request.headers.get('Content-Length')
-      if (contentLength && parseInt(contentLength, 10) > 10000) {
-        return jsonResponse({ error: '消息太长' }, 400)
+      // 读取原始请求体，检查实际大小（Content-Length 可能被省略）
+      const buf = await request.arrayBuffer()
+      if (buf.byteLength > 10000) {
+        return jsonResponse({ error: '消息太长' }, 413)
       }
-
-      const body = (await request.json()) as ChatRequest
+      const body = JSON.parse(new TextDecoder().decode(buf)) as ChatRequest
 
       // 基本校验
       if (!body.messages || !Array.isArray(body.messages)) {
         return jsonResponse({ error: '无效的请求格式' }, 400)
       }
 
-      // 转发到 DeepSeek API
-      const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${env.DEEPSEEK_API_KEY}`,
-        },
-        body: JSON.stringify({
-          model: 'deepseek-chat',
-          messages: body.messages,
-          temperature: 0.7,
-          max_tokens: 800, // 限制回复长度控制成本
-        }),
-      })
+      // 转发到 DeepSeek API（25s 超时）
+      const controller = new AbortController()
+      const timeout = setTimeout(() => controller.abort(), 25000)
+      let response: Response
+      try {
+        response = await fetch('https://api.deepseek.com/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${env.DEEPSEEK_API_KEY}`,
+          },
+          body: JSON.stringify({
+            model: 'deepseek-chat',
+            messages: body.messages,
+            temperature: 0.7,
+            max_tokens: 800, // 限制回复长度控制成本
+          }),
+          signal: controller.signal,
+        })
+      } finally {
+        clearTimeout(timeout)
+      }
 
       let data: unknown
       try {

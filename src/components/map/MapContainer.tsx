@@ -151,7 +151,11 @@ export function MapView({ children }: MapViewProps) {
         }
       })
 
+      let lastBoundsUpdate = 0
       map.on('moveend', () => {
+        const now = Date.now()
+        if (now - lastBoundsUpdate < 150) return
+        lastBoundsUpdate = now
         const b = map.getBounds()
         setBounds({
           north: b.getNorth(),

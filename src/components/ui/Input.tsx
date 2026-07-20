@@ -28,7 +28,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           )}
           {...props}
         />
-        {value && onClear && (
+        {value != null && value !== '' && onClear && (
           <button
             onClick={onClear}
             className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-sumi)]/30 hover:text-[var(--color-sumi)]/60"

@@ -50,6 +50,8 @@ export const useMapStore = create<MapStore>((set, get) => ({
 
   selectedMarkerIds: [],
   hoveredMarkerId: null as string | null,
+  // 注意：此方法实际行为是 toggle（已选则取消，未选则添加），
+  // 命名保留 "set" 是为了避免大规模修改调用方。
   setSelectedMarkerId: (id) => set((s) => {
     if (id === null) return { selectedMarkerIds: [] }
     if (s.selectedMarkerIds.includes(id)) {

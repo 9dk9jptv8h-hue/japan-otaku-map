@@ -21,6 +21,15 @@
 - **地图加载超时**：20s 安全超时强制退出，不再永久卡加载页
 - **Chat 请求不取消**：`AbortController` + unmount 清理，避免死组件更新
 - **touch-action 破坏移动地图**：移除容器触摸拦截
+- **Worker body 校验增强**：`arrayBuffer` 替代可被省略的 `Content-Length`
+- **DeepSeek 超时**：Worker 添加 25s `AbortController`
+- **移动抽屉锁滚动**：打开时 `document.body.style.overflow = 'hidden'`
+- **欢迎消息时间戳固化**：改为组件挂载时动态生成
+- **Chat 输入无上限**：`maxLength={500}`
+- **Esc 关闭抽屉**：键盘无障碍
+- **Input "0" 值 bug**：`value && onClear` → `value != null && value !== ''`
+- **moveend 节流**：150ms 防止 flyTo 期间高频 setBounds
+- **MarkersLayer 过度重建**：仅真正卸载时销毁图层，数据更新走 setData
 - **clearCategories 清空为全选**：重置为 7 品牌完整列表
 
 ---

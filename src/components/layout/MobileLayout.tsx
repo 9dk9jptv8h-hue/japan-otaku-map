@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import type { LocationData } from '@/types'
 import { MapView } from '@/components/map/MapContainer'
 import { MarkersLayer } from '@/components/map/MarkersLayer'
@@ -22,6 +23,25 @@ export function MobileLayout({ locations }: MobileLayoutProps) {
   const sidebarOpen = useUIStore(s => s.sidebarOpen)
   const setSidebarOpen = useUIStore(s => s.setSidebarOpen)
   const { filteredLocations, regionList } = useFilteredLocations()
+
+  // Bug 1: Lock body scroll when drawer is open
+  useEffect(() => {
+    if (sidebarOpen) {
+      document.body.style.overflow = 'hidden'
+      return () => { document.body.style.overflow = '' }
+    }
+  }, [sidebarOpen])
+
+  // Bug 4: Close drawer on Escape key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && sidebarOpen) {
+        setSidebarOpen(false)
+      }
+    }
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [sidebarOpen, setSidebarOpen])
 
   return (
     <div className="relative h-full w-full">

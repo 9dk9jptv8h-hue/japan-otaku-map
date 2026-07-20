@@ -65,7 +65,9 @@ const KEYFRAMES = `
 export function ChatAssistant() {
   /* ---- state ---- */
   const [isOpen, setIsOpen] = useState(false)
-  const [messages, setMessages] = useState<DisplayMessage[]>([WELCOME_MESSAGE])
+  const [messages, setMessages] = useState<DisplayMessage[]>([
+    { ...WELCOME_MESSAGE, timestamp: new Date() },
+  ])
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -460,6 +462,7 @@ export function ChatAssistant() {
               ref={inputRef}
               type="text"
               value={input}
+              maxLength={500}
               onChange={(e) => setInput(e.target.value)}
               onCompositionStart={() => { isComposingRef.current = true }}
               onCompositionEnd={() => { isComposingRef.current = false }}
