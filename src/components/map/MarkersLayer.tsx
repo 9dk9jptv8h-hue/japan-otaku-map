@@ -30,6 +30,16 @@ function MarkersLayerInner({ locations }: MarkersLayerProps) {
   const popupRef = useRef<maplibregl.Popup | null>(null)
   const hoveredFeatureIdRef = useRef<number | null>(null)
   const settingUpRef = useRef(false)
+  const willUnmountRef = useRef(false)
+
+  // Track actual unmount so we only tear down layers/source on final unmount,
+  // not on every dependency change (e.g. locations data update).
+  // MUST be declared BEFORE the main effect so its cleanup runs first on unmount.
+  useEffect(() => {
+    return () => {
+      willUnmountRef.current = true
+    }
+  }, [])
 
   // 字符串 location.id → 数字 feature index 映射
   const idToIndexMap = useMemo(() => {
@@ -125,19 +135,23 @@ function MarkersLayerInner({ locations }: MarkersLayerProps) {
       if (e.features && e.features[0]) {
         const fid = e.features[0].id as number
         if (hoveredFeatureIdRef.current === fid) return
-        // 清除上一个
+        // 清除上一个（try-catch 防止 source 在检查和调用之间被移除）
         if (hoveredFeatureIdRef.current !== null) {
-          map.setFeatureState(
-            { source: 'locations', id: hoveredFeatureIdRef.current },
-            { hover: false }
-          )
+          try {
+            map.setFeatureState(
+              { source: 'locations', id: hoveredFeatureIdRef.current },
+              { hover: false }
+            )
+          } catch (e) { if (e instanceof Error && !e.message.includes('does not exist')) console.warn('Feature state error:', e) }
         }
         // 设置新的
         hoveredFeatureIdRef.current = fid
-        map.setFeatureState(
-          { source: 'locations', id: fid },
-          { hover: true }
-        )
+        try {
+          map.setFeatureState(
+            { source: 'locations', id: fid },
+            { hover: true }
+          )
+        } catch (e) { if (e instanceof Error && !e.message.includes('does not exist')) console.warn('Feature state error:', e) }
         // 同步 store（侧边栏卡片高亮）
         const locId = e.features[0].properties?.id as string
         if (locId) {
@@ -278,7 +292,9 @@ function MarkersLayerInner({ locations }: MarkersLayerProps) {
         popupRef.current.remove()
         popupRef.current = null
       }
-      // 清除图层和数据源（如果还存在）
+      // Only remove layers/source on actual unmount, not on dependency changes.
+      // On data updates, setupLayers() handles incremental updates via setData().
+      if (!willUnmountRef.current) return
       try {
         if (map.getLayer('location-labels')) map.removeLayer('location-labels')
         if (map.getLayer('location-dots')) map.removeLayer('location-dots')
@@ -386,7 +402,7 @@ function renderPopupHTML(props: Record<string, unknown>): string {
   const visitHtml =
     visitCount != null && visitCount > 0
       ? `<span style="font-size:11px;font-weight:600;color:var(--color-text, #1a1a2e);opacity:0.7;flex-shrink:0;">
-          🔥 ${visitCount >= 1000 ? `${(visitCount / 10000).toFixed(1)}万` : visitCount}
+          🔥 ${visitCount >= 10000 ? `${(visitCount / 10000).toFixed(1)}万` : visitCount}
         </span>`
       : ''
 

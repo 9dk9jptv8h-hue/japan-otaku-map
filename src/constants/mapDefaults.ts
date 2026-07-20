@@ -1,6 +1,9 @@
 import type { ViewportState, TileLayerStyle } from '@/types'
 
 // 默认视口：日本
+// NOTE: center uses [lat, lng] order (ViewportState convention for store/persistence).
+// MapLibre GL expects [lng, lat] — see MapContainer.tsx where it's destructured as
+// [DEFAULT_VIEWPORT.center[1], DEFAULT_VIEWPORT.center[0]].
 export const DEFAULT_VIEWPORT: ViewportState = {
   center: [37.5, 137.5],
   zoom: 6,
@@ -46,7 +49,11 @@ function createTimeoutSignal(ms: number): { signal: AbortSignal; clear: () => vo
 
 /**
  * 探测 URL 是否可达（仅判断服务器是否有响应，不关心响应内容）
- * 使用 mode: 'no-cors' 避免因缺少 CORS 头导致误判为不可达
+ *
+ * NOTE: mode: 'no-cors' produces an opaque response (status=0, no headers).
+ * We cannot distinguish HTTP 200 from 503 — we only know the server is
+ * "reachable at the TCP/TLS level". A server that accepts connections but
+ * returns errors will still pass this probe.
  */
 async function probeUrl(url: string, timeoutMs: number): Promise<boolean> {
   const { signal, clear } = createTimeoutSignal(timeoutMs)

@@ -23,9 +23,7 @@ export function DesktopLayout({ locations }: DesktopLayoutProps) {
           <RouteLayer />
         </MapView>
         {/* 地图控件 */}
-        <div className="absolute top-4 right-4 z-[1000]">
-          <MapControls />
-        </div>
+        <MapControls className="absolute top-4 right-4 z-[1000]" />
       </div>
 
       {/* 侧边栏浮在地图上方 */}

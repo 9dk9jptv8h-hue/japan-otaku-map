@@ -8,6 +8,7 @@ interface MapControlsProps {
 }
 
 export function MapControls({ className }: MapControlsProps) {
+  const isMapReady = useMapStore((s) => s.isMapReady)
   const zoomIn = useMapStore((s) => s.zoomIn)
   const zoomOut = useMapStore((s) => s.zoomOut)
   const flyToMarker = useMapStore((s) => s.flyToMarker)
@@ -24,6 +25,7 @@ export function MapControls({ className }: MapControlsProps) {
     'transition-all duration-300 ease-out',
     'hover:scale-110 active:scale-95',
     'hover:bg-white/95',
+    !isMapReady && 'opacity-50 cursor-not-allowed',
   )
 
   return (
@@ -37,6 +39,7 @@ export function MapControls({ className }: MapControlsProps) {
     >
       <button
         onClick={zoomIn}
+        disabled={!isMapReady}
         className={cn(btnClass, 'rounded-t-2xl border-b border-gray-100/30')}
         aria-label="放大"
       >
@@ -44,6 +47,7 @@ export function MapControls({ className }: MapControlsProps) {
       </button>
       <button
         onClick={goHome}
+        disabled={!isMapReady}
         className={cn(btnClass, 'border-b border-gray-100/30')}
         aria-label="回到初始位置"
       >
@@ -51,6 +55,7 @@ export function MapControls({ className }: MapControlsProps) {
       </button>
       <button
         onClick={zoomOut}
+        disabled={!isMapReady}
         className={cn(btnClass, 'rounded-b-2xl')}
         aria-label="缩小"
       >

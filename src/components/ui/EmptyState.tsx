@@ -18,9 +18,11 @@ export function EmptyState({
       <div className="mb-4 text-[var(--color-sumi)]/20">
         {icon ?? <Search className="h-12 w-12" />}
       </div>
-      <h3 className="text-sm font-medium text-[var(--color-sumi)]/60 mb-1">
-        {title}
-      </h3>
+      {title && (
+        <h3 className="text-sm font-medium text-[var(--color-sumi)]/60 mb-1">
+          {title}
+        </h3>
+      )}
       {description && (
         <p className="text-xs text-[var(--color-sumi)]/40 max-w-[240px]">
           {description}

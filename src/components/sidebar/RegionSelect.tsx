@@ -61,6 +61,7 @@ export function RegionSelect({ regionList }: RegionSelectProps) {
         <div className="absolute top-full right-0 mt-1 z-50 min-w-[120px] max-h-[240px] overflow-y-auto rounded-xl glass border border-[var(--color-border)] shadow-elevated py-1">
           <button
             onClick={() => handleSelect(null)}
+            aria-label="全部地区"
             className={cn(
               'w-full text-left px-3 py-1.5 text-[11px] transition-colors',
               'hover:bg-[var(--color-accent)]/5',
@@ -75,6 +76,7 @@ export function RegionSelect({ regionList }: RegionSelectProps) {
             <button
               key={region}
               onClick={() => handleSelect(region)}
+              aria-label={region}
               className={cn(
                 'w-full text-left px-3 py-1.5 text-[11px] transition-colors',
                 'hover:bg-[var(--color-accent)]/5',

@@ -354,7 +354,11 @@ export function scanInput(text: string): ScanResult {
   }
 
   const normalizedText = text
-    .replace(/[​-‍‎-‏‪-‮⁠⁦-⁩﻿]/g, '') // strip zero-width + bidi override chars
+    // Strip zero-width characters and bidi override chars
+    // ​ ZWS, ‌ ZWNJ, ‍ ZWJ, ‎-‏ LRM/RLM,
+    // ‪-‮ bidi overrides, ⁠ word joiner, ⁦-⁩ bidi isolates,
+    // ﻿ BOM / ZWNBS
+    .replace(/[​-‍‎‏‪-‮⁠⁦-⁩﻿]/g, '')
     .replace(/\s+/g, ' ')                   // collapse whitespace
     .trim()
 

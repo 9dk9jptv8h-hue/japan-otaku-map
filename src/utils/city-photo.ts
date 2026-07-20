@@ -75,7 +75,12 @@ const CITY_PHOTOS: Record<string, string> = {
 
 export function getCityPhoto(name: string, address: string): string {
   const searchText = name + address;
-  for (const [city, url] of Object.entries(CITY_PHOTOS)) {
+  // Sort keys by length descending so longer city names match before shorter ones
+  // (e.g. "吉祥寺" before "吉祥", "鹿儿岛" before "鹿儿")
+  const sortedEntries = Object.entries(CITY_PHOTOS).sort(
+    ([a], [b]) => b.length - a.length
+  );
+  for (const [city, url] of sortedEntries) {
     if (searchText.includes(city)) return url;
   }
   return 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b2/Tokyo_Tower_and_Shiba_Park.jpg/640px-Tokyo_Tower_and_Shiba_Park.jpg';

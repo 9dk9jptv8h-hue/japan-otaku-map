@@ -38,6 +38,8 @@ export function Sidebar({ locations, className }: SidebarProps) {
           transitionTimingFunction: sidebarCollapsed
             ? 'cubic-bezier(0.4, 0, 0.2, 1)'
             : 'var(--ease-spring)',
+          paddingTop: 'env(safe-area-inset-top, 0px)',
+          paddingBottom: 'env(safe-area-inset-bottom, 0px)',
         }}
       >
         {/* Header — compact one line */}

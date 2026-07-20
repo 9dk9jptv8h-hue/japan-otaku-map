@@ -10,7 +10,9 @@ export function useFilteredLocations() {
   const sortBy = useFilterStore(s => s.sortBy)
   const debouncedSearch = useDebounce(searchQuery, 300)
 
-  // 地区提取（LOCATIONS 是模块级常量，不会变化）
+  // 地区提取
+  // NOTE: useMemo with empty deps is intentional — LOCATIONS is a module-level
+  // constant (imported from mockData.ts), so it never changes at runtime.
   const regionList = useMemo(() => {
     const set = new Set<string>()
     LOCATIONS.forEach(loc => {

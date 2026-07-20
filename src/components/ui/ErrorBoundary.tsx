@@ -9,24 +9,39 @@ interface ErrorBoundaryState {
   hasError: boolean
   error?: Error
   errorKey: number
+  retryCount: number
 }
+
+const MAX_RETRIES = 3
 
 export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   constructor(props: ErrorBoundaryProps) {
     super(props)
-    this.state = { hasError: false, errorKey: 0 }
+    this.state = { hasError: false, errorKey: 0, retryCount: 0 }
   }
 
-  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
-    return { hasError: true, error, errorKey: 0 }
+  static getDerivedStateFromError(error: Error): Partial<ErrorBoundaryState> {
+    return { hasError: true, error }
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     console.error('ErrorBoundary caught:', error, errorInfo)
   }
 
+  handleRetry = () => {
+    const nextCount = this.state.retryCount + 1
+    if (nextCount > MAX_RETRIES) return
+    this.setState({
+      hasError: false,
+      errorKey: this.state.errorKey + 1,
+      retryCount: nextCount,
+    })
+  }
+
   render() {
     if (this.state.hasError) {
+      const exhausted = this.state.retryCount >= MAX_RETRIES
+
       return (
         this.props.fallback ?? (
           <div className="flex h-screen w-screen items-center justify-center bg-[var(--color-washi)]">
@@ -37,12 +52,18 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
               <p className="text-sm text-[var(--color-sumi)]/50 mb-4">
                 {this.state.error?.message ?? '未知错误'}
               </p>
-              <button
-                onClick={() => this.setState({ hasError: false, errorKey: this.state.errorKey + 1 })}
-                className="rounded-xl bg-[var(--color-indigo)] px-4 py-2 text-sm text-white hover:bg-[var(--color-indigo)]/85 transition-all"
-              >
-                重试
-              </button>
+              {exhausted ? (
+                <p className="text-xs text-[var(--color-sumi)]/30">
+                  已重试 {MAX_RETRIES} 次，请刷新页面
+                </p>
+              ) : (
+                <button
+                  onClick={this.handleRetry}
+                  className="rounded-xl bg-[var(--color-indigo)] px-4 py-2 text-sm text-white hover:bg-[var(--color-indigo)]/85 transition-all"
+                >
+                  重试
+                </button>
+              )}
             </div>
           </div>
         )

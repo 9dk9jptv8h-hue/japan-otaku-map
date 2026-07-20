@@ -30,7 +30,9 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
         />
         {value != null && value !== '' && onClear && (
           <button
+            type="button"
             onClick={onClear}
+            aria-label="清除输入"
             className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-sumi)]/30 hover:text-[var(--color-sumi)]/60"
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

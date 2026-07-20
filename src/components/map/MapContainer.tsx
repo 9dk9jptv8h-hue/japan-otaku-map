@@ -46,6 +46,10 @@ export function MapView({ children }: MapViewProps) {
         pixelRatio: isMobile ? 1 : window.devicePixelRatio,
         fadeDuration: 0,
         refreshExpiredTiles: false,
+        // NOTE: localIdeographFontFamily depends on locally-installed CJK fonts.
+        // PBF glyph fallback (localIdeographFontFamily: false) is disabled,
+        // so missing CJK glyphs will render as tofu (□) on systems without
+        // the specified fonts installed.
         localIdeographFontFamily: "'Noto Sans SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif",
         canvasContextAttributes: { antialias: false },
         trackResize: true,

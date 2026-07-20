@@ -44,12 +44,13 @@ export const LocationCard = memo(function LocationCard({ location, index }: Loca
       onMouseEnter={() => setHovered(location.id)}
       onMouseLeave={() => setHovered(null)}
       className={cn(
-        'location-card rounded-[16px] bg-white p-3 cursor-pointer',
+        'location-card rounded-[16px] bg-white p-3',
         'transition-all duration-300 ease-out',
         'hover:-translate-y-0.5 hover:shadow-card',
         'active:scale-[0.98]',
         isSelected && 'ring-2 ring-offset-1',
-        isHovered && !isSelected && 'shadow-card'
+        isHovered && !isSelected && 'shadow-card',
+        flyToMarker ? 'cursor-pointer' : 'cursor-default'
       )}
       style={{
         boxShadow: isSelected
@@ -117,10 +118,12 @@ export const LocationCard = memo(function LocationCard({ location, index }: Loca
       {/* Navigate button — only show when selected */}
       {isSelected && (
         <button
+          type="button"
           onClick={(e) => {
             e.stopPropagation()
             startNavigation(location)
           }}
+          aria-label={`导航到${location.name}`}
           className="mt-2.5 flex w-full items-center justify-center gap-1.5 rounded-xl py-2 text-xs font-semibold
             transition-all duration-200 active:scale-[0.97]"
           style={{

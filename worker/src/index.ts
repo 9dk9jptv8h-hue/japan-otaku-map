@@ -93,7 +93,11 @@ async function handleTileRequest(request: Request, ctx: ExecutionContext): Promi
   let cacheDuration: number
 
   if (isStyleJson) {
-    // Style JSON: 重写 URL，将 openfreemap origin 替换为 Worker 自身 origin + /tiles
+    // Style JSON: 重写 URL — 将 openfreemap origin 替换为 Worker 自身 origin + /tiles
+    // NOTE: replaceAll matches substrings. Since TILE_ORIGIN is a full origin
+    // (https://tiles.openfreemap.org) and style JSON URLs are absolute, this is
+    // safe in practice. If TILE_ORIGIN is ever changed to a shorter/shared domain,
+    // switch to a URL-parsing approach (parse + rebuild) instead.
     let text = await originResponse.text()
     text = text.replaceAll(TILE_ORIGIN, workerOrigin + '/tiles')
     responseBody = text

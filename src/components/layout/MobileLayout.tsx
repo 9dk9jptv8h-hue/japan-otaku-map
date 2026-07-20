@@ -74,6 +74,8 @@ export function MobileLayout({ locations }: MobileLayoutProps) {
 
       {/* 遮罩 — 点击关闭抽屉 */}
       <div
+        role="dialog"
+        aria-label="关闭菜单"
         className={cn(
           'fixed inset-0 z-40 bg-black/40 transition-opacity duration-300',
           sidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
@@ -105,6 +107,7 @@ export function MobileLayout({ locations }: MobileLayoutProps) {
             </span>
           </div>
           <button
+            type="button"
             onClick={() => setSidebarOpen(false)}
             className="flex h-8 w-8 items-center justify-center rounded-full bg-white/20 hover:bg-white/30 active:scale-90 transition-all"
             aria-label="关闭"

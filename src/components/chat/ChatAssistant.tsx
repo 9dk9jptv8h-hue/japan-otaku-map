@@ -180,16 +180,19 @@ export function ChatAssistant() {
       abortRef.current = controller
       const response = await chat(chatMessages, controller.signal)
 
-      // 5. Add assistant message
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: generateId(),
-          role: 'assistant',
-          content: response,
-          timestamp: new Date(),
-        },
-      ])
+      // 5. Add assistant message (skip if response is empty/whitespace)
+      const trimmedResponse = response?.trim()
+      if (trimmedResponse) {
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: generateId(),
+            role: 'assistant',
+            content: trimmedResponse,
+            timestamp: new Date(),
+          },
+        ])
+      }
       setInput('')
     } catch (err: unknown) {
       const message =
@@ -335,8 +338,8 @@ export function ChatAssistant() {
 
   return (
     <>
-      {/* Injected keyframes */}
-      <style>{KEYFRAMES}</style>
+      {/* Injected keyframes — stable key prevents redundant DOM writes */}
+      <style key="chat-keyframes">{KEYFRAMES}</style>
 
       {/* ---------- Chat Panel ---------- */}
       <div
@@ -364,6 +367,7 @@ export function ChatAssistant() {
           WebkitBackdropFilter: 'blur(20px)',
           border: '1px solid var(--color-border)',
           boxShadow: 'var(--shadow-xl)',
+          paddingBottom: 'env(safe-area-inset-bottom, 0px)',
         }}
       >
           {/* ---- Header ---- */}
@@ -383,6 +387,14 @@ export function ChatAssistant() {
                 动漫店铺问答
               </div>
             </div>
+            <button
+              type="button"
+              onClick={closePanel}
+              aria-label="关闭聊天面板"
+              className="hidden md:flex h-7 w-7 items-center justify-center rounded-full bg-white/20 hover:bg-white/35 active:scale-90 transition-all shrink-0"
+            >
+              <X size={16} color="#fff" />
+            </button>
           </div>
 
           {/* ---- Messages ---- */}
@@ -514,6 +526,7 @@ export function ChatAssistant() {
           color: '#ffffff',
           boxShadow: 'var(--shadow-lg)',
           animation: 'chat-pop-in 400ms var(--ease-spring) both',
+          marginBottom: 'env(safe-area-inset-bottom, 0px)',
         }}
         onMouseEnter={(e) => {
           ;(e.currentTarget as HTMLButtonElement).style.boxShadow =
