@@ -6,6 +6,7 @@ import { fetchWalkingRoute } from '@/services/routingService'
 // ─── Module-level non-serializable handles ───
 let watchId: number | null = null
 let deviationTimer: ReturnType<typeof setTimeout> | null = null
+let navSeq = 0 // 导航请求序列号，防止竞态
 
 interface NavigationStore {
   // ─── Existing state ───
@@ -120,6 +121,7 @@ export const useNavigationStore = create<NavigationStore>()((set, get) => ({
   startNavigation: async (dest) => {
     // 先关闭前一个导航（停止追踪 + 清空状态）
     get().stopTracking()
+    const seq = ++navSeq // 获取当前序列号
     set({ destination: dest, isRouting: true, error: null, isPanelOpen: true,
       route: null, origin: null, activeStepIndex: -1, isDeviated: false,
       finalDestination: null, waypointTarget: null, hasArrivedAtWaypoint: false })
@@ -138,6 +140,7 @@ export const useNavigationStore = create<NavigationStore>()((set, get) => ({
           maximumAge: 60000,
         })
       })
+      if (seq !== navSeq) return // 不是最新请求，丢弃
       origin = {
         lat: pos.coords.latitude,
         lng: pos.coords.longitude,
@@ -162,6 +165,7 @@ export const useNavigationStore = create<NavigationStore>()((set, get) => ({
         lat: dest.latitude,
         lng: dest.longitude,
       })
+      if (seq !== navSeq) return // 不是最新请求，丢弃
       set({ route, isRouting: false, error: null, activeStepIndex: 0 })
       // Start real-time GPS tracking after successful route fetch
       get().startTracking()
