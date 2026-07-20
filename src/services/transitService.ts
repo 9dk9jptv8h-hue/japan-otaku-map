@@ -107,8 +107,8 @@ export async function fetchNearbyStations(
     return cached.stations
   }
 
-  const controller = new AbortController()
-  const timeoutId = setTimeout(() => controller.abort(), 8000) // 8s timeout
+  const totalController = new AbortController()
+  const totalTimeout = setTimeout(() => totalController.abort(), 15000) // 15s total budget
 
   // 查询：火车站 + 地铁站 + 公交站 + 电车站
   const query = `[out:json];(node[railway=station](around:${radiusMeters},${lat},${lng});node[railway=halt](around:${radiusMeters},${lat},${lng});node[railway=tram_stop](around:${radiusMeters},${lat},${lng});node[public_transport=station](around:${radiusMeters},${lat},${lng});node[highway=bus_stop](around:${radiusMeters},${lat},${lng});node[amenity=bus_station](around:${radiusMeters},${lat},${lng}););out center 30;`
@@ -116,10 +116,17 @@ export async function fetchNearbyStations(
   let lastError: Error | null = null
 
   for (const endpoint of OVERPASS_ENDPOINTS) {
+    // 每个端点独立 5s 超时
+    const epController = new AbortController()
+    const epTimeout = setTimeout(() => epController.abort(), 5000)
+    // 如果总超时触发，也中止当前端点
+    const onTotalTimeout = () => epController.abort()
+    totalController.signal.addEventListener('abort', onTotalTimeout, { once: true })
+
     try {
       const response = await fetch(
         `${endpoint}?data=${encodeURIComponent(query)}`,
-        { signal: controller.signal },
+        { signal: epController.signal },
       )
 
       if (!response.ok) {
@@ -148,15 +155,16 @@ export async function fetchNearbyStations(
       return stations
     } catch (err) {
       lastError = err instanceof Error ? err : new Error(String(err))
-      // 如果是超时，下一个端点也不会好，直接放弃
-      if (err instanceof DOMException && err.name === 'AbortError') break
-      // 否则尝试下一个端点
+      // 单个端点超时不放弃，继续尝试下一个
+    } finally {
+      clearTimeout(epTimeout)
+      totalController.signal.removeEventListener('abort', onTotalTimeout)
     }
   }
 
   // 所有端点都失败
   console.warn('[transitService] 所有 Overpass 端点不可达:', lastError?.message)
-  clearTimeout(timeoutId)
+  clearTimeout(totalTimeout)
   return []
 }
 
