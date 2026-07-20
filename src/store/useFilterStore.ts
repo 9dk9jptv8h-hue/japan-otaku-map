@@ -1,6 +1,8 @@
 import { create } from 'zustand'
 import type { LocationCategory, SortOption } from '@/types'
 
+const ALL_CATEGORIES: LocationCategory[] = ['animate', 'melonbooks', 'mandarake', 'surugaya', 'gamers', 'lashinbang', 'kbooks']
+
 interface FilterStore {
   searchQuery: string
   setSearchQuery: (q: string) => void
@@ -20,7 +22,7 @@ export const useFilterStore = create<FilterStore>((set) => ({
   searchQuery: '',
   setSearchQuery: (q) => set({ searchQuery: q }),
 
-  selectedCategories: ['animate', 'melonbooks', 'mandarake', 'surugaya', 'gamers', 'lashinbang', 'kbooks'],
+  selectedCategories: ALL_CATEGORIES,
   toggleCategory: (cat) =>
     set((s) => ({
       selectedCategories: s.selectedCategories.includes(cat)

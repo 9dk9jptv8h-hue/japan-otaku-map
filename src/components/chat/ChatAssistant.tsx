@@ -59,6 +59,45 @@ const KEYFRAMES = `
 `
 
 /* ------------------------------------------------------------------ */
+/*  Static inline styles (extracted to avoid recreation on re-render)  */
+/* ------------------------------------------------------------------ */
+
+const BLOCKED_SYSTEM_STYLE: React.CSSProperties = {
+  background: 'rgba(239,68,68,0.08)',
+  border: '1px solid rgba(239,68,68,0.25)',
+  color: '#b91c1c',
+}
+
+const ERROR_TOAST_STYLE: React.CSSProperties = {
+  background: 'rgba(239,68,68,0.08)',
+  border: '1px solid rgba(239,68,68,0.2)',
+  color: '#b91c1c',
+}
+
+const BOT_AVATAR_STYLE: React.CSSProperties = {
+  background: 'rgba(0,0,0,0.06)',
+}
+
+const ASSISTANT_BUBBLE_STYLE: React.CSSProperties = {
+  background: 'rgba(255,255,255,0.8)',
+  backdropFilter: 'blur(8px)',
+  color: 'var(--color-text)',
+  border: '1px solid var(--color-border)',
+}
+
+const USER_NORMAL_BUBBLE_STYLE: React.CSSProperties = {
+  background: 'var(--color-accent)',
+  color: '#ffffff',
+  border: 'none',
+}
+
+const USER_BLOCKED_BUBBLE_STYLE: React.CSSProperties = {
+  background: 'rgba(239,68,68,0.12)',
+  color: '#b91c1c',
+  border: '1px solid rgba(239,68,68,0.3)',
+}
+
+/* ------------------------------------------------------------------ */
 /*  Component                                                          */
 /* ------------------------------------------------------------------ */
 
@@ -214,7 +253,7 @@ export function ChatAssistant() {
         closePanel()
         return
       }
-      if (isComposingRef.current || e.nativeEvent.isComposing || e.key === 'Process') return
+      if (isComposingRef.current || e.nativeEvent.isComposing || e.key === 'Process' || e.key === 'Unidentified') return
       if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault()
         handleSend()
@@ -234,11 +273,7 @@ export function ChatAssistant() {
         <div key={msg.id} className="flex justify-center my-2 px-3">
           <div
             className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs max-w-[90%]"
-            style={{
-              background: 'rgba(239,68,68,0.08)',
-              border: '1px solid rgba(239,68,68,0.25)',
-              color: '#b91c1c',
-            }}
+            style={BLOCKED_SYSTEM_STYLE}
           >
             <AlertTriangle size={14} className="shrink-0" />
             <span>{msg.content}</span>
@@ -286,21 +321,8 @@ export function ChatAssistant() {
               )}
               style={
                 isUser
-                  ? {
-                      background: isBlocked
-                        ? 'rgba(239,68,68,0.12)'
-                        : 'var(--color-accent)',
-                      color: isBlocked ? '#b91c1c' : '#ffffff',
-                      border: isBlocked
-                        ? '1px solid rgba(239,68,68,0.3)'
-                        : 'none',
-                    }
-                  : {
-                      background: 'rgba(255,255,255,0.8)',
-                      backdropFilter: 'blur(8px)',
-                      color: 'var(--color-text)',
-                      border: '1px solid var(--color-border)',
-                    }
+                  ? (isBlocked ? USER_BLOCKED_BUBBLE_STYLE : USER_NORMAL_BUBBLE_STYLE)
+                  : ASSISTANT_BUBBLE_STYLE
               }
             >
               {isBlocked && isUser && (
@@ -412,7 +434,7 @@ export function ChatAssistant() {
                 <div className="flex gap-2 max-w-[85%]">
                   <div
                     className="shrink-0 w-7 h-7 rounded-full flex items-center justify-center mt-0.5"
-                    style={{ background: 'rgba(0,0,0,0.06)' }}
+                    style={BOT_AVATAR_STYLE}
                   >
                     <Bot
                       size={14}
@@ -421,11 +443,7 @@ export function ChatAssistant() {
                   </div>
                   <div
                     className="flex items-center gap-1 px-4 py-3 rounded-2xl rounded-bl-md"
-                    style={{
-                      background: 'rgba(255,255,255,0.8)',
-                      backdropFilter: 'blur(8px)',
-                      border: '1px solid var(--color-border)',
-                    }}
+                    style={ASSISTANT_BUBBLE_STYLE}
                   >
                     {[0, 1, 2].map((i) => (
                       <span
@@ -450,11 +468,7 @@ export function ChatAssistant() {
               <div className="flex justify-center my-2">
                 <div
                   className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs"
-                  style={{
-                    background: 'rgba(239,68,68,0.08)',
-                    border: '1px solid rgba(239,68,68,0.2)',
-                    color: '#b91c1c',
-                  }}
+                  style={ERROR_TOAST_STYLE}
                 >
                   <AlertTriangle size={13} className="shrink-0" />
                   {error}
@@ -479,7 +493,7 @@ export function ChatAssistant() {
               onCompositionStart={() => { isComposingRef.current = true }}
               onCompositionEnd={() => { isComposingRef.current = false }}
               onKeyDown={(e) => {
-                if (isComposingRef.current || e.nativeEvent.isComposing || e.key === 'Process') return
+                if (isComposingRef.current || e.nativeEvent.isComposing || e.key === 'Process' || e.key === 'Unidentified') return
                 if (e.key === 'Enter' && !e.shiftKey) {
                   e.preventDefault()
                   e.stopPropagation()

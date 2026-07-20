@@ -10,6 +10,8 @@ const CATEGORY_MAP = Object.fromEntries(
   CATEGORIES.map(c => [c.key, c])
 )
 
+const STORE_ZOOM_LEVEL = 16
+
 interface LocationCardProps {
   location: LocationData
   index: number
@@ -34,7 +36,7 @@ export const LocationCard = memo(function LocationCard({ location, index }: Loca
 
   const handleClick = () => {
     setSelected(location.id)
-    flyToMarker?.(location.longitude, location.latitude, 16)
+    flyToMarker?.(location.longitude, location.latitude, STORE_ZOOM_LEVEL)
   }
 
   return (
@@ -57,6 +59,10 @@ export const LocationCard = memo(function LocationCard({ location, index }: Loca
           ? `0 4px 20px ${catMeta.color}25`
           : undefined,
         '--tw-ring-color': isSelected ? catMeta.color : undefined,
+        // NOTE: animationDelay only fires on mount, not on re-sort.
+        // To replay the stagger on sort-order changes, the parent CardList
+        // would need to supply a key prop derived from the current sort order
+        // to force full re-mount of this component.
         animationDelay: `${index * 30}ms`,
       } as React.CSSProperties}
       aria-label={`${location.name} - ${catMeta.label}`}

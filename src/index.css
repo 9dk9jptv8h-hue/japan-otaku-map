@@ -56,6 +56,7 @@
     --ease-smooth: cubic-bezier(0.22, 0.61, 0.36, 1);
     --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
 
+    /* 限定浅色模式 — 切换到暗色瓦片图层时，原生表单控件（select/input）仍保持浅色 */
     color-scheme: light;
     font-family: var(--font-sans);
     font-synthesis: none;
@@ -235,6 +236,7 @@
 
 /* ================================================================
    Scrollbar — minimal & elegant
+   注意：这些规则作用于全局所有元素，非特定容器限定
    ================================================================ */
 ::-webkit-scrollbar {
   width: 5px;

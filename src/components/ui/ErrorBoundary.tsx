@@ -25,6 +25,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    // TODO: Integrate production error reporting here (e.g., Sentry, Cloudflare Analytics)
     console.error('ErrorBoundary caught:', error, errorInfo)
   }
 

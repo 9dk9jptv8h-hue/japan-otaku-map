@@ -57,6 +57,7 @@ export const useMapStore = create<MapStore>((set, get) => ({
     if (s.selectedMarkerIds.includes(id)) {
       return { selectedMarkerIds: s.selectedMarkerIds.filter((x) => x !== id) }
     }
+    // 最多保留 2 个选中标记：新标记加入时自动移除最早的标记，无 UI 反馈（有意设计）
     const next = s.selectedMarkerIds.length >= 2
       ? [...s.selectedMarkerIds.slice(1), id]
       : [...s.selectedMarkerIds, id]

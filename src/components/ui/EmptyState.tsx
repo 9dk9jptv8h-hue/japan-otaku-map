@@ -14,7 +14,7 @@ export function EmptyState({
   action,
 }: EmptyStateProps) {
   return (
-    <div className="flex flex-col items-center justify-center px-6 py-12 text-center">
+    <div className="flex flex-col items-center justify-center px-6 py-12 text-center" role="status">
       <div className="mb-4 text-[var(--color-sumi)]/20">
         {icon ?? <Search className="h-12 w-12" />}
       </div>

@@ -171,6 +171,14 @@ export default {
       if (!body.messages || !Array.isArray(body.messages)) {
         return jsonResponse({ error: '无效的请求格式' }, 400)
       }
+      if (body.messages.length > 20) {
+        return jsonResponse({ error: '消息数量过多，最多支持20条' }, 400)
+      }
+      for (const msg of body.messages) {
+        if (typeof msg.role !== 'string' || typeof msg.content !== 'string') {
+          return jsonResponse({ error: '消息格式无效，每条消息必须包含 role 和 content' }, 400)
+        }
+      }
 
       // 转发到 DeepSeek API（25s 超时）
       const controller = new AbortController()

@@ -1,4 +1,4 @@
-import { type InputHTMLAttributes, forwardRef } from 'react'
+import { type InputHTMLAttributes, forwardRef, useRef, useImperativeHandle } from 'react'
 import { cn } from '@/utils/cn'
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
@@ -8,6 +8,9 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
   ({ icon, onClear, className, value, ...props }, ref) => {
+    const innerRef = useRef<HTMLInputElement>(null)
+    useImperativeHandle(ref, () => innerRef.current as HTMLInputElement)
+
     return (
       <div className="relative w-full">
         {icon && (
@@ -16,7 +19,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           </span>
         )}
         <input
-          ref={ref}
+          ref={innerRef}
           value={value}
           className={cn(
             'w-full rounded-xl border border-[var(--color-sumi)]/10 bg-white/60 px-4 py-2.5 text-sm',
@@ -31,7 +34,10 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
         {value != null && value !== '' && onClear && (
           <button
             type="button"
-            onClick={onClear}
+            onClick={() => {
+              onClear()
+              setTimeout(() => innerRef.current?.focus(), 0)
+            }}
             aria-label="清除输入"
             className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-sumi)]/30 hover:text-[var(--color-sumi)]/60"
           >

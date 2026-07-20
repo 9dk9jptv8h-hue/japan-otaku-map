@@ -1,5 +1,6 @@
 import type { LocationData } from '@/types'
 
+// 占位图 — 所有店铺共用同一个 SVG，后续需替换为各店铺独立图片
 const IMG = '/animate_store.svg'
 
 // ================================================================

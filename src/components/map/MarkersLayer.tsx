@@ -217,6 +217,7 @@ function MarkersLayerInner({ locations }: MarkersLayerProps) {
             16, ['case', ['boolean', ['feature-state', 'hover'], false], 14, 9],
           ],
           'circle-color': ([
+            // MapLibre types don't cover spread in match expressions
             'match', ['get', 'category'],
             ...CATEGORIES.flatMap(c => [c.key, c.color]),
             '#607d8b'
@@ -409,7 +410,7 @@ function renderPopupHTML(props: Record<string, unknown>): string {
   return `
     <div style="width:280px;overflow:hidden;font-family:'Microsoft YaHei','PingFang SC','Hiragino Sans GB',system-ui,sans-serif;">
       <div style="position:relative;height:120px;overflow:hidden;background:#f0f0f0;">
-        <img src="${photoUrl}" alt="${escapeHTML(address)}" loading="lazy"
+        <img src="${escapeHTML(photoUrl)}" alt="${escapeHTML(address)}" loading="lazy"
           style="width:100%;height:100%;object-fit:cover;"
           onerror="this.style.display='none';this.parentElement.style.background='linear-gradient(135deg, ${color}33, ${color}11)';"/>
         <div style="position:absolute;bottom:0;left:0;right:0;height:40px;pointer-events:none;background:linear-gradient(to top, var(--color-surface, #fff), transparent);"></div>

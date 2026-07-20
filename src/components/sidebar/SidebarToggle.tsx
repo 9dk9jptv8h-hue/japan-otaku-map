@@ -18,7 +18,8 @@ export function SidebarToggle({ collapsed, onClick, className }: SidebarTogglePr
         'hover:scale-110 active:scale-95',
         'shadow-lg backdrop-blur-md',
         collapsed
-          ? 'fixed top-4 left-3 z-[9999] header-gradient text-white'
+          // z-50: sits above the sidebar panel and map content when collapsed
+          ? 'fixed top-4 left-3 z-50 header-gradient text-white'
           : 'glass text-[var(--color-text-dim)] hover:text-[var(--color-text)]',
         className
       )}
