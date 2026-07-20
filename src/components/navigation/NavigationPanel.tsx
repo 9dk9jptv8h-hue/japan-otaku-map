@@ -133,11 +133,20 @@ export function NavigationPanel() {
   const [loadingOriginStations, setLoadingOriginStations] = useState(false)
   const [selectedOriginStation, setSelectedOriginStation] = useState<TransitStation | null>(null)
   const [animating, setAnimating] = useState(true)
+  const [exiting, setExiting] = useState(false)
 
   useEffect(() => {
     const timer = setTimeout(() => setAnimating(false), 50)
     return () => clearTimeout(timer)
   }, [])
+
+  // ─── 带退出动画的关闭 ───
+  const handleClose = () => {
+    setExiting(true)
+    setTimeout(() => {
+      useNavigationStore.getState().clearNavigation()
+    }, 250)
+  }
 
   const {
     origin,
@@ -149,7 +158,6 @@ export function NavigationPanel() {
     isPanelOpen,
     setTransportMode,
     setPanelOpen,
-    clearNavigation,
   } = useNavigationStore()
 
   const activeStepIndex = useNavigationStore(s => s.activeStepIndex)
@@ -431,7 +439,7 @@ export function NavigationPanel() {
       {/* ── Header ── */}
       <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3">
         <button
-          onClick={clearNavigation}
+          onClick={handleClose}
           className="flex h-8 w-8 items-center justify-center rounded-lg transition-colors hover:bg-gray-100"
           aria-label="关闭导航"
         >
@@ -526,7 +534,7 @@ export function NavigationPanel() {
               继续导航
             </button>
             <button
-              onClick={() => useNavigationStore.getState().clearNavigation()}
+              onClick={handleClose}
               className="flex-1 rounded-lg border border-gray-200 py-2 text-xs font-medium text-[var(--color-text-dim)] active:scale-95 transition-transform"
             >
               结束导航
@@ -828,7 +836,7 @@ export function NavigationPanel() {
       {/* ── Action buttons ── */}
       <div className="flex gap-2 border-t border-gray-100 px-4 py-3">
         <button
-          onClick={clearNavigation}
+          onClick={handleClose}
           className="flex-1 rounded-lg bg-gray-100 px-3 py-2 text-xs font-medium text-[var(--color-text-dim)] transition-colors hover:bg-gray-200"
         >
           清除路线
@@ -855,7 +863,7 @@ export function NavigationPanel() {
           'flex max-h-[calc(100vh-240px)] flex-col overflow-hidden',
           glassPanel,
           'transition-all duration-300 ease-out',
-          animating ? 'translate-x-4 opacity-0' : 'translate-x-0 opacity-100',
+          exiting ? 'translate-x-4 opacity-0' : animating ? 'translate-x-4 opacity-0' : 'translate-x-0 opacity-100',
         )}
       >
         <div className="flex-1 overflow-y-auto">{panelContent}</div>
@@ -872,7 +880,7 @@ export function NavigationPanel() {
         'rounded-t-2xl',
         glassSheet,
         'transition-all duration-300 ease-out',
-        animating ? 'translate-y-4 opacity-0' : 'translate-y-0 opacity-100',
+        exiting ? 'translate-y-4 opacity-0' : animating ? 'translate-y-4 opacity-0' : 'translate-y-0 opacity-100',
       )}
     >
       {/* Drag handle */}
