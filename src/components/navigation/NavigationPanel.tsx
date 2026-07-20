@@ -3,7 +3,7 @@ import {
   Navigation,
   Footprints,
   Bus,
-  X,
+  ChevronRight,
   ChevronUp,
   ChevronDown,
   MapPin,
@@ -410,9 +410,13 @@ export function NavigationPanel() {
             }, 400)
           }}
           className="flex h-8 w-8 items-center justify-center rounded-lg transition-colors hover:bg-gray-100"
-          aria-label="关闭导航"
+          aria-label="收起面板"
         >
-          <X className="h-4 w-4 text-[var(--color-text-dim)]" />
+          {isDesktop ? (
+            <ChevronRight className="h-5 w-5 text-[var(--color-text-dim)]" />
+          ) : (
+            <ChevronDown className="h-5 w-5 text-[var(--color-text-dim)]" />
+          )}
         </button>
 
         {/* Transport mode toggle */}
