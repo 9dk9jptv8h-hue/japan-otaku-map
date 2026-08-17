@@ -34,7 +34,7 @@ export const JAPAN_BOUNDS: [[number, number], [number, number]] = [
 // vercel.json: /tiles/:path* → https://tiles.openfreemap.org/:path*
 // ================================================================
 
-const WORKER_TILE_BASE = 'https://japan-map-ai.9dk9jptv8h.workers.dev'
+const WORKER_TILE_BASE = 'https://japan-map-ai.9dk9jptv8h-hue.workers.dev'
 const DIRECT_TILES = 'https://tiles.openfreemap.org'
 
 // 运行时检测：是否已在 Vercel 部署上

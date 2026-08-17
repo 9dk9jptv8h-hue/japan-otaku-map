@@ -2,7 +2,7 @@ const TILE_CACHE = 'map-tiles-v4'
 // 直连 OpenFreeMap 的瓦片（无 /tiles 前缀）
 const TILE_HOSTS = ['tiles.openfreemap.org']
 // 走 Cloudflare Worker 代理的瓦片（hostname + /tiles 前缀）
-const TILE_PROXY_HOSTS = ['japan-map-ai.9dk9jptv8h.workers.dev']
+const TILE_PROXY_HOSTS = ['japan-map-ai.9dk9jptv8h-hue.workers.dev']
 const MAX_CACHE_ENTRIES = 2000
 let putCount = 0
 let tileCache = null
