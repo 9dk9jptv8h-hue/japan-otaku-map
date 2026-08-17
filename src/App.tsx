@@ -32,7 +32,7 @@ const CITY_DOTS = [
   { name: '广岛', top: '65%', left: '40%', delay: 1.3, size: 6 },
 ]
 
-function WelcomeScreen() {
+function WelcomeScreen({ onSkip }: { onSkip: () => void }) {
   const [count, setCount] = useState(mockLocations.length)
 
   /* 数字递增动画 — 0 → 176 */
@@ -183,6 +183,16 @@ function WelcomeScreen() {
           ))}
         </div>
 
+        {/* 跳过动画，直接进入地图 */}
+        <button
+          type="button"
+          onClick={onSkip}
+          className="px-5 py-2 rounded-full text-[13px] font-medium text-white/70 hover:text-white border border-white/20 hover:border-white/40 transition-colors"
+          style={{ animation: 'fadeInUp 0.5s 2s ease-out both' }}
+        >
+          跳过，直接进入地图 →
+        </button>
+
       </div>
     </div>
   )
@@ -286,12 +296,26 @@ function LoadingTransition({ isMapReady }: { isMapReady: boolean }) {
 /* ================================================================
    App Root — 零条件渲染三层方案
    所有层始终在DOM中，纯CSS opacity transition控制可见性
+   （4.7.0 起：欢迎/加载层在淡出后卸载，会话内二次访问跳过欢迎页）
    ================================================================ */
+
+/* 会话内记住已看过欢迎页，二次访问直接进入地图 */
+const WELCOME_SEEN_KEY = 'jom:welcome-seen'
+function hasSeenWelcome(): boolean {
+  try { return sessionStorage.getItem(WELCOME_SEEN_KEY) === '1' } catch { return false }
+}
+function markWelcomeSeen(): void {
+  try { sessionStorage.setItem(WELCOME_SEEN_KEY, '1') } catch { /* ignore */ }
+}
 
 export default function App() {
   const [mapRender, setMapRender] = useState(false)
-  const [welcomeOpacity, setWelcomeOpacity] = useState(1)
-  const [loadingOpacity, setLoadingOpacity] = useState(0)
+  // 会话内已看过欢迎页 → 跳过欢迎动画，直接进入加载态
+  const [welcomeSkipped] = useState(hasSeenWelcome)
+  const [welcomeMounted, setWelcomeMounted] = useState(!welcomeSkipped)
+  const [welcomeOpacity, setWelcomeOpacity] = useState(welcomeSkipped ? 0 : 1)
+  const [loadingOpacity, setLoadingOpacity] = useState(welcomeSkipped ? 1 : 0)
+  const [loadingMounted, setLoadingMounted] = useState(true)
   const isMapReady = useMapStore(s => s.isMapReady)
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
 
@@ -301,14 +325,23 @@ export default function App() {
     return () => window.removeEventListener('resize', handleResize)
   }, [])
 
+  // 跳过欢迎页（点击"跳过"按钮）
+  const skipWelcome = () => {
+    markWelcomeSeen()
+    setWelcomeOpacity(0)
+    setLoadingOpacity(1)
+  }
+
   // 阶段1→2：欢迎→加载（欢迎淡出，加载淡入交叉过渡）
   useEffect(() => {
+    if (welcomeSkipped) return  // 已看过：不安排定时器，保持加载态
     const t = setTimeout(() => {
       setWelcomeOpacity(0)     // 欢迎开始淡出
       setLoadingOpacity(1)     // 加载开始淡入（此时地图还没渲染！）
+      markWelcomeSeen()
     }, isMobile ? 2200 : 2500)
     return () => clearTimeout(t)
-  }, [isMobile])
+  }, [isMobile, welcomeSkipped])
 
   // 加载页淡入完成后（opacity达到1），才开始渲染地图
   useEffect(() => {
@@ -340,34 +373,52 @@ export default function App() {
     return () => { clearTimeout(t); clearTimeout(safetyTimer) }
   }, [mapRender, isMapReady])
 
+  // 欢迎层淡出完成后卸载（粒子动画不再占用 CPU/GPU）
+  useEffect(() => {
+    if (!welcomeMounted || welcomeOpacity > 0) return
+    const t = setTimeout(() => setWelcomeMounted(false), 700)  // 等0.6s过渡结束
+    return () => clearTimeout(t)
+  }, [welcomeMounted, welcomeOpacity])
+
+  // 加载层淡出完成后卸载（进度条/呼吸灯动画停止）
+  useEffect(() => {
+    if (loadingOpacity > 0 || !mapRender) return
+    const t = setTimeout(() => setLoadingMounted(false), 600)
+    return () => clearTimeout(t)
+  }, [loadingOpacity, mapRender])
+
   return (
     <ErrorBoundary>
       {/* 地图层 — 最低。加载页就绪后才开始渲染 */}
       {mapRender && <AppShell locations={mockLocations} />}
 
       {/* 加载过渡层 — 中间 */}
-      <div
-        className="fixed inset-0 z-[9998]"
-        style={{
-          opacity: loadingOpacity,
-          transition: 'opacity 0.5s ease-out',
-          pointerEvents: loadingOpacity > 0 ? 'auto' : 'none',
-        }}
-      >
-        <LoadingTransition isMapReady={isMapReady} />
-      </div>
+      {loadingMounted && (
+        <div
+          className="fixed inset-0 z-[9998]"
+          style={{
+            opacity: loadingOpacity,
+            transition: 'opacity 0.5s ease-out',
+            pointerEvents: loadingOpacity > 0 ? 'auto' : 'none',
+          }}
+        >
+          <LoadingTransition isMapReady={isMapReady} />
+        </div>
+      )}
 
       {/* 欢迎层 — 最顶层 */}
-      <div
-        className="fixed inset-0 z-[9999]"
-        style={{
-          opacity: welcomeOpacity,
-          transition: 'opacity 0.6s ease-out',
-          pointerEvents: welcomeOpacity > 0 ? 'auto' : 'none',
-        }}
-      >
-        <WelcomeScreen />
-      </div>
+      {welcomeMounted && (
+        <div
+          className="fixed inset-0 z-[9999]"
+          style={{
+            opacity: welcomeOpacity,
+            transition: 'opacity 0.6s ease-out',
+            pointerEvents: welcomeOpacity > 0 ? 'auto' : 'none',
+          }}
+        >
+          <WelcomeScreen onSkip={skipWelcome} />
+        </div>
+      )}
     </ErrorBoundary>
   )
 }
