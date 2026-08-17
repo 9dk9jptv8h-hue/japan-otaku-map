@@ -1,5 +1,8 @@
-const TILE_CACHE = 'map-tiles-v3'
+const TILE_CACHE = 'map-tiles-v4'
+// 直连 OpenFreeMap 的瓦片（无 /tiles 前缀）
 const TILE_HOSTS = ['tiles.openfreemap.org']
+// 走 Cloudflare Worker 代理的瓦片（hostname + /tiles 前缀）
+const TILE_PROXY_HOSTS = ['japan-map-ai.9dk9jptv8h.workers.dev']
 const MAX_CACHE_ENTRIES = 2000
 let putCount = 0
 let tileCache = null
@@ -29,8 +32,14 @@ async function trimCache(cache) {
 self.addEventListener('fetch', (e) => {
   const url = new URL(e.request.url)
 
-  // Only cache tile requests from OpenFreeMap
-  if (!TILE_HOSTS.some(h => url.hostname === h)) return
+  // 只缓存 GET 瓦片请求：
+  // 1) 直连 OpenFreeMap（任意路径，hostname 精确匹配）
+  // 2) Worker 代理 /tiles/*（避免误拦截同域 AI Chat POST）
+  const isTile =
+    e.request.method === 'GET' &&
+    (TILE_HOSTS.some(h => url.hostname === h) ||
+      (TILE_PROXY_HOSTS.some(h => url.hostname === h) && url.pathname.startsWith('/tiles')))
+  if (!isTile) return
 
   e.respondWith(
     (tileCache ? Promise.resolve(tileCache) : caches.open(TILE_CACHE)).then(cache =>

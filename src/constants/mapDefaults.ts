@@ -20,9 +20,13 @@ export const JAPAN_BOUNDS: [[number, number], [number, number]] = [
 // ================================================================
 // 瓦片代理策略（自动检测）
 //
-// 问题：workers.dev 在国内被墙，直连 openfreemap.org 也可能被墙
-//      但某些网络（如 VPN）下 Vercel 不可达而 OpenFreeMap 直连反而能通
-// 方案：启动时自动检测，优先直连 OpenFreeMap（延迟更低），Vercel 做 fallback
+// 问题：直连 openfreemap.org 在某些网络（尤其中国大陆）不可达。
+// 方案：启动时自动检测，优先直连 OpenFreeMap（延迟最低），
+//       不可达时回退到 Cloudflare Worker 瓦片代理（/tiles/* 路由）。
+//
+// 注意：曾经的 Vercel 代理（japan-otaku-map.vercel.app）已下线（404），
+//       2026-08 起改用 Worker 代理。workers.dev 在大陆同样可能被墙，
+//       若要彻底覆盖大陆用户，建议为 Worker 绑定自定义域名。
 //
 //   Vercel 部署 → 同源相对路径 /tiles/ → vercel.json rewrites → OpenFreeMap
 //   其他部署   → 自动选择可用的代理
@@ -30,7 +34,7 @@ export const JAPAN_BOUNDS: [[number, number], [number, number]] = [
 // vercel.json: /tiles/:path* → https://tiles.openfreemap.org/:path*
 // ================================================================
 
-const VERCEL_URL = 'https://japan-otaku-map.vercel.app'
+const WORKER_TILE_BASE = 'https://japan-map-ai.9dk9jptv8h.workers.dev'
 const DIRECT_TILES = 'https://tiles.openfreemap.org'
 
 // 运行时检测：是否已在 Vercel 部署上
@@ -54,11 +58,12 @@ function createTimeoutSignal(ms: number): { signal: AbortSignal; clear: () => vo
  * We cannot distinguish HTTP 200 from 503 — we only know the server is
  * "reachable at the TCP/TLS level". A server that accepts connections but
  * returns errors will still pass this probe.
+ * 使用 GET（而非 HEAD）：Worker 瓦片路由只注册了 GET。
  */
 async function probeUrl(url: string, timeoutMs: number): Promise<boolean> {
   const { signal, clear } = createTimeoutSignal(timeoutMs)
   try {
-    await fetch(url, { method: 'HEAD', mode: 'no-cors', signal })
+    await fetch(url, { method: 'GET', mode: 'no-cors', signal })
     return true
   } catch {
     return false
@@ -67,7 +72,7 @@ async function probeUrl(url: string, timeoutMs: number): Promise<boolean> {
   }
 }
 
-/** 自动检测最佳瓦片代理：优先直连 OpenFreeMap，不通则用 Vercel */
+/** 自动检测最佳瓦片代理：优先直连 OpenFreeMap，不通则用 Cloudflare Worker */
 export async function detectTileProxy(): Promise<string> {
   if (_detectedBase !== null) return _detectedBase
   if (_detectPromise) return _detectPromise
@@ -86,24 +91,24 @@ export async function detectTileProxy(): Promise<string> {
       return _detectedBase
     }
 
-    // Fallback: Vercel Edge 代理
-    if (await probeUrl(`${VERCEL_URL}/tiles/styles/positron`, 5000)) {
-      _detectedBase = VERCEL_URL
-      console.log('[瓦片代理] ⚠️ 使用 Vercel 代理')
+    // Fallback: Cloudflare Worker 瓦片代理
+    if (await probeUrl(`${WORKER_TILE_BASE}/tiles/styles/positron`, 5000)) {
+      _detectedBase = WORKER_TILE_BASE
+      console.log('[瓦片代理] ⚠️ 使用 Cloudflare Worker 代理')
       return _detectedBase
     }
 
-    // 全挂了就用 Vercel（让用户至少能看到报错）
-    console.warn('[瓦片代理] ❌ 所有代理不可达，默认使用 Vercel')
-    _detectedBase = VERCEL_URL
+    // 全挂了就用 Worker 代理（让用户至少能看到报错）
+    console.warn('[瓦片代理] ❌ 所有代理不可达，默认使用 Worker 代理')
+    _detectedBase = WORKER_TILE_BASE
     return _detectedBase
   })()
 
   return _detectPromise
 }
 
-/** 同步版 tileProxyBase（初始化前使用 Vercel 兜底） */
-export const tileProxyBase = isVercel ? '' : VERCEL_URL
+/** 同步版 tileProxyBase（初始化前使用 Worker 代理兜底） */
+export const tileProxyBase = isVercel ? '' : WORKER_TILE_BASE
 
 /** 用检测结果更新用于 transformRequest 的 base URL */
 export function getResolvedTileBase(): string {
@@ -113,12 +118,12 @@ export function getResolvedTileBase(): string {
 const resolveStyleUrl = (style: string, base: string): string => {
   if (!base) return `/tiles/styles/${style}`              // Vercel 相对路径
   if (base === DIRECT_TILES) return `${base}/styles/${style}`  // 直连 OpenFreeMap
-  return `${base}/tiles/styles/${style}`                  // Vercel 跨域代理
+  return `${base}/tiles/styles/${style}`                  // Worker 跨域代理
 }
 
 // NOTE: TILE_STYLES 在模块初始化时计算（同步），此时 detectTileProxy() 尚未运行，
-// tileProxyBase 固定为 Vercel fallback 值。这意味着 TILE_STYLES 的 style URL 始终指向
-// Vercel 代理，而非最终检测结果。运行时通过 getResolvedStyleUrl() 获取修正后的 URL。
+// tileProxyBase 固定为 Worker 代理兜底值。这意味着 TILE_STYLES 的 style URL 始终指向
+// Worker 代理，而非最终检测结果。运行时通过 getResolvedStyleUrl() 获取修正后的 URL。
 // 如果未来需要静态使用 TILE_STYLES 中的 URL（如 SSR 预渲染），需先 await detectTileProxy()。
 export const TILE_STYLES: Record<TileLayerStyle, {
   url: string
