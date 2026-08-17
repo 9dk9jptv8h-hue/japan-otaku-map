@@ -8,7 +8,7 @@ import {
   User,
 } from 'lucide-react'
 import { cn } from '@/utils/cn'
-import { chat } from '@/services/aiService'
+import { chat, SYSTEM_PROMPT } from '@/services/aiService'
 import { scanInput, getSafetyMessage } from '@/services/promptShield'
 import type { ChatMessage } from '@/services/aiService'
 
@@ -201,15 +201,18 @@ export function ChatAssistant() {
 
     try {
       // 3. Build history (limit to last MAX_HISTORY messages)
-      // NOTE: 系统提示词由 Worker 服务端注入，这里只发 user/assistant 历史
+      // 附带客户端系统提示词：仅作为旧 Worker 过渡期兜底，新 Worker 会丢弃并注入服务端版本
       const recentMessages = [...messages, userMsg]
         .filter((m) => !m.blocked && m.role !== 'system')
         .slice(-MAX_HISTORY)
 
-      const chatMessages: ChatMessage[] = recentMessages.map((m) => ({
-        role: m.role as 'user' | 'assistant',
-        content: m.content,
-      }))
+      const chatMessages: ChatMessage[] = [
+        { role: 'system', content: SYSTEM_PROMPT },
+        ...recentMessages.map((m) => ({
+          role: m.role as 'user' | 'assistant',
+          content: m.content,
+        })),
+      ]
 
       // 4. Call AI with AbortController for cleanup on unmount
       abortRef.current?.abort()
