@@ -7,6 +7,26 @@
 
 ---
 
+## [4.6.0] - 2026-08-17
+
+> 高优先级修复：瓦片代理 fallback、AI 账单安全、骏河屋地区筛选、大陆城市图片加载。
+
+### Fixed（修复）
+- **瓦片代理 fallback 失效**：原 fallback `japan-otaku-map.vercel.app` 已下线（404），改用 Cloudflare Worker `/tiles/*` 路由；探测改为 GET（Worker 瓦片路由未注册 HEAD）
+- **11 条骏河屋地址缺失县名**（北海道 3、愛知県 4、大阪府 2、福岡県 2），导致这些店铺永远无法按地区筛选 → 补全县名前缀，176 条全部通过地区提取校验
+- **城市照片热链 Wikimedia**：`upload.wikimedia.org` 在大陆不可用 → 59 张图片下载压缩为 WebP 自托管（`public/cities/`），署名与许可见 `public/cities/CREDITS.md`，弹窗增加来源链接
+
+### Security（安全）
+- **系统提示词服务端注入**：Worker 持有权威 SYSTEM_PROMPT，客户端 `system` 消息一律丢弃，前端不再发送（ChatAssistant/aiService）
+- **Origin 校验**：AI 路由仅允许 github.io / vercel.app / localhost，curl 等无 Origin 请求 403
+- **限流**：每 IP 10 分钟 20 次滑动窗口；绑定 `RATE_LIMIT_KV` 时跨 isolate 持久化，未绑定自动回退内存计数
+
+### Changed（变更）
+- Service Worker 缓存 Worker 代理瓦片（`/tiles/*` 前缀 + GET 校验，避免误拦 AI POST），缓存版本 v4
+- `worker/README.md` 补充限流 KV 绑定步骤与大陆自定义域名提示
+
+---
+
 ## [4.5.0] - 2026-07-20
 
 > 代码审查共发现 92 个问题：72 个修复、20 个验证后确认已修复无需改动。
