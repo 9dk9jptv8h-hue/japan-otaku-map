@@ -3,7 +3,7 @@ import maplibregl from 'maplibre-gl'
 import { useMapStore } from '@/store/useMapStore'
 import { useNavigationStore } from '@/store/useNavigationStore'
 import { CATEGORIES } from '@/constants/theme'
-import { getCityPhoto } from '@/utils/city-photo'
+import { getCityPhoto, getCityPhotoSource } from '@/utils/city-photo'
 import type { LocationData } from '@/types'
 
 function escapeHTML(str: string): string {
@@ -373,6 +373,7 @@ function renderPopupHTML(props: Record<string, unknown>): string {
   const color = categoryMeta?.color ?? '#607d8b'
   const label = categoryMeta?.label ?? ''
   const photoUrl = getCityPhoto(name, address)
+  const photoSourceUrl = getCityPhotoSource(name, address)
 
   // 解析标签
   let tags: string[] = []
@@ -416,6 +417,8 @@ function renderPopupHTML(props: Record<string, unknown>): string {
           style="width:100%;height:100%;object-fit:cover;"
           onerror="this.style.display='none';this.parentElement.style.background='linear-gradient(135deg, ${color}33, ${color}11)';"/>
         <div style="position:absolute;bottom:0;left:0;right:0;height:40px;pointer-events:none;background:linear-gradient(to top, var(--color-surface, #fff), transparent);"></div>
+        <a href="${escapeHTML(photoSourceUrl)}" target="_blank" rel="noopener noreferrer" title="图片来源：Wikimedia Commons"
+          style="position:absolute;bottom:6px;right:8px;font-size:9px;line-height:1;color:rgba(255,255,255,0.8);background:rgba(0,0,0,0.35);padding:2px 6px;border-radius:6px;text-decoration:none;">Wikimedia Commons</a>
         ${label ? `<span style="position:absolute;top:12px;left:12px;border-radius:8px;padding:2px 10px;font-size:10px;font-weight:700;color:white;background:${color};letter-spacing:0.05em;box-shadow:0 2px 8px rgba(0,0,0,0.2);">${label}</span>` : ''}
         ${ratingHtml ? `<span style="position:absolute;top:12px;right:12px;">${ratingHtml}</span>` : ''}
       </div>
