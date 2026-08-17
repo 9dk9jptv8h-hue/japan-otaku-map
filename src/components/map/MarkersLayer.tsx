@@ -3,7 +3,6 @@ import maplibregl from 'maplibre-gl'
 import { useMapStore } from '@/store/useMapStore'
 import { useNavigationStore } from '@/store/useNavigationStore'
 import { CATEGORIES } from '@/constants/theme'
-import { getCityPhoto, getCityPhotoSource } from '@/utils/city-photo'
 import type { LocationData } from '@/types'
 
 function escapeHTML(str: string): string {
@@ -372,8 +371,6 @@ function renderPopupHTML(props: Record<string, unknown>): string {
   const categoryMeta = CATEGORIES.find((c) => c.key === category)
   const color = categoryMeta?.color ?? '#607d8b'
   const label = categoryMeta?.label ?? ''
-  const photoUrl = getCityPhoto(name, address)
-  const photoSourceUrl = getCityPhotoSource(name, address)
 
   // 解析标签
   let tags: string[] = []
@@ -395,8 +392,8 @@ function renderPopupHTML(props: Record<string, unknown>): string {
     .join('')
 
   const ratingHtml = rating
-    ? `<span style="display:flex;align-items:center;gap:4px;border-radius:8px;background:rgba(0,0,0,0.4);padding:2px 8px;font-size:11px;font-weight:600;color:white;backdrop-filter:blur(4px);">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="#f2a7b4" stroke="none">
+    ? `<span style="display:flex;align-items:center;gap:4px;border-radius:8px;background:rgba(0,0,0,0.05);padding:2px 8px;font-size:11px;font-weight:600;color:var(--color-text, #1a1a2e);">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="#f59e0b" stroke="none">
           <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
         </svg>
         ${rating}
@@ -412,17 +409,11 @@ function renderPopupHTML(props: Record<string, unknown>): string {
 
   return `
     <div style="width:280px;overflow:hidden;font-family:'Microsoft YaHei','PingFang SC','Hiragino Sans GB',system-ui,sans-serif;">
-      <div style="position:relative;height:120px;overflow:hidden;background:#f0f0f0;">
-        <img src="${escapeHTML(photoUrl)}" alt="${escapeHTML(address)}" loading="lazy"
-          style="width:100%;height:100%;object-fit:cover;"
-          onerror="this.style.display='none';this.parentElement.style.background='linear-gradient(135deg, ${color}33, ${color}11)';"/>
-        <div style="position:absolute;bottom:0;left:0;right:0;height:40px;pointer-events:none;background:linear-gradient(to top, var(--color-surface, #fff), transparent);"></div>
-        <a href="${escapeHTML(photoSourceUrl)}" target="_blank" rel="noopener noreferrer" title="图片来源：Wikimedia Commons"
-          style="position:absolute;bottom:6px;right:8px;font-size:9px;line-height:1;color:rgba(255,255,255,0.8);background:rgba(0,0,0,0.35);padding:2px 6px;border-radius:6px;text-decoration:none;">Wikimedia Commons</a>
-        ${label ? `<span style="position:absolute;top:12px;left:12px;border-radius:8px;padding:2px 10px;font-size:10px;font-weight:700;color:white;background:${color};letter-spacing:0.05em;box-shadow:0 2px 8px rgba(0,0,0,0.2);">${label}</span>` : ''}
-        ${ratingHtml ? `<span style="position:absolute;top:12px;right:12px;">${ratingHtml}</span>` : ''}
-      </div>
       <div style="padding:12px 16px 16px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+          ${label ? `<span style="display:inline-flex;align-items:center;border-radius:8px;padding:2px 10px;font-size:10px;font-weight:700;color:white;background:${color};letter-spacing:0.05em;">${label}</span>` : ''}
+          ${ratingHtml || ''}
+        </div>
         <h3 style="font-size:15px;font-weight:700;color:var(--color-text, #1a1a2e);line-height:1.3;margin:0;">${escapeHTML(name)}</h3>
         ${nameJa ? `<p style="font-size:11px;color:var(--color-text-dim, #5c5c7a);opacity:0.6;margin:4px 0 0;">${escapeHTML(nameJa)}</p>` : ''}
         <p style="font-size:12px;color:var(--color-text-dim, #5c5c7a);line-height:1.5;margin:8px 0 0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${escapeHTML(description)}</p>
