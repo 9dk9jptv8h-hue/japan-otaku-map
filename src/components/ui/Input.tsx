@@ -1,4 +1,5 @@
 import { type InputHTMLAttributes, forwardRef, useRef, useImperativeHandle } from 'react'
+import { X } from 'lucide-react'
 import { cn } from '@/utils/cn'
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
@@ -14,7 +15,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
     return (
       <div className="relative w-full">
         {icon && (
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-sumi)]/40">
+          <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-sumi)]/40">
             {icon}
           </span>
         )}
@@ -22,10 +23,10 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           ref={innerRef}
           value={value}
           className={cn(
-            'w-full rounded-xl border border-[var(--color-sumi)]/10 bg-white/60 px-4 py-2.5 text-sm',
-            'placeholder:text-[var(--color-sumi)]/30',
-            'focus:outline-none focus:ring-2 focus:ring-[var(--color-sakura)]/50 focus:border-transparent',
-            'transition-all duration-300 ease-out',
+            'w-full rounded-xl border border-[var(--color-border)] bg-white/80 px-4 py-2.5 text-sm shadow-soft',
+            'placeholder:text-[var(--color-sumi)]/35',
+            'focus:border-[var(--color-accent)]/40 focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]/20',
+            'transition-[border-color,box-shadow,background-color] duration-300 ease-out',
             icon ? 'pl-10' : undefined,
             className
           )}
@@ -39,12 +40,9 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
               setTimeout(() => innerRef.current?.focus(), 0)
             }}
             aria-label="清除输入"
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-sumi)]/30 hover:text-[var(--color-sumi)]/60"
+            className="absolute right-2.5 top-1/2 flex h-6 min-h-6 w-6 min-w-6 -translate-y-1/2 items-center justify-center rounded-full text-[var(--color-sumi)]/35 transition-[color,background-color] hover:bg-[var(--color-sumi)]/8 hover:text-[var(--color-sumi)]/70"
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="18" y1="6" x2="6" y2="18" />
-              <line x1="6" y1="6" x2="18" y2="18" />
-            </svg>
+            <X className="h-3.5 w-3.5" />
           </button>
         )}
       </div>

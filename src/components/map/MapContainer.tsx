@@ -43,7 +43,7 @@ export function MapView({ children }: MapViewProps) {
         maxZoom: isMobile ? 18 : MAX_ZOOM, // 移动端限制 maxZoom=18 以减少高缩放级别瓦片加载量，节省带宽与电量
         maxBounds: JAPAN_BOUNDS,
         attributionControl: false,
-        pixelRatio: isMobile ? 1 : window.devicePixelRatio,
+        pixelRatio: isMobile ? 1 : Math.min(window.devicePixelRatio || 1, 1.75),
         fadeDuration: 0,
         refreshExpiredTiles: false,
         // NOTE: localIdeographFontFamily depends on locally-installed CJK fonts.
@@ -51,7 +51,7 @@ export function MapView({ children }: MapViewProps) {
         // so missing CJK glyphs will render as tofu (□) on systems without
         // the specified fonts installed.
         localIdeographFontFamily: "'Noto Sans SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif",
-        canvasContextAttributes: { antialias: false },
+        canvasContextAttributes: { antialias: false, powerPreference: 'high-performance' },
         trackResize: true,
         collectResourceTiming: false,
         crossSourceCollisions: false,

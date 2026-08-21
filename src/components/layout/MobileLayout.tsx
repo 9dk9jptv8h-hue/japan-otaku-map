@@ -12,7 +12,7 @@ import { RegionSelect } from '@/components/sidebar/RegionSelect'
 import { CardList } from '@/components/sidebar/CardList'
 import { useUIStore } from '@/store/useUIStore'
 import { useFilteredLocations } from '@/hooks/useFilteredLocations'
-import { Menu, X } from 'lucide-react'
+import { ChevronRight, List, Menu, X } from 'lucide-react'
 import { cn } from '@/utils/cn'
 
 interface MobileLayoutProps {
@@ -24,7 +24,7 @@ export function MobileLayout({ locations }: MobileLayoutProps) {
   const setSidebarOpen = useUIStore(s => s.setSidebarOpen)
   const { filteredLocations, regionList } = useFilteredLocations()
 
-  // Bug 1: Lock body scroll when drawer is open
+  // 抽屉打开时锁定背景滚动
   useEffect(() => {
     if (sidebarOpen) {
       document.body.style.overflow = 'hidden'
@@ -32,7 +32,7 @@ export function MobileLayout({ locations }: MobileLayoutProps) {
     }
   }, [sidebarOpen])
 
-  // Bug 4: Close drawer on Escape key
+  // Esc 关闭抽屉
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && sidebarOpen) {
@@ -52,92 +52,121 @@ export function MobileLayout({ locations }: MobileLayoutProps) {
       </MapView>
 
       {/* 地图控件 */}
-      <MapControls className="absolute top-16 right-3 z-[999]" />
-
-      {/* 顶部搜索栏 — 侧边栏打开时不渲染 */}
+        <MapControls
+          className="absolute right-3 z-[999]"
+          style={{ top: 'calc(env(safe-area-inset-top, 0px) + 64px)' }}
+        />
       {!sidebarOpen && (
         <div className="absolute top-0 left-0 right-0 z-[1000] p-2 pt-safe pointer-events-none">
           <div className="flex items-center gap-2 pointer-events-auto">
             <button
+              type="button"
               onClick={() => setSidebarOpen(true)}
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl glass shadow-soft border border-[var(--color-border)] active:scale-95 transition-transform"
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl glass border border-[var(--color-border)] shadow-soft transition-[transform,box-shadow] duration-200 active:scale-95"
               aria-label="打开菜单"
             >
               <Menu className="h-5 w-5 text-[var(--color-text-dim)]" />
             </button>
-            <div className="flex-1 glass rounded-xl shadow-soft border border-[var(--color-border)] pointer-events-auto">
+            <div className="min-w-0 flex-1 rounded-2xl glass border border-[var(--color-border)] shadow-soft pointer-events-auto">
               <SearchBar />
             </div>
           </div>
         </div>
       )}
 
-      {/* 遮罩 — 点击关闭抽屉 */}
+      {/* 遮罩 */}
       <div
         role="dialog"
         aria-label="关闭菜单"
         className={cn(
-          'fixed inset-0 z-40 bg-black/40 transition-opacity duration-300',
+          'fixed inset-0 z-40 bg-slate-900/45 backdrop-blur-[2px] transition-opacity duration-300',
           sidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
         )}
         onClick={() => setSidebarOpen(false)}
       />
 
-      {/* 左侧滑出抽屉 — 弹簧动画 */}
+      {/* 左侧滑出抽屉 */}
       <div
         className={cn(
-          'fixed top-0 left-0 bottom-0 z-50 w-[85vw] max-w-[360px]',
-          'sidebar-gradient flex flex-col',
-          'shadow-xl'
+          'sidebar-gradient fixed top-0 left-0 bottom-0 z-50 flex w-[88vw] max-w-[400px] flex-col',
+          'overflow-hidden rounded-r-[28px] border-r border-white/80 shadow-xl'
         )}
         style={{
-          transform: sidebarOpen ? 'translateX(0)' : 'translateX(-100%)',
-          transition: 'transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)',
+          transform: sidebarOpen ? 'translateX(0)' : 'translateX(-104%)',
+          transition: 'transform 0.38s cubic-bezier(0.34, 1.56, 0.64, 1)',
           willChange: 'transform',
+          pointerEvents: sidebarOpen ? 'auto' : 'none',
           paddingTop: 'env(safe-area-inset-top, 0px)',
           paddingBottom: 'env(safe-area-inset-bottom, 0px)',
         }}
       >
-        {/* Header — compact single line */}
-        <div className="header-gradient shrink-0 px-4 py-3 text-white flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <h1 className="text-lg font-bold">🗾 日本动漫店铺地图</h1>
-            <span className="inline-flex items-center rounded-full bg-white/20 px-2 py-0.5 text-xs">
-              📍 {locations.length}
-            </span>
+        {/* 品牌头部 */}
+        <div className="header-gradient relative shrink-0 px-4 pb-3.5 pt-4 text-white">
+          <div className="relative z-10 flex items-center justify-between gap-2">
+            <div className="flex min-w-0 items-center gap-2.5">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white/20 text-[17px] shadow-[inset_0_1px_0_rgba(255,255,255,0.35)]">
+                🗾
+              </div>
+              <div className="min-w-0">
+                <h1 className="truncate text-[15px] font-extrabold tracking-tight">
+                  日本动漫店铺地图
+                </h1>
+                <p className="mt-0.5 truncate text-[9px] font-semibold uppercase tracking-[0.16em] text-white/60">
+                  Otaku Store Map · {locations.length} stores
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setSidebarOpen(false)}
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/20 transition-[background-color,transform] duration-200 hover:bg-white/35 active:scale-90"
+              aria-label="关闭"
+            >
+              <X className="h-4 w-4" />
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={() => setSidebarOpen(false)}
-            className="flex h-8 w-8 items-center justify-center rounded-full bg-white/20 hover:bg-white/30 active:scale-90 transition-all"
-            aria-label="关闭"
-          >
-            <X className="h-4 w-4" />
-          </button>
         </div>
 
         {/* 搜索 + 筛选 + 地区 */}
-        <div className="shrink-0 space-y-3 px-3 py-3 glass border-b border-[var(--color-border)]">
-          {/* SearchBar + SortPopover 同行 */}
+        <div className="shrink-0 space-y-2.5 border-b border-[var(--color-border)] bg-white/55 px-3 py-3">
           <div className="flex items-center gap-2">
-            <div className="flex-1">
+            <div className="min-w-0 flex-1">
               <SearchBar />
             </div>
             <SortPopover />
           </div>
-
-          {/* FilterPanel — compact dots */}
-          <FilterPanel />
-
-          {/* RegionSelect — 地区下拉 */}
-          <RegionSelect regionList={regionList} />
+          <div className="flex items-center gap-2">
+            <div className="min-w-0 flex-1">
+              <FilterPanel locations={locations} />
+            </div>
+            <RegionSelect regionList={regionList} />
+          </div>
         </div>
 
         {/* 列表 */}
-        <div className="flex-1 overflow-y-auto px-3 pt-2 pb-safe">
+        <div className="flex-1 overflow-y-auto overscroll-contain px-3 pt-3 pb-safe">
           <CardList locations={filteredLocations} total={locations.length} />
         </div>
       </div>
+
+      {/* 底部结果栏 — 提升列表入口的可见性 */}
+      {!sidebarOpen && (
+        <button
+          type="button"
+          onClick={() => setSidebarOpen(true)}
+          className={cn(
+            'absolute left-3 right-[92px] z-[998] flex h-12 items-center justify-center gap-1.5',
+            'rounded-2xl glass border border-[var(--color-border)] shadow-elevated',
+            'text-[12.5px] font-semibold text-[var(--color-text)]',
+            'transition-[transform,box-shadow] duration-200 active:scale-[0.97]'
+          )}
+          style={{ bottom: 'calc(env(safe-area-inset-bottom, 0px) + 14px)' }}
+        >
+          <List className="h-4 w-4 text-[var(--color-accent)]" />
+          {filteredLocations.length}/{locations.length} 个地点
+          <ChevronRight className="h-3.5 w-3.5 text-[var(--color-text-dim)]" />
+        </button>
+      )}
 
       {/* 导航面板 — 底部 Sheet */}
       <NavigationPanel />

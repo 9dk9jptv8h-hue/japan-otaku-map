@@ -48,76 +48,93 @@ export const LocationCard = memo(function LocationCard({ location, index }: Loca
   return (
     <div
       ref={cardRef}
+      role="button"
+      tabIndex={0}
       onClick={handleClick}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          handleClick()
+        }
+      }}
       onMouseEnter={() => setHovered(location.id)}
       onMouseLeave={() => setHovered(null)}
+      aria-label={`${location.name} - ${catMeta.label}`}
+      aria-pressed={isSelected}
       className={cn(
-        'location-card rounded-[16px] bg-white p-3',
-        'transition-all duration-300 ease-out',
+        'location-card group relative rounded-2xl bg-white/95 p-3',
+        'transition-[transform,box-shadow,border-color,background-color] duration-300 ease-out',
         'hover:-translate-y-0.5 hover:shadow-card',
         'active:scale-[0.98]',
-        isSelected && 'ring-2 ring-offset-1',
+        isSelected && 'ring-2 ring-offset-1 ring-offset-white',
         isHovered && !isSelected && 'shadow-card',
         flyToMarker ? 'cursor-pointer' : 'cursor-default'
       )}
       style={{
+        animationDelay: `${Math.min(index, 12) * 30}ms`,
+          // 只让首屏卡片播放入场动画，屏幕外 160+ 张卡片保持零动画开销
+          animation: index < 14 ? undefined : 'none',
         boxShadow: isSelected
-          ? `0 4px 20px ${catMeta.color}25`
+          ? `0 10px 32px ${catMeta.color}30`
           : undefined,
+        borderColor: isSelected ? `${catMeta.color}66` : undefined,
         '--tw-ring-color': isSelected ? catMeta.color : undefined,
-        // NOTE: animationDelay only fires on mount, not on re-sort.
-        // To replay the stagger on sort-order changes, the parent CardList
-        // would need to supply a key prop derived from the current sort order
-        // to force full re-mount of this component.
-        animationDelay: `${index * 30}ms`,
       } as React.CSSProperties}
-      aria-label={`${location.name} - ${catMeta.label}`}
+      data-selected={isSelected || undefined}
     >
-      {/* Top row: brand dot + label + rating */}
-      <div className="flex items-center justify-between mb-1.5">
-        <div className="flex items-center gap-1.5">
-          <span
-            className="inline-block w-2 h-2 rounded-full shrink-0"
-            style={{ backgroundColor: catMeta.color }}
-          />
-          <span className="text-[11px] font-medium text-[var(--color-text-dim)]">
-            {catMeta.label}
-          </span>
-        </div>
+      {/* 选中态左侧品牌色条 */}
+      <span
+        aria-hidden
+        className="absolute left-0 top-0 h-full w-1 rounded-r-full transition-opacity duration-300"
+        style={{
+          background: `linear-gradient(180deg, ${catMeta.color}, ${catMeta.color}22)`,
+          opacity: isSelected ? 1 : 0,
+        }}
+      />
+
+      {/* 品牌 + 评分 */}
+      <div className="relative mb-1.5 flex items-center justify-between gap-2">
+        <span
+          className="inline-flex min-w-0 items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-semibold"
+          style={{ backgroundColor: catMeta.color + '14', color: catMeta.color }}
+        >
+          <span className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ backgroundColor: catMeta.color }} />
+          <span className="truncate">{catMeta.label}</span>
+        </span>
         {location.rating != null && (
-          <div className="flex items-center gap-0.5">
+          <span className="flex shrink-0 items-center gap-0.5">
             <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
             <span className="text-[11px] font-semibold text-[var(--color-text)]">
               {location.rating.toFixed(1)}
             </span>
-          </div>
+          </span>
         )}
       </div>
 
-      {/* Store name */}
-      <h3 className="text-sm font-bold text-[var(--color-text)] truncate mb-1">
+      {/* 店名 */}
+      <h3 className="relative mb-1 truncate text-[13.5px] font-bold leading-snug text-[var(--color-text)]">
         {location.name}
       </h3>
 
-      {/* Address */}
+      {/* 地址 */}
       {location.address && (
-        <div className="flex items-center gap-1 mb-2">
-          <MapPin className="h-3 w-3 shrink-0 text-[var(--color-text-dim)]" />
-          <span className="text-xs text-[var(--color-text-dim)] truncate">
+        <div className="relative mb-2 flex items-center gap-1">
+          <MapPin className="h-3 w-3 shrink-0 text-[var(--color-text-dim)]/70" />
+          <span className="truncate text-[11.5px] text-[var(--color-text-dim)]">
             {location.address}
           </span>
         </div>
       )}
 
-      {/* Tags — max 3 */}
+      {/* 标签 */}
       {location.tags.length > 0 && (
-        <div className="flex flex-wrap gap-1">
+        <div className="relative flex flex-wrap gap-1">
           {location.tags.slice(0, 3).map((tag) => (
             <span
               key={tag}
               className="rounded-full px-2 py-0.5 text-[10px] font-medium"
               style={{
-                backgroundColor: catMeta.color + '15',
+                backgroundColor: catMeta.color + '12',
                 color: catMeta.color,
               }}
             >
@@ -127,7 +144,7 @@ export const LocationCard = memo(function LocationCard({ location, index }: Loca
         </div>
       )}
 
-      {/* Navigate button — only show when selected */}
+      {/* 导航按钮 — 选中后展开 */}
       {isSelected && (
         <button
           type="button"
@@ -136,18 +153,17 @@ export const LocationCard = memo(function LocationCard({ location, index }: Loca
             startNavigation(location)
           }}
           aria-label={`导航到${location.name}`}
-          className="mt-2.5 flex w-full items-center justify-center gap-1.5 rounded-xl py-2 text-xs font-semibold
-            transition-all duration-200 active:scale-[0.97]"
+          className="mt-2.5 flex w-full items-center justify-center gap-1.5 rounded-xl py-2 text-xs font-semibold transition-[transform,background-color,box-shadow] duration-200 active:scale-[0.97]"
           style={{
-            background: catMeta.color + '18',
+            background: catMeta.color + '16',
             color: catMeta.color,
+            animation: 'cardSlideIn 0.3s var(--ease-smooth) both',
           }}
         >
           <Navigation className="h-3.5 w-3.5" />
           导航到这里
         </button>
       )}
-
     </div>
   )
 })

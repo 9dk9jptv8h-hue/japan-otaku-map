@@ -36,31 +36,33 @@ export function SortPopover() {
   return (
     <div ref={ref} className="relative shrink-0">
       <button
+        type="button"
         onClick={() => setOpen(!open)}
         className={cn(
-          'flex h-9 w-9 items-center justify-center rounded-xl',
-          'border border-[var(--color-border)] bg-white/80',
-          'transition-all duration-200',
-          'hover:border-[var(--color-accent)]/40 hover:bg-white',
+          'flex h-9 w-9 items-center justify-center rounded-xl border shadow-soft',
+          'transition-[border-color,background-color,transform] duration-200',
           'active:scale-95',
-          open && 'border-[var(--color-accent)]/40 bg-white'
+          open
+            ? 'border-[var(--color-accent)]/35 bg-white text-[var(--color-accent)]'
+            : 'border-[var(--color-border)] bg-white/80 text-[var(--color-text-dim)] hover:border-[var(--color-accent)]/35 hover:bg-white hover:text-[var(--color-text)]'
         )}
         aria-label="排序方式"
         aria-expanded={open}
       >
-        <ArrowUpDown className="h-4 w-4 text-[var(--color-text-dim)]" />
+        <ArrowUpDown className="h-4 w-4" />
       </button>
 
       {open && (
-        <div className="absolute top-full right-0 mt-1.5 z-50 w-[140px] rounded-xl glass border border-[var(--color-border)] shadow-elevated py-1">
+        <div className="popover-panel absolute right-0 top-full z-50 mt-1.5 w-[148px] rounded-2xl glass border border-[var(--color-border)] py-1 shadow-elevated">
           {SORT_OPTIONS.map((opt) => (
             <button
               key={opt.key}
+              type="button"
               onClick={() => handleSelect(opt.key)}
               aria-label={opt.label}
               className={cn(
-                'w-full flex items-center justify-between px-3 py-2 text-[12px] transition-colors',
-                'hover:bg-[var(--color-accent)]/5',
+                'flex w-full items-center justify-between px-3 py-2.5 text-[12px] transition-colors',
+                'hover:bg-[var(--color-accent)]/6',
                 sortBy === opt.key
                   ? 'font-bold text-[var(--color-accent)]'
                   : 'text-[var(--color-text-dim)]'

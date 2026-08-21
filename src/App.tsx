@@ -33,7 +33,7 @@ const CITY_DOTS = [
 ]
 
 function WelcomeScreen({ onSkip }: { onSkip: () => void }) {
-  const [count, setCount] = useState(mockLocations.length)
+  const [count, setCount] = useState(0)
 
   /* 数字递增动画 — 0 → 176 */
   useEffect(() => {
@@ -59,7 +59,7 @@ function WelcomeScreen({ onSkip }: { onSkip: () => void }) {
 
   /* 背景粒子 — 40个彩色光点 */
   const particles = useMemo(() =>
-    Array.from({ length: 40 }, (_, i) => ({
+    Array.from({ length: window.innerWidth < 768 ? 20 : 40 }, (_, i) => ({
       id: i,
       left: `${Math.random() * 100}%`,
       top: `${Math.random() * 100}%`,
@@ -188,7 +188,7 @@ function WelcomeScreen({ onSkip }: { onSkip: () => void }) {
           type="button"
           onClick={onSkip}
           className="px-5 py-2 rounded-full text-[13px] font-medium text-white/70 hover:text-white border border-white/20 hover:border-white/40 transition-colors"
-          style={{ animation: 'fadeInUp 0.5s 2s ease-out both' }}
+          style={{ animation: 'fadeInUp 0.5s 1.2s ease-out both' }}
         >
           跳过，直接进入地图 →
         </button>
@@ -309,7 +309,7 @@ function markWelcomeSeen(): void {
 }
 
 export default function App() {
-  const [mapRender, setMapRender] = useState(false)
+  const [mapRender] = useState(true)
   // 会话内已看过欢迎页 → 跳过欢迎动画，直接进入加载态
   const [welcomeSkipped] = useState(hasSeenWelcome)
   const [welcomeMounted, setWelcomeMounted] = useState(!welcomeSkipped)
@@ -329,7 +329,7 @@ export default function App() {
   const skipWelcome = () => {
     markWelcomeSeen()
     setWelcomeOpacity(0)
-    setLoadingOpacity(1)
+    setLoadingOpacity(useMapStore.getState().isMapReady ? 0 : 1)
   }
 
   // 阶段1→2：欢迎→加载（欢迎淡出，加载淡入交叉过渡）
@@ -337,41 +337,33 @@ export default function App() {
     if (welcomeSkipped) return  // 已看过：不安排定时器，保持加载态
     const t = setTimeout(() => {
       setWelcomeOpacity(0)     // 欢迎开始淡出
-      setLoadingOpacity(1)     // 加载开始淡入（此时地图还没渲染！）
+      setLoadingOpacity(useMapStore.getState().isMapReady ? 0 : 1) // 地图已就绪则直接过渡到地图
       markWelcomeSeen()
-    }, isMobile ? 2200 : 2500)
+    }, isMobile ? 2000 : 2400)
     return () => clearTimeout(t)
   }, [isMobile, welcomeSkipped])
 
-  // 加载页淡入完成后（opacity达到1），才开始渲染地图
-  useEffect(() => {
-    if (loadingOpacity < 0.5) return  // loading还没淡入完
-    const t = setTimeout(() => {
-      setMapRender(true)  // 地图开始加载（加载页已完全覆盖）
-    }, 500)  // 等loading淡入动画(0.5s)完成
-    return () => clearTimeout(t)
-  }, [loadingOpacity])
 
   // 地图就绪 → 加载页淡出
   useEffect(() => {
-    if (!mapRender) return
+    // 地图已后台常驻，无需 gating
 
     const safetyTimer = setTimeout(() => {
       // Force exit loading after 20s even if map not ready
       if (!isMapReady) {
         console.warn('[App] Map loading timeout, forcing exit')
-        setMapRender(true)
+        // 地图已后台常驻，此处仅记录超时
       }
     }, 20000)
 
     if (!isMapReady) return () => clearTimeout(safetyTimer)
 
-    // 额外等1秒让进度条走完
+    // 450ms 冲刺让进度条走完
     const t = setTimeout(() => {
       setLoadingOpacity(0)  // 加载页淡出，地图露出来
-    }, 1000)
+    }, 450)
     return () => { clearTimeout(t); clearTimeout(safetyTimer) }
-  }, [mapRender, isMapReady])
+  }, [isMapReady])
 
   // 欢迎层淡出完成后卸载（粒子动画不再占用 CPU/GPU）
   useEffect(() => {
@@ -382,14 +374,14 @@ export default function App() {
 
   // 加载层淡出完成后卸载（进度条/呼吸灯动画停止）
   useEffect(() => {
-    if (loadingOpacity > 0 || !mapRender) return
+    if (loadingOpacity > 0) return
     const t = setTimeout(() => setLoadingMounted(false), 600)
     return () => clearTimeout(t)
-  }, [loadingOpacity, mapRender])
+  }, [loadingOpacity])
 
   return (
     <ErrorBoundary>
-      {/* 地图层 — 最低。加载页就绪后才开始渲染 */}
+      {/* 地图层 — 应用挂载即开始后台加载，加载页只负责视觉过渡 */}
       {mapRender && <AppShell locations={mockLocations} />}
 
       {/* 加载过渡层 — 中间 */}
