@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { useFilterStore } from '@/store/useFilterStore'
 import { CATEGORIES } from '@/constants/theme'
-import type { LocationData } from '@/types'
+import type { LocationCategory, LocationData } from '@/types'
 import { cn } from '@/utils/cn'
 
 interface FilterPanelProps {
@@ -42,9 +42,23 @@ export function FilterPanel({ locations }: FilterPanelProps) {
   const selectedCategories = useFilterStore((s) => s.selectedCategories)
   const toggleCategory = useFilterStore((s) => s.toggleCategory)
   const clearCategories = useFilterStore((s) => s.clearCategories)
+  const selectOnly = useFilterStore((s) => s.selectOnly)
 
   const allSelected = selectedCategories.length === CATEGORIES.length
   const partialSelected = selectedCategories.length > 0 && !allSelected
+
+  const handleCategoryClick = (cat: { key: LocationCategory }) => {
+    if (allSelected) {
+      // 全选态下点品牌 → 聚焦独显该品牌（用户直觉：点谁看谁）
+      selectOnly(cat.key)
+    } else if (selectedCategories.includes(cat.key) && selectedCategories.length === 1) {
+      // 独显态再点当前独显品牌 → 恢复全选
+      clearCategories()
+    } else {
+      // 部分选中态 → 保持原有 toggle 微调
+      toggleCategory(cat.key)
+    }
+  }
 
   const counts = useMemo(() => {
     if (!locations || locations.length === 0) return null
@@ -86,7 +100,7 @@ export function FilterPanel({ locations }: FilterPanelProps) {
             <button
               key={cat.key}
               type="button"
-              onClick={() => toggleCategory(cat.key)}
+              onClick={() => handleCategoryClick(cat)}
               aria-pressed={active}
               aria-label={`筛选 ${cat.label}`}
               className={cn(CARD_BASE, dimmed && 'opacity-40')}

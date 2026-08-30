@@ -10,6 +10,7 @@ interface FilterStore {
   selectedCategories: LocationCategory[]
   toggleCategory: (cat: LocationCategory) => void
   clearCategories: () => void
+  selectOnly: (cat: LocationCategory) => void
 
   sortBy: SortOption
   setSortBy: (sort: SortOption) => void
@@ -30,6 +31,7 @@ export const useFilterStore = create<FilterStore>((set) => ({
         : [...s.selectedCategories, cat],
     })),
   clearCategories: () => set({ selectedCategories: ['animate', 'melonbooks', 'mandarake', 'surugaya', 'gamers', 'lashinbang', 'kbooks'] }),
+  selectOnly: (cat) => set({ selectedCategories: [cat] }),
 
   sortBy: 'rating',
   setSortBy: (sort) => set({ sortBy: sort }),
