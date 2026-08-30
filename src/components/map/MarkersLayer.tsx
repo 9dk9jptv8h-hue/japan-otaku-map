@@ -421,7 +421,7 @@ function renderPopupHTML(props: Record<string, unknown>): string {
   return `
     <div style="width:280px;overflow:hidden;font-family:'Microsoft YaHei','PingFang SC','Hiragino Sans GB',system-ui,sans-serif;">
       <div style="padding:12px 16px 16px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;padding-right:32px;">
           ${label ? `<span style="display:inline-flex;align-items:center;border-radius:8px;padding:2px 10px;font-size:10px;font-weight:700;color:white;background:${color};letter-spacing:0.05em;">${label}</span>` : ''}
           ${ratingHtml || ''}
         </div>
