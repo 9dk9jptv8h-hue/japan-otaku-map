@@ -63,7 +63,7 @@ export function FilterPanel({ locations }: FilterPanelProps) {
             key={cat.key}
             type="button"
             onClick={() => toggleCategory(cat.key)}
-            aria-pressed={selectedCategories.includes(cat.key)}
+            aria-pressed={active}
             aria-label={`筛选 ${cat.label}`}
             className={cn(
               CHIP_BASE,

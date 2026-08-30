@@ -47,10 +47,33 @@ export async function chat(messages: ChatMessage[], signal?: AbortSignal): Promi
   const controller = new AbortController()
   const timeoutId = setTimeout(() => controller.abort(), 30000)
 
-  // 合并外部 signal 和内部超时 signal
-  const combinedSignal = signal
-    ? AbortSignal.any([controller.signal, signal])
-    : controller.signal
+  // 区分取消来源：timeout（内部超时）| user（外部调用方主动取消/组件卸载）
+  // 用可变容器对象保存，避免 TS 控制流分析把闭包内的赋值窄化掉
+  //（TS 不会追踪嵌套函数闭包内的赋值，直接 let 会报 TS2367）
+  const abortState: { source: 'timeout' | 'user' } = { source: 'timeout' }
+
+  // 合并外部 signal 和内部超时 signal。
+  // AbortSignal.any 在旧浏览器中不存在（同步抛 TypeError 绕过错误处理），
+  // 因此做能力检测：不支持的浏览器退化手动组合 —— 监听外部 signal 的
+  // abort 事件转发给内部 controller。
+  let combinedSignal: AbortSignal = controller.signal
+  if (signal) {
+    const onUserAbort = () => {
+      abortState.source = 'user'
+      // 仅在不支持 AbortSignal.any 时手动转发；现代浏览器由 AbortSignal.any 触发 fetch abort
+      if (typeof AbortSignal.any !== 'function') {
+        controller.abort()
+      }
+    }
+    if (signal.aborted) {
+      onUserAbort()
+    } else {
+      signal.addEventListener('abort', onUserAbort, { once: true })
+    }
+    if (typeof AbortSignal.any === 'function') {
+      combinedSignal = AbortSignal.any([controller.signal, signal])
+    }
+  }
 
   let response: Response
 
@@ -63,6 +86,10 @@ export async function chat(messages: ChatMessage[], signal?: AbortSignal): Promi
     })
   } catch (err) {
     if (err instanceof DOMException && err.name === 'AbortError') {
+      // 区分「超时」与「用户取消」，分别给出不同提示（B5）
+      if (abortState.source === 'user') {
+        throw new Error('请求已取消')
+      }
       throw new Error('请求超时，请稍后重试')
     }
     throw new Error(

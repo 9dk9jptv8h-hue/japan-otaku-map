@@ -24,12 +24,29 @@ function RouteLayerInner() {
   positionRef.current = userPosition
   const bearingRef = useRef(userBearing)
   bearingRef.current = userBearing
+  // 记录上一次渲染的 route 引用，用于判断「路线数据是否真正变化」：
+  // 仅 route 变化时重建 source + fitBounds；origin/destination 单独变化只增量更新起终点，
+  // 避免每次导航状态变化都拆 source + 双次 fitBounds（镜头「拉远-拉近」双跳）
+  const lastRouteRef = useRef<typeof route>(null)
+  // 仅在真正卸载时才拆除图层/source（与 MarkersLayer 一致）；依赖变化时保留 source 以便增量 setData
+  const willUnmountRef = useRef(false)
+
+  // MUST be declared BEFORE the main effect so its cleanup runs first on unmount
+  useEffect(() => {
+    return () => {
+      willUnmountRef.current = true
+    }
+  }, [])
 
   useEffect(() => {
     if (!mapInstance) return
 
     const map = mapInstance
     const hasData = !!(route && origin && destination)
+    // 判断本次运行路线数据是否真正变化（与上次渲染比较）
+    const routeChanged = lastRouteRef.current !== route
+    // 记录本次渲染的路线，供后续「路线是否变化」判断使用（重置见下方 !hasData 分支）
+    lastRouteRef.current = route
 
     // 构建 GeoJSON FeatureCollection — 三种 feature 合并到单一 source
     const buildRouteGeoJSON = () => ({
@@ -116,12 +133,27 @@ function RouteLayerInner() {
         } catch (e) {
           // ignore "does not exist" errors
         }
+        lastRouteRef.current = null // 下次导航开始时视为全新路线，重建 + fitBounds
         return
       }
 
       const geojson = buildRouteGeoJSON()
 
-      // 数据源已存在 → 更新数据 + 重建可能丢失的图层
+      // 路线数据真正变化 → 强制重建 source（移除旧 source/layers，走下方 addSource 分支 + 一次 fitBounds）。
+      // 仅 origin/destination 变化（routeChanged=false）→ 保留 source，走 setData 增量更新，避免重复拆源/双次 fitBounds
+      if (routeChanged && map.getSource('nav-route')) {
+        try {
+          if (map.getLayer('nav-route-line')) map.removeLayer('nav-route-line')
+          if (map.getLayer('nav-route-outline')) map.removeLayer('nav-route-outline')
+          if (map.getLayer('nav-route-end')) map.removeLayer('nav-route-end')
+          if (map.getLayer('nav-route-start')) map.removeLayer('nav-route-start')
+          if (map.getSource('nav-route')) map.removeSource('nav-route')
+        } catch (e) {
+          if (e instanceof Error && !e.message.includes('does not exist')) console.warn('Cleanup error:', e)
+        }
+      }
+
+      // 数据源已存在 → 更新数据 + 重建可能丢失的图层（不触发 fitBounds）
       if (map.getSource('nav-route')) {
         ;(map.getSource('nav-route') as maplibregl.GeoJSONSource).setData(geojson as any)
         ensureRouteLayers()
@@ -230,7 +262,9 @@ function RouteLayerInner() {
     return () => {
       map.off('style.load', setupLayers)
       map.off('styledata', handleStyleData)
-      // 清除图层和数据源（如果还存在）
+      // 依赖变化时保留 source/layers，由 setupLayers 内部决定是否重建（避免重复拆源）；
+      // 仅在真正卸载时拆除（MapContainer 卸载整个地图时会一并销毁，这里做防御性清理）
+      if (!willUnmountRef.current) return
       try {
         if (map.getLayer('nav-route-line')) map.removeLayer('nav-route-line')
         if (map.getLayer('nav-route-outline')) map.removeLayer('nav-route-outline')
@@ -436,6 +470,24 @@ function RouteLayerInner() {
     // Toggle bearing arrow layer on/off as bearing comes and goes
     const hasBearing = userBearing != null && userBearing >= 0
     const arrowExists = !!map.getLayer('nav-user-arrow')
+
+    const addArrowLayer = () => {
+      if (map.getLayer('nav-user-arrow')) return
+      map.addLayer({
+        id: 'nav-user-arrow',
+        type: 'symbol',
+        source: 'nav-user-position',
+        layout: {
+          'icon-image': 'nav-arrow',
+          'icon-size': ['interpolate', ['linear'], ['zoom'], 10, 0.35, 16, 0.55],
+          'icon-rotate': ['get', 'bearing'],
+          'icon-rotation-alignment': 'map',
+          'icon-allow-overlap': true,
+          'icon-ignore-placement': true,
+        },
+      })
+    }
+
     if (hasBearing && !arrowExists) {
       if (!map.hasImage('nav-arrow')) {
         const svg = `<svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -444,23 +496,12 @@ function RouteLayerInner() {
         const img = new Image()
         img.onload = () => {
           if (!map.hasImage('nav-arrow')) map.addImage('nav-arrow', img as any)
+          // onload 后立即补建箭头图层，否则箭头要等下一次 GPS 更新才出现
+          addArrowLayer()
         }
         img.src = 'data:image/svg+xml;base64,' + btoa(svg)
-      }
-      if (map.hasImage('nav-arrow')) {
-        map.addLayer({
-          id: 'nav-user-arrow',
-          type: 'symbol',
-          source: 'nav-user-position',
-          layout: {
-            'icon-image': 'nav-arrow',
-            'icon-size': ['interpolate', ['linear'], ['zoom'], 10, 0.35, 16, 0.55],
-            'icon-rotate': ['get', 'bearing'],
-            'icon-rotation-alignment': 'map',
-            'icon-allow-overlap': true,
-            'icon-ignore-placement': true,
-          },
-        })
+      } else {
+        addArrowLayer()
       }
     } else if (!hasBearing && arrowExists) {
       map.removeLayer('nav-user-arrow')

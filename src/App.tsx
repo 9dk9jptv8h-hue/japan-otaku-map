@@ -373,11 +373,15 @@ export default function App() {
   }, [welcomeMounted, welcomeOpacity])
 
   // 加载层淡出完成后卸载（进度条/呼吸灯动画停止）
+  // C1: 首次访问时欢迎层先展示，此时 loadingOpacity=0 但加载层必须保持挂载，
+  // 否则欢迎页淡出后、地图仍慢速加载时会露出空白区域、无进度反馈。
+  // 只有欢迎阶段彻底结束（welcomeMounted=false）且加载层 opacity 归零后才卸载。
   useEffect(() => {
+    if (welcomeMounted) return
     if (loadingOpacity > 0) return
     const t = setTimeout(() => setLoadingMounted(false), 600)
     return () => clearTimeout(t)
-  }, [loadingOpacity])
+  }, [loadingOpacity, welcomeMounted])
 
   return (
     <ErrorBoundary>

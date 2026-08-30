@@ -118,6 +118,8 @@ export function ChatAssistant() {
   const isComposingRef = useRef(false)
   const mountedRef = useRef(true)
   const abortRef = useRef<AbortController | null>(null)
+  // C3-3: 与 isLoading 同步的 ref，防止闭包中 isLoading 滞后导致连发竞态
+  const isLoadingRef = useRef(false)
 
   /* ---- effects ---- */
 
@@ -161,7 +163,8 @@ export function ChatAssistant() {
 
   const handleSend = useCallback(async () => {
     const text = input.trim()
-    if (!text || isLoading) return
+    // C3-3: 用 ref 即时判断，确保同一时间只有一次请求在途
+    if (!text || isLoadingRef.current) return
 
     // 1. Prompt shield
     const scanResult = scanInput(text.normalize('NFC'))
@@ -197,6 +200,7 @@ export function ChatAssistant() {
     }
     setMessages((prev) => [...prev, userMsg])
     setIsLoading(true)
+    isLoadingRef.current = true
     setError(null)
 
     try {
@@ -235,16 +239,19 @@ export function ChatAssistant() {
       }
       setInput('')
     } catch (err: unknown) {
+      // 被主动取消的请求（组件卸载/面板关闭等）不报错、也不显示「请求超时」
+      if (abortRef.current?.signal.aborted) return
       const message =
         err instanceof Error ? err.message : '请求失败，请稍后再试'
       setError(message)
     } finally {
+      isLoadingRef.current = false
       setIsLoading(false)
       if (mountedRef.current) {
         setTimeout(() => inputRef.current?.focus(), 50)
       }
     }
-  }, [input, isLoading, messages])
+  }, [input, messages])
 
   /* ---- key handling ---- */
 
@@ -254,13 +261,33 @@ export function ChatAssistant() {
         closePanel()
         return
       }
+      // C3-2: 焦点循环——面板打开时 Tab 在面板内循环，焦点不逃逸
+      if (e.key === 'Tab' && isOpen) {
+        const panel = panelRef.current
+        if (!panel) return
+        const focusables = panel.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        )
+        if (focusables.length === 0) return
+        const first = focusables[0]
+        const last = focusables[focusables.length - 1]
+        const active = document.activeElement
+        if (e.shiftKey && (active === first || active === panel)) {
+          e.preventDefault()
+          last.focus()
+        } else if (!e.shiftKey && active === last) {
+          e.preventDefault()
+          first.focus()
+        }
+        return
+      }
       if (isComposingRef.current || e.nativeEvent.isComposing || e.key === 'Process' || e.key === 'Unidentified') return
       if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault()
         handleSend()
       }
     },
-    [handleSend, closePanel],
+    [handleSend, closePanel, isOpen],
   )
 
   /* ---- render helpers ---- */
@@ -370,9 +397,10 @@ export function ChatAssistant() {
         role="dialog"
         aria-label="AI 聊天助手"
         aria-hidden={!isOpen}
+        inert={!isOpen}
         onKeyDown={handleKeyDown}
         className={cn(
-          'fixed z-50 flex flex-col overflow-hidden',
+          'fixed z-[1100] flex flex-col overflow-hidden',
           // 过渡动画
           'transition-all duration-[250ms] ease-out origin-bottom-right',
           // 显隐控制
@@ -414,7 +442,7 @@ export function ChatAssistant() {
               type="button"
               onClick={closePanel}
               aria-label="关闭聊天面板"
-              className="hidden md:flex h-7 w-7 items-center justify-center rounded-full bg-white/20 hover:bg-white/35 active:scale-90 transition-all shrink-0"
+              className="flex h-7 w-7 items-center justify-center rounded-full bg-white/20 hover:bg-white/35 active:scale-90 transition-all shrink-0"
             >
               <X size={16} color="#fff" />
             </button>
@@ -532,9 +560,11 @@ export function ChatAssistant() {
         aria-label={isOpen ? '关闭聊天助手' : '打开聊天助手'}
         onClick={togglePanel}
         className={cn(
-          'fixed z-50 flex items-center justify-center rounded-full transition-all duration-200',
+          'fixed z-[1100] items-center justify-center rounded-full transition-all duration-200',
           'bottom-10 right-3 w-[52px] h-[52px]',
           'md:bottom-9 md:right-4 md:w-[56px] md:h-[56px]',
+          // C3-1: 移动端面板全屏打开时隐藏 FAB，改由面板内关闭按钮关闭，避免遮挡发送区
+          isOpen ? 'hidden md:flex' : 'flex',
         )}
         style={{
           background: 'var(--color-accent)',

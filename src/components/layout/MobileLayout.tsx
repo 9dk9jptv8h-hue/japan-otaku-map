@@ -11,6 +11,7 @@ import { SortPopover } from '@/components/sidebar/SortPopover'
 import { RegionSelect } from '@/components/sidebar/RegionSelect'
 import { CardList } from '@/components/sidebar/CardList'
 import { useUIStore } from '@/store/useUIStore'
+import { useNavigationStore } from '@/store/useNavigationStore'
 import { useFilteredLocations } from '@/hooks/useFilteredLocations'
 import { ChevronRight, List, Menu, X } from 'lucide-react'
 import { cn } from '@/utils/cn'
@@ -22,6 +23,7 @@ interface MobileLayoutProps {
 export function MobileLayout({ locations }: MobileLayoutProps) {
   const sidebarOpen = useUIStore(s => s.sidebarOpen)
   const setSidebarOpen = useUIStore(s => s.setSidebarOpen)
+  const route = useNavigationStore(s => s.route)
   const { filteredLocations, regionList } = useFilteredLocations()
 
   // 抽屉打开时锁定背景滚动
@@ -74,10 +76,9 @@ export function MobileLayout({ locations }: MobileLayoutProps) {
         </div>
       )}
 
-      {/* 遮罩 */}
+      {/* 遮罩 — 仅视觉装饰，dialog 语义放在抽屉容器上 */}
       <div
-        role="dialog"
-        aria-label="关闭菜单"
+        aria-hidden="true"
         className={cn(
           'fixed inset-0 z-40 bg-slate-900/45 backdrop-blur-[2px] transition-opacity duration-300',
           sidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
@@ -85,8 +86,12 @@ export function MobileLayout({ locations }: MobileLayoutProps) {
         onClick={() => setSidebarOpen(false)}
       />
 
-      {/* 左侧滑出抽屉 */}
+      {/* 左侧滑出抽屉 — 真正的 dialog 容器；关闭时 inert 使内部控件不可聚焦 */}
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="菜单"
+        inert={!sidebarOpen}
         className={cn(
           'sidebar-gradient fixed top-0 left-0 bottom-0 z-50 flex w-[88vw] max-w-[400px] flex-col',
           'overflow-hidden rounded-r-[28px] border-r border-white/80 shadow-xl'
@@ -149,8 +154,8 @@ export function MobileLayout({ locations }: MobileLayoutProps) {
         </div>
       </div>
 
-      {/* 底部结果栏 — 提升列表入口的可见性 */}
-      {!sidebarOpen && (
+      {/* 底部结果栏 — 提升列表入口的可见性；导航进行中隐藏，避免被收起条遮挡 */}
+      {!sidebarOpen && !route && (
         <button
           type="button"
           onClick={() => setSidebarOpen(true)}

@@ -97,6 +97,7 @@ export const useNavigationStore = create<NavigationStore>()((set, get) => ({
 
   // ─── clearNavigation (updated: also stops tracking) ───
   clearNavigation: () => {
+    navSeq++ // 递增序列号：让所有 in-flight 的路线请求失效（B3）
     get().stopTracking()
     set({
       origin: null,
@@ -147,6 +148,7 @@ export const useNavigationStore = create<NavigationStore>()((set, get) => ({
       }
       set({ origin })
     } catch (err) {
+      if (seq !== navSeq) return // 不是最新请求，丢弃过期错误
       const msg =
         err instanceof GeolocationPositionError
           ? err.code === err.PERMISSION_DENIED
@@ -170,6 +172,7 @@ export const useNavigationStore = create<NavigationStore>()((set, get) => ({
       // Start real-time GPS tracking after successful route fetch
       get().startTracking()
     } catch (err) {
+      if (seq !== navSeq) return // 过期请求的错误不覆盖新导航状态
       set({
         isRouting: false,
         error: err instanceof Error ? err.message : '路线计算失败',
@@ -232,7 +235,10 @@ export const useNavigationStore = create<NavigationStore>()((set, get) => ({
     const { route, activeStepIndex } = get()
     if (route && activeStepIndex < route.steps.length - 1) {
       const nextStep = route.steps[activeStepIndex + 1]
-      if (nextStep.coordinates) {
+      if (!nextStep.coordinates) {
+        // 该步骤没有坐标，无法判断接近度 —— 直接跳过，避免卡在当前步
+        set({ activeStepIndex: activeStepIndex + 1 })
+      } else {
         const dist = haversineDistance(newPos, {
           lat: nextStep.coordinates[1],
           lng: nextStep.coordinates[0],
@@ -284,18 +290,21 @@ export const useNavigationStore = create<NavigationStore>()((set, get) => ({
   reRoute: async () => {
     const { userPosition, destination } = get()
     if (!userPosition || !destination) return
+    const seq = ++navSeq // 捕获当前序列号，防止与其它导航请求竞态
     set({ origin: userPosition, isRouting: true, error: null, isDeviated: false })
     try {
       const route = await fetchWalkingRoute(userPosition, {
         lat: destination.latitude,
         lng: destination.longitude,
       })
+      if (seq !== navSeq) return // 不是最新请求，丢弃过期结果
       set({
         route,
         activeStepIndex: 0,
         isRouting: false,
       })
     } catch (err) {
+      if (seq !== navSeq) return // 过期请求的错误不覆盖新状态
       set({
         isRouting: false,
         error: err instanceof Error ? err.message : '重新规划路线失败',
@@ -311,6 +320,8 @@ export const useNavigationStore = create<NavigationStore>()((set, get) => ({
       set({ error: '无法获取当前位置，请确保 GPS 已开启' })
       return
     }
+
+    const seq = ++navSeq // 捕获当前序列号，防止竞态
 
     // Save the real destination as final
     set({ finalDestination: { ...currentDest }, hasArrivedAtWaypoint: false })
@@ -343,12 +354,15 @@ export const useNavigationStore = create<NavigationStore>()((set, get) => ({
         lat: station.lat,
         lng: station.lng,
       })
+      if (seq !== navSeq) return // 已失效（clearNavigation/新导航），丢弃
       set({ route, isRouting: false, error: null, activeStepIndex: 0 })
       get().startTracking()
     } catch (err) {
+      if (seq !== navSeq) return // 过期请求的错误不覆盖新状态
       set({
         destination: currentDest,
         finalDestination: null,
+        waypointTarget: null, // 失败时一并清掉站点目标，避免残留
         isRouting: false,
         error: err instanceof Error ? err.message : '路线计算失败',
       })
@@ -363,15 +377,18 @@ export const useNavigationStore = create<NavigationStore>()((set, get) => ({
       set({ error: '无法获取当前位置' })
       return
     }
+    const seq = ++navSeq // 捕获当前序列号，防止竞态
     set({ hasArrivedAtWaypoint: false, destination: finalDestination, origin: userPosition, transportMode: 'walking', isRouting: true, error: null, isPanelOpen: true })
     try {
       const route = await fetchWalkingRoute(userPosition, {
         lat: finalDestination.latitude,
         lng: finalDestination.longitude,
       })
+      if (seq !== navSeq) return // 已失效（clearNavigation/新导航），丢弃
       set({ route, finalDestination: null, waypointTarget: null, isRouting: false, error: null, activeStepIndex: 0 })
       get().startTracking()
     } catch (err) {
+      if (seq !== navSeq) return // 过期请求的错误不覆盖新状态
       set({
         isRouting: false,
         finalDestination: null,

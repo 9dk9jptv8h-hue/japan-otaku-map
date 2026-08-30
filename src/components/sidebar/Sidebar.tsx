@@ -25,8 +25,9 @@ export function Sidebar({ locations, className }: SidebarProps) {
         <SidebarToggle collapsed onClick={toggleSidebar} />
       )}
 
-      {/* 浮动玻璃侧栏 — 与地图边缘留出呼吸空间 */}
+      {/* 浮动玻璃侧栏 — 与地图边缘留出呼吸空间；折叠时 inert 使内部控件不可聚焦 */}
       <aside
+        inert={sidebarCollapsed}
         className={cn(
           'sidebar-gradient fixed left-3 top-3 bottom-3 z-30 flex w-[var(--sidebar-width)] flex-col',
           'overflow-hidden rounded-[26px] border border-white/80 shadow-elevated gpu-layer',

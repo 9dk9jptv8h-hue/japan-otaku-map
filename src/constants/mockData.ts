@@ -176,7 +176,7 @@ export const mockLocations: LocationData[] = [
   { id: 'sur-cbu-9', name: '骏河屋名古屋荣店', nameJa: '駿河屋名古屋栄店', description: '丸善名古屋本店6F/7F。位于荣商圈核心，书籍和中古媒体品类丰富。', category: 'surugaya', latitude: 35.167, longitude: 136.907, imageUrl: IMG, address: '愛知県名古屋市中区栄3-8-14 丸善名古屋本店6F/7F', tags: ['名古屋', '荣', '丸善', '书籍'], rating: 4.1, visitCount: 1000, updatedAt: '2025-01-01' },
 
   // ── 关西 ──
-  { id: 'sur-knk-1', name: '骏河屋京都寺町店', nameJa: '駿河屋京都寺町店', description: '京都寺町通的骏河屋，古都氛围中淘二手动漫周边和游戏的好去处。', category: 'surugaya', latitude: 35.003, longitude: 135.764, imageUrl: IMG, address: '京都市下京区恵比須之町534-2', tags: ['京都', '寺町', '二手', '古都'], rating: 4.1, visitCount: 1200, updatedAt: '2025-01-01' },
+  { id: 'sur-knk-1', name: '骏河屋京都寺町店', nameJa: '駿河屋京都寺町店', description: '京都寺町通的骏河屋，古都氛围中淘二手动漫周边和游戏的好去处。', category: 'surugaya', latitude: 35.003, longitude: 135.764, imageUrl: IMG, address: '京都府京都市下京区恵比須之町534-2', tags: ['京都', '寺町', '二手', '古都'], rating: 4.1, visitCount: 1200, updatedAt: '2025-01-01' },
   { id: 'sur-knk-2', name: '骏河屋大阪日本桥总店', nameJa: '駿河屋大阪日本橋本館', description: '大阪日本桥御宅街的旗舰店。二手手办、游戏、动漫周边品类极其丰富。', category: 'surugaya', latitude: 34.659, longitude: 135.507, imageUrl: IMG, address: '大阪府大阪市浪速区日本橋4-11-3', tags: ['大阪', '日本桥', '旗舰店', '手办'], rating: 4.3, visitCount: 4500, updatedAt: '2025-01-01' },
   { id: 'sur-knk-3', name: '骏河屋大阪御宅之路动漫周边店', nameJa: '駿河屋大阪オタロードアニメ・ホビー館', description: '大阪御宅之路(オタロード)上的动漫周边专门店。景品和扭蛋品类充实。', category: 'surugaya', latitude: 34.661, longitude: 135.506, imageUrl: IMG, address: '大阪府大阪市浪速区日本橋3-8-18', tags: ['大阪', '御宅之路', '动漫周边', '景品'], rating: 4.1, visitCount: 1800, updatedAt: '2025-01-01' },
 

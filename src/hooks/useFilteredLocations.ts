@@ -40,9 +40,11 @@ export function useFilteredLocations() {
     }
 
     // 分类过滤
-    if (selectedCategories.length > 0) {
-      result = result.filter((loc) => selectedCategories.includes(loc.category))
-    }
+    // 无条件执行：selectedCategories 初始为全部7个品牌（useFilterStore 默认值），
+    // 用户逐一切掉全部品牌后数组为空 —— 若此时跳过过滤会显示全部176家，
+    // 但 FilterPanel 上没有任何品牌呈选中态，状态与结果矛盾。
+    // 因此空数组直接过滤为空结果，UI 显示 EmptyState，语义自洽。
+    result = result.filter((loc) => selectedCategories.includes(loc.category))
 
     // 地区过滤
     if (selectedRegion) {

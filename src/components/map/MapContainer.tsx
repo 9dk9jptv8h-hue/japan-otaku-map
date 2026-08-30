@@ -74,6 +74,10 @@ export function MapView({ children }: MapViewProps) {
         },
       })
 
+      // 构造成功后立即登记 mapRef，避免在首个 load/error/styledata 事件触发前
+      // 组件卸载时 mapRef.current 仍为 null，导致 map.remove() 被跳过 → WebGL 实例泄漏
+      mapRef.current = map
+
       map.addControl(
         new maplibregl.AttributionControl({
           compact: true,
@@ -94,6 +98,7 @@ export function MapView({ children }: MapViewProps) {
       }, LOAD_TIMEOUT)
 
       map.on('load', () => {
+        if (cancelled) return
         clearTimeout(loadTimeout)
         mapRef.current = map
         setMapInstance(map)
@@ -102,6 +107,7 @@ export function MapView({ children }: MapViewProps) {
       })
 
       map.on('error', (e) => {
+        if (cancelled) return
         console.error('[Map] MapLibre 错误:', e.error?.status, e.error?.message)
         if (
           e.error?.status === 404 ||
@@ -122,9 +128,11 @@ export function MapView({ children }: MapViewProps) {
       // styledata：style 加载完成后作为 fallback 信号
       let styleLoaded = false
       map.on('styledata', () => {
+        if (cancelled) return
         if (!styleLoaded) {
           styleLoaded = true
           setTimeout(() => {
+            if (cancelled) return
             if (!initialized.current) {
               console.warn('[Map] style 已加载但 load 事件超时，强制跳过加载页')
               mapRef.current = map
@@ -194,10 +202,12 @@ export function MapView({ children }: MapViewProps) {
       if (mapRef.current) {
         mapRef.current.remove()
         mapRef.current = null
-        setMapInstance(null)
-        setFlyToMarker(null)
-        setMapReady(false)
       }
+      // store 状态重置无条件执行：即使 mapRef.current 为 null（事件触发前卸载）
+      // 也要复位，避免死地图被异步事件写回 store
+      setMapInstance(null)
+      setFlyToMarker(null)
+      setMapReady(false)
     }
   }, [])
 

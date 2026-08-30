@@ -115,57 +115,61 @@ export async function fetchNearbyStations(
 
   let lastError: Error | null = null
 
-  for (const endpoint of OVERPASS_ENDPOINTS) {
-    // 每个端点独立 5s 超时
-    const epController = new AbortController()
-    const epTimeout = setTimeout(() => epController.abort(), 5000)
-    // 如果总超时触发，也中止当前端点
-    const onTotalTimeout = () => epController.abort()
-    totalController.signal.addEventListener('abort', onTotalTimeout, { once: true })
+  try {
+    for (const endpoint of OVERPASS_ENDPOINTS) {
+      // 每个端点独立 5s 超时
+      const epController = new AbortController()
+      const epTimeout = setTimeout(() => epController.abort(), 5000)
+      // 如果总超时触发，也中止当前端点
+      const onTotalTimeout = () => epController.abort()
+      totalController.signal.addEventListener('abort', onTotalTimeout, { once: true })
 
-    try {
-      const response = await fetch(
-        `${endpoint}?data=${encodeURIComponent(query)}`,
-        { signal: epController.signal },
-      )
+      try {
+        const response = await fetch(
+          `${endpoint}?data=${encodeURIComponent(query)}`,
+          { signal: epController.signal },
+        )
 
-      if (!response.ok) {
-        throw new Error(`${endpoint} returned ${response.status}`)
+        if (!response.ok) {
+          throw new Error(`${endpoint} returned ${response.status}`)
+        }
+
+        const data: OverpassResponse = await response.json()
+
+        const stations: TransitStation[] = data.elements
+          .filter(el => el.tags?.name || el.tags?.['name:en'] || el.tags?.['name:ja'] || el.tags?.['name:zh'])
+          .map(el => ({
+            id: el.id,
+            name: extractName(el.tags || {}),
+            lat: el.lat,
+            lng: el.lon,
+            railway: getRailwayType(el.tags || {}),
+            distance: haversineDistance(lat, lng, el.lat, el.lon),
+            lines: extractLines(el.tags || {}),
+          }))
+          .sort((a, b) => a.distance - b.distance)
+          .slice(0, 10)
+
+        // 写入缓存
+        stationCache.set(cacheKey, { stations, timestamp: Date.now() })
+
+        return stations
+      } catch (err) {
+        lastError = err instanceof Error ? err : new Error(String(err))
+        // 单个端点超时不放弃，继续尝试下一个
+      } finally {
+        clearTimeout(epTimeout)
+        totalController.signal.removeEventListener('abort', onTotalTimeout)
       }
-
-      const data: OverpassResponse = await response.json()
-
-      const stations: TransitStation[] = data.elements
-        .filter(el => el.tags?.name || el.tags?.['name:en'] || el.tags?.['name:ja'] || el.tags?.['name:zh'])
-        .map(el => ({
-          id: el.id,
-          name: extractName(el.tags || {}),
-          lat: el.lat,
-          lng: el.lon,
-          railway: getRailwayType(el.tags || {}),
-          distance: haversineDistance(lat, lng, el.lat, el.lon),
-          lines: extractLines(el.tags || {}),
-        }))
-        .sort((a, b) => a.distance - b.distance)
-        .slice(0, 10)
-
-      // 写入缓存
-      stationCache.set(cacheKey, { stations, timestamp: Date.now() })
-
-      return stations
-    } catch (err) {
-      lastError = err instanceof Error ? err : new Error(String(err))
-      // 单个端点超时不放弃，继续尝试下一个
-    } finally {
-      clearTimeout(epTimeout)
-      totalController.signal.removeEventListener('abort', onTotalTimeout)
     }
-  }
 
-  // 所有端点都失败
-  console.warn('[transitService] 所有 Overpass 端点不可达:', lastError?.message)
-  clearTimeout(totalTimeout)
-  return []
+    // 所有端点都失败
+    console.warn('[transitService] 所有 Overpass 端点不可达:', lastError?.message)
+    return []
+  } finally {
+    // 成功（return stations）与失败都要清理总超时定时器，避免泄漏（B4）
+    clearTimeout(totalTimeout)
+  }
 }
 
 // ═══════════════════════════════════════════

@@ -52,6 +52,10 @@ export const LocationCard = memo(function LocationCard({ location, index }: Loca
       tabIndex={0}
       onClick={handleClick}
       onKeyDown={(e) => {
+        // C2: 只处理焦点在外层卡片本身时的键盘操作；
+        // 内层「导航到这里」按钮的键盘事件冒泡到这里直接放行，
+        // 否则 preventDefault 会劫持按钮的默认激活，导致纯键盘无法触发导航。
+        if (e.target !== e.currentTarget) return
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault()
           handleClick()

@@ -7,6 +7,26 @@
 
 ---
 
+## [4.8.2] - 2026-08-30
+
+### Fixed（修复）
+- **地图生命周期泄漏**：`MapContainer` 构造后立即登记 mapRef、所有异步回调统一 cancelled 守卫，防事件触发前卸载导致 WebGL 实例泄漏；store 状态无条件复位
+- **hover 残留**：`MarkersLayer` 鼠标离开无条件清理 feature-state，侧边栏联动做来源区分，修复标记放大态永不清除
+- **路线双 fitBounds 镜头双跳**：`RouteLayer` 以 route 引用变化判断拆源重建 + 唯一 fitBounds，origin/destination 变化走 setData 增量；箭头图层抽出在图标 onload 后补建，消除首现延迟
+- **导航竞态**：`useNavigationStore` 全局 navSeq 序列号，startNavigation/navigateToStation/continueToFinalDestination/reRoute 四路径统一捕获 + 校验，clearNavigation 使 in-flight 请求全部失效
+- **AI 取消/超时区分**：`aiService` 用容器对象区分 AbortError 来源（超时报「请稍后重试」/用户取消报「请求已取消」）；`AbortSignal.any` 加能力检测，旧浏览器退化手动组合
+- **Overpass 总超时泄漏**：`transitService` 外层 try/finally 统一清理 totalTimeout，成功路径不再泄漏定时器
+- **品牌全关显示 176 家矛盾**：`useFilteredLocations` 无条件执行分类过滤，空数组显示空态，与 UI 选中态自洽
+- **京都府漏店**：骏河屋京都寺町店地址补「京都府」前缀，地区筛选不再漏店
+- 聊天面板 z 序升至 1100、移动端全屏时隐藏 FAB、面板 inert 阻止焦点逃逸 + Tab 焦点循环、isLoading ref 防连发
+- 移动端抽屉 dialog 语义移到容器（遮罩 aria-hidden）+ inert；桌面侧栏折叠时 inert
+- 筛选胶囊 aria-pressed 对齐实际激活态；地点卡片键盘事件只处理焦点在自身时
+- 排序/地区弹层支持 Escape 关闭
+- Service Worker 增加导航请求离线兜底（回退 app-shell → 首页 → 503）与同源静态资源 stale-while-revalidate，activate 白名单防误删
+- 移除 body 全局安全区 padding，改由各组件处理，消除双重叠加
+
+---
+
 ## [4.8.1] - 2026-08-30
 
 ### Fixed（修复）

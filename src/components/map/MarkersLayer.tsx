@@ -161,15 +161,26 @@ function MarkersLayerInner({ locations }: MarkersLayerProps) {
 
     const handleMouseLeave = () => {
       map.getCanvas().style.cursor = ''
-      const currentHovered = useMapStore.getState().hoveredMarkerId
-      if (!currentHovered) {
-        if (hoveredFeatureIdRef.current !== null) {
+      // 鼠标离开标记就是清理信号：无条件清理该标记的 hover 放大状态。
+      // 旧代码用 `if (!currentHovered)` 判断，但 mousemove 刚把 hoveredMarkerId 置真，
+      // 条件恒为 false，导致 feature-state 的 hover:true 永不清理、标记持续放大。
+      const mapHoveredLocId =
+        hoveredFeatureIdRef.current !== null
+          ? locations[hoveredFeatureIdRef.current]?.id
+          : undefined
+      if (hoveredFeatureIdRef.current !== null) {
+        try {
           map.setFeatureState(
             { source: 'locations', id: hoveredFeatureIdRef.current },
             { hover: false }
           )
-          hoveredFeatureIdRef.current = null
-        }
+        } catch (e) { if (e instanceof Error && !e.message.includes('does not exist')) console.warn('Feature state error:', e) }
+        hoveredFeatureIdRef.current = null
+      }
+      // hoveredMarkerId 是「地图 hover 与侧边栏卡片 hover」共用字段：
+      // 仅当 store 当前值对应的是本地图 feature（而非侧边栏卡片）时才清 store，避免误清侧边栏高亮
+      const currentHovered = useMapStore.getState().hoveredMarkerId
+      if (currentHovered && mapHoveredLocId && currentHovered === mapHoveredLocId) {
         useMapStore.getState().setHoveredMarkerId(null)
       }
     }

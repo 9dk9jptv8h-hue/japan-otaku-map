@@ -73,9 +73,8 @@
       overscroll-behavior: none;
     height: 100dvh;
     width: 100vw;
-    /* 移动端安全区域 */
-    padding-bottom: env(safe-area-inset-bottom, 0px);
-    padding-top: env(safe-area-inset-top, 0px);
+    /* 安全区改由各组件自身处理（搜索条 pt-safe / 抽屉 padding / FAB margin 等），
+       避免与 body 全局 padding 双重叠加，并保持 fixed 抽屉与 absolute 地图定位基准一致 */
   }
 
   #root {
