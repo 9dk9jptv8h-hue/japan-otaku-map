@@ -7,6 +7,14 @@
 
 ---
 
+## [4.8.1] - 2026-08-30
+
+### Fixed（修复）
+- **瓦片加载恢复原配方案**：瓦片代理优先级恢复为 Cloudflare Worker 缓存优先（CF 边缘 CDN 缓存 7 天，命中后明显提速），直连 OpenFreeMap 作为无代理网络兜底；探测超时 5s → 2.5s 减少回退等待
+- **清理残留**：移除 DeepSeek Harness 遗留的本地瓦片缓存（public/tiles-cache 与 scripts/download-tiles.py，移入备份目录，未被代码引用）
+
+---
+
 ## [4.8.0] - 2026-08-21
 
 ### Changed（变更）

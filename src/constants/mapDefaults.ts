@@ -20,13 +20,19 @@ export const JAPAN_BOUNDS: [[number, number], [number, number]] = [
 // ================================================================
 // 瓦片代理策略（自动检测）
 //
-// 问题：直连 openfreemap.org 在某些网络（尤其中国大陆）不可达。
-// 方案：启动时自动检测，优先直连 OpenFreeMap（延迟最低），
-//       不可达时回退到 Cloudflare Worker 瓦片代理（/tiles/* 路由）。
+// 背景：直连 OpenFreeMap 源站带宽较慢，大瓦片下载实测要 4-6 秒；
+//       而 Cloudflare Worker（japan-map-ai.9dk9jptv8h-hue.workers.dev）
+//       有 CF 边缘 CDN 缓存 7 天，命中后明显提速（走代理网络的用户
+//       能吃到缓存）。
+// 优先级：
+//   ① Cloudflare Worker 瓦片缓存代理（CF 边缘 CDN 缓存 7 天，命中快）
+//   ② 直连 OpenFreeMap（无代理网络兜底）
+//   ③ 全挂 → Worker 兜底（让用户至少能看到报错）
 //
 // 注意：曾经的 Vercel 代理（japan-otaku-map.vercel.app）已下线（404），
-//       2026-08 起改用 Worker 代理。workers.dev 在大陆同样可能被墙，
-//       若要彻底覆盖大陆用户，建议为 Worker 绑定自定义域名。
+//       2026-08 起改用 Worker 代理。workers.dev 在大陆部分网络同样可能被墙，
+//       所以保留直连 OpenFreeMap 兜底；若要彻底覆盖大陆用户，
+//       建议为 Worker 绑定自定义域名。
 //
 //   Vercel 部署 → 同源相对路径 /tiles/ → vercel.json rewrites → OpenFreeMap
 //   其他部署   → 自动选择可用的代理
@@ -72,7 +78,7 @@ async function probeUrl(url: string, timeoutMs: number): Promise<boolean> {
   }
 }
 
-/** 自动检测最佳瓦片代理：优先直连 OpenFreeMap，不通则用 Cloudflare Worker */
+/** 自动检测最佳瓦片代理：优先 Cloudflare Worker 缓存代理，不通则直连 OpenFreeMap */
 export async function detectTileProxy(): Promise<string> {
   if (_detectedBase !== null) return _detectedBase
   if (_detectPromise) return _detectPromise
@@ -84,17 +90,19 @@ export async function detectTileProxy(): Promise<string> {
   }
 
   _detectPromise = (async () => {
-    // 优先尝试直连 OpenFreeMap（延迟更低，少一跳代理）
-    if (await probeUrl(`${DIRECT_TILES}/styles/positron`, 5000)) {
-      _detectedBase = DIRECT_TILES
-      console.log('[瓦片代理] ✅ 直连 OpenFreeMap')
+    // 探测超时用 2500ms（而非 5s）：无代理网络下 Worker 探测大概率失败，
+    // 短超时避免用户多等 2.5s；Worker 命中后本就该快，无需长探测窗口。
+    // 优先探测 Cloudflare Worker 缓存代理（CF 边缘 CDN 缓存 7 天，命中快）
+    if (await probeUrl(`${WORKER_TILE_BASE}/tiles/styles/positron`, 2500)) {
+      _detectedBase = WORKER_TILE_BASE
+      console.log('[瓦片代理] ✅ 使用 Cloudflare Worker 缓存代理')
       return _detectedBase
     }
 
-    // Fallback: Cloudflare Worker 瓦片代理
-    if (await probeUrl(`${WORKER_TILE_BASE}/tiles/styles/positron`, 5000)) {
-      _detectedBase = WORKER_TILE_BASE
-      console.log('[瓦片代理] ⚠️ 使用 Cloudflare Worker 代理')
+    // 无代理网络下 Worker 不可达时，兜底直连 OpenFreeMap（源站带宽慢但可达）
+    if (await probeUrl(`${DIRECT_TILES}/styles/positron`, 2500)) {
+      _detectedBase = DIRECT_TILES
+      console.log('[瓦片代理] ⚠️ 直连 OpenFreeMap')
       return _detectedBase
     }
 
