@@ -77,12 +77,54 @@ function MarkersLayerInner({ locations }: MarkersLayerProps) {
       })),
     })
 
+    // ─── 打开 Popup（单例：先移除旧 popup 再创建新 popup）───
+    const openPopupFor = (loc: LocationData) => {
+      // 已存在 popup → 先移除并置空（保证全局始终只有一个 popup）
+      if (popupRef.current) {
+        popupRef.current.remove()
+        popupRef.current = null
+      }
+
+      const popupHTML = renderPopupHTML({
+        id: loc.id,
+        name: loc.name,
+        nameJa: loc.nameJa || '',
+        category: loc.category,
+        description: loc.description || '',
+        rating: loc.rating || 0,
+        address: loc.address || '',
+        visitCount: loc.visitCount || 0,
+        tags: JSON.stringify(loc.tags || []),
+        imageUrl: loc.imageUrl || '',
+      })
+
+      popupRef.current = new maplibregl.Popup({
+        offset: 15,
+        maxWidth: '300px',
+        closeButton: true,
+        closeOnClick: true,
+        className: 'maplibre-popup-card',
+      })
+        .setLngLat([loc.longitude, loc.latitude])
+        .setHTML(popupHTML)
+        .addTo(map)
+
+      popupRef.current.on('close', () => {
+        popupRef.current = null
+        // popup 关闭时同步取消选中
+        const stillSelected = useMapStore.getState().selectedMarkerIds
+        if (stillSelected.includes(loc.id)) {
+          useMapStore.getState().removeSelectedMarkerId(loc.id)
+        }
+      })
+    }
+
     // ─── 点击标记 → 弹出 Popup + 同步 store ───
     const handleClick = (e: maplibregl.MapLayerMouseEvent) => {
       if (!e.features || !e.features[0]) return
-      const feature = e.features[0]
-      const coords = (feature.geometry as { type: 'Point'; coordinates: number[] }).coordinates.slice() as [number, number]
-      const props = feature.properties!
+      const props = e.features[0].properties!
+      const loc = locations.find(l => l.id === props.id)
+      if (!loc) return
 
       // 检查当前选中状态（toggle 逻辑）
       const currentSelected = useMapStore.getState().selectedMarkerIds
@@ -100,32 +142,8 @@ function MarkersLayerInner({ locations }: MarkersLayerProps) {
         return
       }
 
-      // 选中 → 打开 popup
-      if (popupRef.current) {
-        popupRef.current.remove()
-      }
-
-      const popupHTML = renderPopupHTML(props)
-
-      popupRef.current = new maplibregl.Popup({
-        offset: 15,
-        maxWidth: '300px',
-        closeButton: true,
-        closeOnClick: true,
-        className: 'maplibre-popup-card',
-      })
-        .setLngLat(coords)
-        .setHTML(popupHTML)
-        .addTo(map)
-
-      popupRef.current.on('close', () => {
-        popupRef.current = null
-        // popup 关闭时同步取消选中
-        const stillSelected = useMapStore.getState().selectedMarkerIds
-        if (stillSelected.includes(props.id)) {
-          useMapStore.getState().removeSelectedMarkerId(props.id)
-        }
-      })
+      // 选中 → 打开 popup（统一走 openPopupFor，不复用 feature 的 coords/props）
+      openPopupFor(loc)
     }
 
     // ─── 鼠标 hover → feature-state 驱动放大 + 光标 ───
@@ -195,6 +213,18 @@ function MarkersLayerInner({ locations }: MarkersLayerProps) {
       const loc = locations.find(l => l.id === id)
       if (loc) {
         useNavigationStore.getState().startNavigation(loc)
+      }
+    }
+
+    // Register global handler: 侧边栏点店铺 → 打开对应 popup（与地图 marker 共用同一 popupRef 单例）
+    ;(window as any).__openStorePopup = (id: string) => {
+      const loc = locations.find(l => l.id === id)
+      if (loc) openPopupFor(loc)
+    }
+    ;(window as any).__closeStorePopup = () => {
+      if (popupRef.current) {
+        popupRef.current.remove()
+        popupRef.current = null
       }
     }
 
@@ -299,6 +329,8 @@ function MarkersLayerInner({ locations }: MarkersLayerProps) {
       map.off('style.load', setupLayers)
       map.off('styledata', handleStyleData)
       delete (window as any).__navigateToStore
+      delete (window as any).__openStorePopup
+      delete (window as any).__closeStorePopup
       if (popupRef.current) {
         popupRef.current.remove()
         popupRef.current = null

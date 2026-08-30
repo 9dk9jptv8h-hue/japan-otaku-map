@@ -41,8 +41,15 @@ export const LocationCard = memo(function LocationCard({ location, index }: Loca
   }, [isSelected])
 
   const handleClick = () => {
+    const wasSelected = isSelected
     setSelected(location.id)
     flyToMarker?.(location.longitude, location.latitude, STORE_ZOOM_LEVEL)
+    // 与地图 marker 的 toggle 语义对齐：点已选中店铺 → 关闭 popup；点未选中店铺 → 打开 popup
+    if (wasSelected) {
+      ;(window as any).__closeStorePopup?.()
+    } else {
+      ;(window as any).__openStorePopup?.(location.id)
+    }
   }
 
   return (
