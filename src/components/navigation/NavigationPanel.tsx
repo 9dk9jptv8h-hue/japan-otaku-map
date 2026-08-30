@@ -179,6 +179,7 @@ export function NavigationPanel() {
   const userPosition = useNavigationStore(s => s.userPosition)
   const hasArrivedAtWaypoint = useNavigationStore(s => s.hasArrivedAtWaypoint)
   const finalDestination = useNavigationStore(s => s.finalDestination)
+  const waypointRole = useNavigationStore(s => s.waypointRole)
 
   const stepRefs = useRef<(HTMLDivElement | null)[]>([])
   const prevIsRouting = useRef(isRouting)
@@ -471,7 +472,7 @@ export function NavigationPanel() {
             hasArrivedAtWaypoint ? 'text-green-700' : 'text-blue-600',
           )}>
             {hasArrivedAtWaypoint
-              ? '已到达车站 · 可选择继续导航'
+              ? (waypointRole === 'dest' ? '已到达下车点' : '已到达出发站')
               : `正在追踪 · 第 ${activeStepIndex + 1}/${route.steps.length} 步`}
           </span>
         </div>
@@ -494,10 +495,14 @@ export function NavigationPanel() {
                 <polyline points="20 6 9 17 4 12"/>
               </svg>
             </div>
-            <p className="text-sm font-semibold text-green-700">已到达车站</p>
+            <p className="text-sm font-semibold text-green-700">
+              {waypointRole === 'dest' ? '已到达下车点' : '已到达出发站'}
+            </p>
           </div>
           <p className="text-xs text-green-600">
-            已到达 {destination?.name}，是否继续导航至最终目的地 {finalDestination.name}？
+            {waypointRole === 'dest'
+              ? `已到达下车点，步行至目的地 ${finalDestination.name}`
+              : `已到达出发站，请乘车前往最终目的地 ${finalDestination.name}？`}
           </p>
           <div className="flex gap-2">
             <button
@@ -637,9 +642,9 @@ export function NavigationPanel() {
             {selectedOriginStation && (
               <StationWalkCard
                 station={selectedOriginStation}
-                label="步行到车站"
+                label="步行到出发站"
                 prefix="出发"
-                onNavigate={() => useNavigationStore.getState().navigateToStation(selectedOriginStation)}
+                onNavigate={() => useNavigationStore.getState().navigateToStation(selectedOriginStation, 'origin')}
               />
             )}
           </div>
@@ -678,9 +683,9 @@ export function NavigationPanel() {
             {selectedStation && (
               <StationWalkCard
                 station={selectedStation}
-                label="步行到车站"
+                label="乘车至此 · 步行到店"
                 prefix="到达"
-                onNavigate={() => useNavigationStore.getState().navigateToStation(selectedStation)}
+                onNavigate={() => useNavigationStore.getState().navigateToStation(selectedStation, 'dest')}
               />
             )}
           </div>

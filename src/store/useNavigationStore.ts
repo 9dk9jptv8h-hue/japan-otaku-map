@@ -37,6 +37,8 @@ interface NavigationStore {
   hasArrivedAtWaypoint: boolean
   /** Temporary station waypoint target for transit navigation */
   waypointTarget: GeoPoint | null
+  /** 公交导航当前阶段：'origin' 步行到出发站 / 'dest' 到下车点后步行至目的地 */
+  waypointRole: 'origin' | 'dest' | null
 
   // ─── Existing actions ───
   setOrigin: (p: GeoPoint | null) => void
@@ -60,8 +62,15 @@ interface NavigationStore {
   advanceToStep: (index: number) => void
   /** Re-calculate route from current position to destination */
   reRoute: () => Promise<void>
-  /** Start walking navigation to a transit station, saving the real destination */
-  navigateToStation: (station: { id: number; name: string; lat: number; lng: number }) => Promise<void>
+  /**
+   * 公交导航：按角色发起导航
+   * - 'origin'：走到出发站，destination 暂换为出发站，原目的地存入 finalDestination
+   * - 'dest'：直接走到最终目的地，destination 保持原样，下车点仅作 waypointTarget 接近检测
+   */
+  navigateToStation: (
+    station: { id: number; name: string; lat: number; lng: number },
+    role: 'origin' | 'dest',
+  ) => Promise<void>
   /** Continue navigation from waypoint to the final destination */
   continueToFinalDestination: () => Promise<void>
 }
@@ -85,6 +94,7 @@ export const useNavigationStore = create<NavigationStore>()((set, get) => ({
   finalDestination: null,
   hasArrivedAtWaypoint: false,
   waypointTarget: null,
+  waypointRole: null,
 
   // ─── Existing simple setters ───
   setOrigin: (p) => set({ origin: p }),
@@ -115,6 +125,7 @@ export const useNavigationStore = create<NavigationStore>()((set, get) => ({
       finalDestination: null,
       hasArrivedAtWaypoint: false,
       waypointTarget: null,
+      waypointRole: null,
     })
   },
 
@@ -125,7 +136,7 @@ export const useNavigationStore = create<NavigationStore>()((set, get) => ({
     const seq = ++navSeq // 获取当前序列号
     set({ destination: dest, isRouting: true, error: null, isPanelOpen: true,
       route: null, origin: null, activeStepIndex: -1, isDeviated: false,
-      finalDestination: null, waypointTarget: null, hasArrivedAtWaypoint: false })
+      finalDestination: null, waypointTarget: null, hasArrivedAtWaypoint: false, waypointRole: null })
 
     // Step 1: get GPS position
     let origin: GeoPoint
@@ -313,7 +324,7 @@ export const useNavigationStore = create<NavigationStore>()((set, get) => ({
   },
 
   // ─── navigateToStation ───
-  navigateToStation: async (station) => {
+  navigateToStation: async (station, role) => {
     const { destination: currentDest, userPosition } = get()
     if (!currentDest) return
     if (!userPosition) {
@@ -323,7 +334,42 @@ export const useNavigationStore = create<NavigationStore>()((set, get) => ({
 
     const seq = ++navSeq // 捕获当前序列号，防止竞态
 
-    // Save the real destination as final
+    // ── 到达段：直接走到最终目的地，destination 保持原样 ──
+    if (role === 'dest') {
+      // 不再把 destination 换成下车点，仅把下车点作为 waypointTarget 用于接近检测
+      set({
+        finalDestination: { ...currentDest },
+        hasArrivedAtWaypoint: false,
+        waypointTarget: { lat: station.lat, lng: station.lng },
+        waypointRole: 'dest',
+        origin: userPosition,
+        transportMode: 'walking',
+        isRouting: true,
+        error: null,
+        isPanelOpen: true,
+      })
+      try {
+        const route = await fetchWalkingRoute(userPosition, {
+          lat: currentDest.latitude,
+          lng: currentDest.longitude,
+        })
+        if (seq !== navSeq) return // 已失效（clearNavigation/新导航），丢弃
+        set({ route, isRouting: false, error: null, activeStepIndex: 0 })
+        get().startTracking()
+      } catch (err) {
+        if (seq !== navSeq) return // 过期请求的错误不覆盖新状态
+        set({
+          finalDestination: null,
+          waypointTarget: null,
+          waypointRole: null, // 失败时一并清掉站点目标，避免残留
+          isRouting: false,
+          error: err instanceof Error ? err.message : '路线计算失败',
+        })
+      }
+      return
+    }
+
+    // ── 出发段：保持现有行为 —— 走到出发站 ──
     set({ finalDestination: { ...currentDest }, hasArrivedAtWaypoint: false })
 
     // Use existing userPosition, fetch route directly (skip GPS re-acquire)
@@ -343,6 +389,7 @@ export const useNavigationStore = create<NavigationStore>()((set, get) => ({
       destination: stationAsDest,
       finalDestination: { ...currentDest },
       waypointTarget: { lat: station.lat, lng: station.lng },
+      waypointRole: 'origin',
       origin: userPosition,
       transportMode: 'walking',
       isRouting: true,
@@ -362,7 +409,8 @@ export const useNavigationStore = create<NavigationStore>()((set, get) => ({
       set({
         destination: currentDest,
         finalDestination: null,
-        waypointTarget: null, // 失败时一并清掉站点目标，避免残留
+        waypointTarget: null,
+        waypointRole: null, // 失败时一并清掉站点目标，避免残留
         isRouting: false,
         error: err instanceof Error ? err.message : '路线计算失败',
       })
@@ -378,20 +426,21 @@ export const useNavigationStore = create<NavigationStore>()((set, get) => ({
       return
     }
     const seq = ++navSeq // 捕获当前序列号，防止竞态
-    set({ hasArrivedAtWaypoint: false, destination: finalDestination, origin: userPosition, transportMode: 'walking', isRouting: true, error: null, isPanelOpen: true })
+    set({ hasArrivedAtWaypoint: false, destination: finalDestination, origin: userPosition, transportMode: 'walking', isRouting: true, error: null, isPanelOpen: true, waypointRole: null })
     try {
       const route = await fetchWalkingRoute(userPosition, {
         lat: finalDestination.latitude,
         lng: finalDestination.longitude,
       })
       if (seq !== navSeq) return // 已失效（clearNavigation/新导航），丢弃
-      set({ route, finalDestination: null, waypointTarget: null, isRouting: false, error: null, activeStepIndex: 0 })
+      set({ route, finalDestination: null, waypointTarget: null, waypointRole: null, isRouting: false, error: null, activeStepIndex: 0 })
       get().startTracking()
     } catch (err) {
       if (seq !== navSeq) return // 过期请求的错误不覆盖新状态
       set({
         isRouting: false,
         finalDestination: null,
+        waypointRole: null,
         error: err instanceof Error ? err.message : '路线计算失败',
       })
     }
